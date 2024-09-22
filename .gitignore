@@ -1,0 +1,10 @@
+# Node.js
+node_modules/
+npm-debug.log
+.env
+
+# React
+frontend/node_modules/
+
+# Miscellaneous
+.DS_Store
