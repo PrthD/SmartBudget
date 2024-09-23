@@ -1,7 +1,7 @@
 # Node.js
 node_modules/
 npm-debug.log
-.env
+backend/.env
 
 # React
 frontend/node_modules/
