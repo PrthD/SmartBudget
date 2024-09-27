@@ -23,7 +23,7 @@
     "prettier": "^3.3.3"
   },
   "scripts": {
-    "start": "node server.js",
+    "start": "nodemon server.js",
     "dev": "nodemon server.js"
   }
 }
