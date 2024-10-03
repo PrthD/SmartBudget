@@ -1,5 +1,5 @@
-const { GoogleGenerativeAI } = require('@google/generative-ai');
-const dotenv = require('dotenv');
+import { GoogleGenerativeAI } from '@google/generative-ai';
+import dotenv from 'dotenv';
 
 // Load environment variables
 dotenv.config();
@@ -19,8 +19,9 @@ const predefinedQuestions = [
 
 // Controller function to handle AI recommendations
 const getAIRecommendation = async (req, res) => {
-  const { questionIndex } = req.body;
+  const { questionIndex, totalExpenses, totalIncome, savings } = req.body;
 
+  // Validate the question index
   if (
     questionIndex === undefined ||
     questionIndex < 0 ||
@@ -29,11 +30,19 @@ const getAIRecommendation = async (req, res) => {
     return res.status(400).json({ error: 'Invalid question selected.' });
   }
 
-  const prompt = predefinedQuestions[questionIndex]; // Dropdown selected question
+  // Retrieve the selected question from the predefined list
+  const prompt = predefinedQuestions[questionIndex];
+
+  // Construct a complete prompt with financial context
+  const contextPrompt = `
+    ${prompt}
+    My total monthly expenses are $${totalExpenses}, and my total monthly income is $${totalIncome}. 
+    I currently have $${savings} in savings. Based on this information, what would you recommend?
+  `;
 
   try {
-    // Generate content using the Gemini API
-    const result = await model.generateContent(prompt);
+    // Generate content using the Gemini API with the contextual prompt
+    const result = await model.generateContent(contextPrompt);
 
     // Send AI response back to the client
     res.status(200).json({
@@ -49,4 +58,4 @@ const getAIRecommendation = async (req, res) => {
   }
 };
 
-module.exports = { getAIRecommendation };
+export default getAIRecommendation;

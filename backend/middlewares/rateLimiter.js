@@ -1,5 +1,5 @@
-const rateLimit = require('express-rate-limit');
-const slowDown = require('express-slow-down');
+import rateLimit from 'express-rate-limit';
+import slowDown from 'express-slow-down';
 
 // Global Rate Limiting: Limit total requests to 15 per minute globally
 const globalLimiter = rateLimit({
@@ -18,4 +18,4 @@ const globalSpeedLimiter = slowDown({
   },
 });
 
-module.exports = [globalLimiter, globalSpeedLimiter];
+export { globalLimiter, globalSpeedLimiter };

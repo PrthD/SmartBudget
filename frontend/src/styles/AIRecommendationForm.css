@@ -1,0 +1,97 @@
+/* Container styling */
+.ai-recommendation-form {
+  width: 400px;
+  margin: 0 auto;
+  padding: 20px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background-color: #f4f4f4;
+  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+}
+
+.ai-recommendation-form h2 {
+  text-align: center;
+  color: #333;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+/* Label Styling */
+.form-group label {
+  display: block;
+  font-weight: bold;
+  margin-bottom: 5px;
+  color: #555;
+}
+
+/* Input, Select, and Textarea Styling */
+.form-group input,
+.form-group select,
+.form-group textarea {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  font-size: 16px;
+  box-sizing: border-box;
+}
+
+/* Button Styling */
+button {
+  display: block;
+  width: 100%;
+  padding: 12px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.3s ease;
+}
+
+button:hover {
+  background-color: #0056b3;
+}
+
+button:disabled {
+  background-color: #bbb;
+  cursor: not-allowed;
+}
+
+/* Error and Success Messages */
+.error-message,
+.success-message {
+  text-align: center;
+  font-size: 14px;
+  margin-top: 20px;
+}
+
+.error-message {
+  color: red;
+}
+
+.success-message {
+  color: green;
+}
+
+/* Recommendation Result Styling */
+.recommendation-result {
+  background-color: #e8f8e8;
+  border: 1px solid #c6e6c6;
+  padding: 20px;
+  border-radius: 8px;
+  margin-top: 20px;
+}
+
+.recommendation-result h3 {
+  color: #2c662d;
+}
+
+.recommendation-result p {
+  font-size: 16px;
+  line-height: 1.5;
+  color: #333;
+}

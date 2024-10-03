@@ -1,9 +1,10 @@
-const express = require('express');
-const cors = require('cors');
-const dotenv = require('dotenv');
-const connectDB = require('./config/db');
-const aiRoutes = require('./routes/aiRoutes');
-const expenseRoutes = require('./routes/expenseRoutes');
+import express from 'express';
+import cors from 'cors';
+import dotenv from 'dotenv';
+import connectDB from './config/db.js';
+import aiRoutes from './routes/aiRoutes.js';
+import expenseRoutes from './routes/expenseRoutes.js';
+import incomeRoutes from './routes/incomeRoutes.js';
 
 // Load environment variables
 dotenv.config();
@@ -22,6 +23,7 @@ app.use(express.json());
 // Routes
 app.use('/api/ai', aiRoutes); // AI routes
 app.use('/api/expenses', expenseRoutes); // Expense routes
+app.use('/api/income', incomeRoutes); // Income routes
 
 // Start the server
 const PORT = process.env.PORT || 5000;

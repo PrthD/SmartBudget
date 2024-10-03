@@ -6,13 +6,14 @@ import '../styles/ExpenseForm.css';
 const ExpenseForm = () => {
   // State to manage form input values
   const [category, setCategory] = useState('');
+  const [customCategoryName, setCustomCategoryName] = useState('');
   const [amount, setAmount] = useState('');
   const [date, setDate] = useState('');
   const [description, setDescription] = useState('');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
-  // Predefined categories (can be replaced with API categories or custom ones)
+  // Predefined categories
   const predefinedCategories = [
     'Groceries',
     'Transportation',
@@ -24,8 +25,11 @@ const ExpenseForm = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    // Determine which category to send to the backend
+    const finalCategory = category === 'custom' ? customCategoryName : category;
+
     // Client-side validation
-    if (!category || !amount || amount <= 0) {
+    if (!finalCategory || !amount || amount <= 0) {
       setError(
         'Please fill in all required fields and ensure the amount is greater than zero.'
       );
@@ -37,7 +41,7 @@ const ExpenseForm = () => {
       // Send the data to the backend API
       // const response = await axios.post('http://localhost:5000/api/expenses', {
       await axios.post('http://localhost:5000/api/expenses', {
-        category,
+        category: finalCategory,
         amount: parseFloat(amount),
         date: date || new Date().toISOString(),
         description,
@@ -45,6 +49,7 @@ const ExpenseForm = () => {
 
       // Clear form and show success message
       setCategory('');
+      setCustomCategoryName('');
       setAmount('');
       setDate('');
       setDescription('');
@@ -78,6 +83,21 @@ const ExpenseForm = () => {
             <option value="custom">Custom Category</option>
           </select>
         </div>
+
+        {/* Custom Category Input (Visible only if "Custom Category" is selected) */}
+        {category === 'custom' && (
+          <div className="form-group">
+            <label htmlFor="customCategoryName">Custom Category Name:</label>
+            <input
+              type="text"
+              id="customCategoryName"
+              value={customCategoryName}
+              onChange={(e) => setCustomCategoryName(e.target.value)}
+              required
+              placeholder="Enter custom category name"
+            />
+          </div>
+        )}
 
         {/* Amount Input */}
         <div className="form-group">
