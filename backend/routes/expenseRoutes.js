@@ -1,89 +1,102 @@
 import express from 'express';
 import Expense from '../models/Expense.js';
+import logger from '../config/logger.js';
 
 const router = express.Router();
 
-// Create a new expense
+// @route    POST /api/expenses
+// @desc     Add a new expense
 router.post('/', async (req, res) => {
-  console.log('POST /api/expenses request received');
-  console.log('Request Body:', req.body);
+  logger.info('POST /api/expenses request received');
   const { category, amount, date, description, customCategory } = req.body;
 
-  try {
-    // Validate that amount is a number and category is provided
-    if (!category || !amount) {
-      return res
-        .status(400)
-        .json({ error: 'Category and amount are required.' });
-    }
+  // Validate the required fields
+  if (!category || !amount) {
+    logger.warn('Category and amount are required');
+    return res.status(400).json({ error: 'Category and amount are required.' });
+  }
 
-    // Create the expense
+  try {
     const expense = new Expense({
       category,
-      customCategory: customCategory || false, // Indicate if it's a custom category
-      amount,
-      date,
+      customCategory: customCategory || false,
+      amount: parseFloat(amount),
+      date: date ? new Date(date) : new Date(),
       description,
     });
 
-    // Save to the database
     const savedExpense = await expense.save();
+    logger.info('Expense saved successfully:', savedExpense);
     res.status(201).json(savedExpense);
-    console.log('Expense saved successfully:', savedExpense);
   } catch (err) {
-    console.error('Error saving expense:', err.message);
+    logger.error('Error saving expense: ' + err.message);
     res.status(500).json({ error: 'Server Error' });
   }
 });
 
-// Get all expenses
+// @route    GET /api/expenses
+// @desc     Get all expenses
 router.get('/', async (req, res) => {
+  logger.info('GET /api/expenses request received');
   try {
     const expenses = await Expense.find();
-    res.json(expenses);
+    logger.info('Expenses retrieved successfully');
+    res.status(200).json(expenses);
   } catch (err) {
-    console.error(err.message);
-    res.status(500).json({ error: 'Server Error' });
+    logger.error('Error fetching expenses: ' + err.message);
+    res.status(500).json({ error: 'Failed to fetch expenses' });
   }
 });
 
-// Update an existing expense
+// @route    PUT /api/expenses/:id
+// @desc     Update an expense
 router.put('/:id', async (req, res) => {
+  logger.info(`PUT /api/expenses/${req.params.id} request received`);
   const { category, amount, date, description, customCategory } = req.body;
 
   try {
     // Find the expense by ID and update it
     let expense = await Expense.findById(req.params.id);
-    if (!expense) return res.status(404).json({ error: 'Expense not found' });
+    if (!expense) {
+      logger.warn(`Expense not found for id: ${req.params.id}`);
+      return res.status(404).json({ error: 'Expense not found' });
+    }
 
     // Update fields
     expense.category = category || expense.category;
-    expense.amount = amount || expense.amount;
-    expense.date = date || expense.date;
+    expense.amount = parseFloat(amount) || expense.amount;
+    expense.date = date ? new Date(date) : expense.date;
     expense.description = description || expense.description;
-    expense.customCategory = customCategory || expense.customCategory;
+    expense.customCategory =
+      customCategory !== undefined ? customCategory : expense.customCategory;
 
     // Save the updated expense
-    expense = await expense.save();
-    res.json(expense);
+    const updatedExpense = await expense.save();
+    logger.info('Expense updated successfully:', updatedExpense);
+    res.json(updatedExpense);
   } catch (err) {
-    console.error(err.message);
+    logger.error('Error updating expense: ' + err.message);
     res.status(500).json({ error: 'Server Error' });
   }
 });
 
-// Delete an expense
+// @route    DELETE /api/expenses/:id
+// @desc     Delete an expense
 router.delete('/:id', async (req, res) => {
+  logger.info(`DELETE /api/expenses/${req.params.id} request received`);
   try {
     const expense = await Expense.findById(req.params.id);
-    if (!expense) return res.status(404).json({ error: 'Expense not found' });
+    if (!expense) {
+      logger.warn(`Expense not found for id: ${req.params.id}`);
+      return res.status(404).json({ error: 'Expense not found' });
+    }
 
-    // Remove the expense from the database
-    await Expense.deleteOne({ _id: req.params.id });
-    res.json({ message: 'Expense deleted successfully' });
+    await Expense.findByIdAndDelete(req.params.id);
+    logger.info('Expense removed successfully');
+    res.status(200).json({ message: 'Expense removed successfully' });
   } catch (err) {
-    console.error(err.message);
-    res.status(500).json({ error: 'Server Error' });
+    logger.error('Error deleting expense: ' + err.message);
+    res.status(500).json({ error: 'Failed to delete expense' });
   }
 });
 

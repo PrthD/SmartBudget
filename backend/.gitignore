@@ -1,0 +1,9 @@
+# Node.js specific ignores for backend
+node_modules/
+npm-debug.log
+
+# Environment files for the backend
+.env*
+
+# Miscellaneous
+.DS_Store

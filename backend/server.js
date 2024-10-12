@@ -1,6 +1,8 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import morgan from 'morgan';
+import logger from './config/logger.js';
 import connectDB from './config/db.js';
 import aiRoutes from './routes/aiRoutes.js';
 import expenseRoutes from './routes/expenseRoutes.js';
@@ -19,6 +21,12 @@ connectDB();
 app.use(cors({ origin: 'http://localhost:3000' }));
 // Middleware to parse JSON
 app.use(express.json());
+// Middleware to log all HTTP requests using morgan and winston
+app.use(
+  morgan('combined', {
+    stream: { write: (message) => logger.info(message.trim()) },
+  })
+);
 
 // Routes
 app.use('/api/ai', aiRoutes); // AI routes

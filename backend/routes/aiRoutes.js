@@ -1,9 +1,20 @@
 import express from 'express';
 import getAIRecommendation from '../controllers/aiController.js';
+import logger from '../config/logger.js';
 
 const router = express.Router();
 
-// POST route to get AI recommendations
-router.post('/recommendation', getAIRecommendation);
+// @route    POST /api/ai/recommendation
+// @desc     Get AI-based budget recommendations
+router.post('/recommendation', async (req, res) => {
+  logger.info('POST /api/ai/recommendation request received');
+  try {
+    await getAIRecommendation(req, res);
+    logger.info('AI recommendation processed successfully');
+  } catch (err) {
+    logger.error('Error in AI recommendation: ' + err.message);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
 
 export default router;

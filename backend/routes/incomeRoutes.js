@@ -1,79 +1,97 @@
 import express from 'express';
 import Income from '../models/Income.js';
+import logger from '../config/logger.js';
 
 const router = express.Router();
 
-// Create a new income stream
+// @route    POST /api/income
+// @desc     Add a new income entry
 router.post('/', async (req, res) => {
+  logger.info('POST /api/income request received');
   const { source, amount, date, description } = req.body;
 
-  try {
-    // Validate that required fields are provided
-    if (!source || !amount) {
-      return res.status(400).json({ error: 'Source and amount are required.' });
-    }
+  // Validate the required fields
+  if (!source || !amount) {
+    logger.warn('Source and amount are required');
+    return res.status(400).json({ error: 'Source and amount are required.' });
+  }
 
-    // Create a new income stream
+  try {
     const income = new Income({
       source,
-      amount,
-      date: date || new Date(), // Use provided date or default to current date
+      amount: parseFloat(amount),
+      date: date ? new Date(date) : new Date(),
       description,
-      // user: req.user.id, // Uncomment and use if user authentication is enabled
     });
 
     const savedIncome = await income.save();
+    logger.info('Income saved successfully:', savedIncome);
     res.status(201).json(savedIncome);
   } catch (err) {
-    console.error('Error creating income:', err.message);
+    logger.error('Error saving income: ' + err.message);
     res.status(500).json({ error: 'Server Error' });
   }
 });
 
-// Get all income streams
+// @route    GET /api/income
+// @desc     Get all income entries
 router.get('/', async (req, res) => {
+  logger.info('GET /api/income request received');
   try {
-    const incomes = await Income.find(); // Get all income streams
-    res.json(incomes);
+    const incomeEntries = await Income.find();
+    logger.info('Income entries retrieved successfully');
+    res.status(200).json(incomeEntries);
   } catch (err) {
-    console.error('Error fetching income:', err.message);
-    res.status(500).json({ error: 'Server Error' });
+    logger.error('Error fetching income entries: ' + err.message);
+    res.status(500).json({ error: 'Failed to fetch income entries' });
   }
 });
 
-// Update an existing income stream
+// @route    PUT /api/income/:id
+// @desc     Update an income entry
 router.put('/:id', async (req, res) => {
+  logger.info(`PUT /api/income/${req.params.id} request received`);
   const { source, amount, date, description } = req.body;
 
   try {
-    let income = await Income.findById(req.params.id);
-    if (!income) return res.status(404).json({ error: 'Income not found' });
+    const income = await Income.findById(req.params.id);
+    if (!income) {
+      logger.warn(`Income entry not found for id: ${req.params.id}`);
+      return res.status(404).json({ error: 'Income entry not found' });
+    }
 
     // Update the fields
     income.source = source || income.source;
-    income.amount = amount || income.amount;
-    income.date = date || income.date;
+    income.amount = parseFloat(amount) || income.amount;
+    income.date = date ? new Date(date) : income.date;
     income.description = description || income.description;
 
-    income = await income.save();
-    res.json(income);
+    const updatedIncome = await income.save();
+    logger.info('Income updated successfully:', updatedIncome);
+    res.status(200).json(updatedIncome);
   } catch (err) {
-    console.error('Error updating income:', err.message);
-    res.status(500).json({ error: 'Server Error' });
+    logger.error('Error updating income: ' + err.message);
+    res.status(500).json({ error: 'Failed to update income entry' });
   }
 });
 
-// Delete an income stream
+// @route    DELETE /api/income/:id
+// @desc     Delete an income entry
 router.delete('/:id', async (req, res) => {
+  logger.info(`DELETE /api/income/${req.params.id} request received`);
   try {
     const income = await Income.findById(req.params.id);
-    if (!income) return res.status(404).json({ error: 'Income not found' });
+    if (!income) {
+      logger.warn(`Income entry not found for id: ${req.params.id}`);
+      return res.status(404).json({ error: 'Income entry not found' });
+    }
 
-    await income.deleteOne(); // Delete the income stream
-    res.json({ message: 'Income deleted successfully' });
+    await Income.findByIdAndDelete(req.params.id);
+    logger.info('Income entry removed successfully');
+    res.status(200).json({ message: 'Income entry removed successfully' });
   } catch (err) {
-    console.error('Error deleting income:', err.message);
-    res.status(500).json({ error: 'Server Error' });
+    logger.error('Error deleting income entry: ' + err.message);
+    res.status(500).json({ error: 'Failed to delete income entry' });
   }
 });
 
