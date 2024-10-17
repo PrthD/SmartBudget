@@ -1,78 +1,42 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import '../styles/Dashboard.css';
 import IncomeVsExpensesChart from '../components/charts/IncomeVsExpensesChart';
 import MonthlyTrendsChart from '../components/charts/MonthlyTrendsChart';
 import SavingsChart from '../components/charts/SavingsChart';
+import PropTypes from 'prop-types';
 
-const Dashboard = () => {
+const Dashboard = ({ incomeData, expenseData }) => {
   const [totalIncome, setTotalIncome] = useState(0);
   const [totalExpenses, setTotalExpenses] = useState(0);
   const [savings, setSavings] = useState(0);
-  const [incomeData, setIncomeData] = useState([]);
-  const [expenseData, setExpenseData] = useState([]);
   const [monthlyData, setMonthlyData] = useState([]);
   const [savingsData, setSavingsData] = useState([]);
-  const [recommendations, setRecommendations] = useState('');
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const incomeResponse = await axios.get(
-          'http://localhost:5000/api/income'
-        );
-        setIncomeData(incomeResponse.data);
-        const totalIncome = incomeResponse.data.reduce(
-          (sum, income) => sum + income.amount,
-          0
-        );
-        setTotalIncome(totalIncome);
+    const totalIncomeCalc = incomeData.reduce(
+      (sum, income) => sum + income.amount,
+      0
+    );
+    const totalExpensesCalc = expenseData.reduce(
+      (sum, expense) => sum + expense.amount,
+      0
+    );
 
-        const expensesResponse = await axios.get(
-          'http://localhost:5000/api/expenses'
-        );
-        setExpenseData(expensesResponse.data);
-        const totalExpenses = expensesResponse.data.reduce(
-          (sum, expense) => sum + expense.amount,
-          0
-        );
-        setTotalExpenses(totalExpenses);
+    setTotalIncome(totalIncomeCalc);
+    setTotalExpenses(totalExpensesCalc);
+    setSavings(totalIncomeCalc - totalExpensesCalc);
 
-        setSavings(totalIncome - totalExpenses);
+    // Generate monthly data
+    const monthlyDataCalc = generateMonthlyData(incomeData, expenseData);
+    setMonthlyData(monthlyDataCalc);
 
-        // Generate monthly data from the fetched income and expense data
-        const monthlyData = generateMonthlyData(
-          incomeResponse.data,
-          expensesResponse.data
-        );
-        setMonthlyData(monthlyData);
-
-        // Generate savings data from total income and expenses
-        const savingsData = generateSavingsData(monthlyData);
-        setSavingsData(savingsData);
-
-        // Fetch AI recommendations (optional)
-        const aiResponse = await axios.post(
-          'http://localhost:5000/api/ai/recommendation',
-          {
-            questionIndex: 0,
-            totalExpenses,
-            totalIncome,
-            savings: totalIncome - totalExpenses,
-          }
-        );
-        setRecommendations(aiResponse.data.data);
-      } catch (error) {
-        console.error('Error fetching data:', error.message);
-      }
-    };
-
-    fetchData();
-  }, []);
+    // Generate savings data
+    const savingsDataCalc = generateSavingsData(monthlyDataCalc);
+    setSavingsData(savingsDataCalc);
+  }, [incomeData, expenseData]);
 
   // Function to generate monthly trend data
   const generateMonthlyData = (incomeData, expenseData) => {
-    // Generate monthly totals for income and expenses based on the data
     const monthlyTotals = {};
 
     incomeData.forEach((income) => {
@@ -126,20 +90,12 @@ const Dashboard = () => {
         </div>
       </div>
 
-      {/* AI Recommendations */}
-      <div className="recommendations">
-        <h2>AI Budget Recommendations</h2>
-        <p>{recommendations}</p>
-      </div>
-
       {/* Render Chart Components */}
       <div className="charts">
         {/* Pass incomeData and expenseData as props to IncomeVsExpensesChart */}
         <IncomeVsExpensesChart
           totalIncome={totalIncome}
           totalExpenses={totalExpenses}
-          incomeData={incomeData} // Use these props if needed in the chart
-          expenseData={expenseData} // Use these props if needed in the chart
         />
         {/* Pass monthlyData as prop to MonthlyTrendsChart */}
         <MonthlyTrendsChart monthlyData={monthlyData} />
@@ -148,6 +104,28 @@ const Dashboard = () => {
       </div>
     </div>
   );
+};
+
+// Define PropTypes for the Dashboard component
+Dashboard.propTypes = {
+  incomeData: PropTypes.arrayOf(
+    PropTypes.shape({
+      _id: PropTypes.string.isRequired,
+      amount: PropTypes.number.isRequired,
+      date: PropTypes.string.isRequired,
+      source: PropTypes.string.isRequired,
+      description: PropTypes.string,
+    })
+  ).isRequired,
+  expenseData: PropTypes.arrayOf(
+    PropTypes.shape({
+      _id: PropTypes.string.isRequired,
+      amount: PropTypes.number.isRequired,
+      date: PropTypes.string.isRequired,
+      category: PropTypes.string.isRequired,
+      description: PropTypes.string,
+    })
+  ).isRequired,
 };
 
 export default Dashboard;

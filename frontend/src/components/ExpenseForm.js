@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import PropTypes from 'prop-types';
 
 import '../styles/ExpenseForm.css';
 
-const ExpenseForm = () => {
+const ExpenseForm = ({ onExpenseAdded }) => {
   // State to manage form input values
   const [category, setCategory] = useState('');
   const [customCategoryName, setCustomCategoryName] = useState('');
@@ -46,6 +47,9 @@ const ExpenseForm = () => {
         date: date || new Date().toISOString(),
         description,
       });
+
+      // Trigger data re-fetch via the passed prop
+      onExpenseAdded();
 
       // Clear form and show success message
       setCategory('');
@@ -147,6 +151,10 @@ const ExpenseForm = () => {
       {success && <p className="success-message">{success}</p>}
     </div>
   );
+};
+
+ExpenseForm.propTypes = {
+  onExpenseAdded: PropTypes.func.isRequired,
 };
 
 export default ExpenseForm;

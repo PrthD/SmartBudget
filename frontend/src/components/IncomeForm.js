@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import PropTypes from 'prop-types';
 
 import '../styles/IncomeForm.css';
 
-const IncomeForm = () => {
+const IncomeForm = ({ onIncomeAdded }) => {
   // State management for form fields
   const [source, setSource] = useState('');
   const [amount, setAmount] = useState('');
@@ -31,6 +32,9 @@ const IncomeForm = () => {
         date: date || new Date().toISOString(),
         description,
       });
+
+      // Trigger data re-fetch via the passed prop
+      onIncomeAdded();
 
       // Clear form and show success message
       setSource('');
@@ -110,6 +114,10 @@ const IncomeForm = () => {
       {success && <p className="success-message">{success}</p>}
     </div>
   );
+};
+
+IncomeForm.propTypes = {
+  onIncomeAdded: PropTypes.func.isRequired,
 };
 
 export default IncomeForm;
