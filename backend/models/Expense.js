@@ -1,14 +1,14 @@
 import mongoose from 'mongoose';
 
-// Define the Expense schema
 const ExpenseSchema = new mongoose.Schema({
   category: {
     type: String,
     required: true,
+    trim: true,
   },
   customCategory: {
     type: Boolean,
-    default: false, // Indicates whether the category is a custom one created by the user
+    default: false,
   },
   amount: {
     type: Number,
@@ -25,7 +25,7 @@ const ExpenseSchema = new mongoose.Schema({
   },
   user: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'User', // Reference to the user who created this expense
+    ref: 'User',
     //required: true,
   },
 });

@@ -10,7 +10,6 @@ router.post('/recommendation', async (req, res) => {
   logger.info('POST /api/ai/recommendation request received');
   try {
     await getAIRecommendation(req, res);
-    logger.info('AI recommendation processed successfully');
   } catch (err) {
     logger.error('Error in AI recommendation: ' + err.message);
     res.status(500).json({ error: 'Internal server error' });

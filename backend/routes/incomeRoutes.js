@@ -10,10 +10,11 @@ router.post('/', async (req, res) => {
   logger.info('POST /api/income request received');
   const { source, amount, date, description } = req.body;
 
-  // Validate the required fields
-  if (!source || !amount) {
-    logger.warn('Source and amount are required');
-    return res.status(400).json({ error: 'Source and amount are required.' });
+  if (!source || !amount || isNaN(amount)) {
+    logger.warn('Source and valid amount are required');
+    return res
+      .status(400)
+      .json({ error: 'Source and valid amount are required.' });
   }
 
   try {
@@ -53,6 +54,10 @@ router.put('/:id', async (req, res) => {
   logger.info(`PUT /api/income/${req.params.id} request received`);
   const { source, amount, date, description } = req.body;
 
+  if (amount && isNaN(amount)) {
+    return res.status(400).json({ error: 'Invalid amount provided.' });
+  }
+
   try {
     const income = await Income.findById(req.params.id);
     if (!income) {
@@ -60,7 +65,6 @@ router.put('/:id', async (req, res) => {
       return res.status(404).json({ error: 'Income entry not found' });
     }
 
-    // Update the fields
     income.source = source || income.source;
     income.amount = parseFloat(amount) || income.amount;
     income.date = date ? new Date(date) : income.date;

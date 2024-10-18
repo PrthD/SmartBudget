@@ -8,19 +8,16 @@ import aiRoutes from './routes/aiRoutes.js';
 import expenseRoutes from './routes/expenseRoutes.js';
 import incomeRoutes from './routes/incomeRoutes.js';
 
-// Load environment variables
 dotenv.config();
 
-// Initialize express app
 const app = express();
 
-// Connect to MongoDB
 connectDB();
 
 // Middleware for CORS
 app.use(cors({ origin: 'http://localhost:3000' }));
-// Middleware to parse JSON
 app.use(express.json());
+
 // Middleware to log all HTTP requests using morgan and winston
 app.use(
   morgan('combined', {
@@ -33,6 +30,19 @@ app.use('/api/ai', aiRoutes); // AI routes
 app.use('/api/expenses', expenseRoutes); // Expense routes
 app.use('/api/income', incomeRoutes); // Income routes
 
-// Start the server
+// Global error-handling middleware
+app.use((err, res) => {
+  logger.error(err.message);
+  res.status(500).json({ error: 'Something went wrong!' });
+});
+
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+const server = app.listen(PORT, () =>
+  console.log(`Server running on port ${PORT}`)
+);
+
+process.on('SIGTERM', () => {
+  server.close(() => {
+    console.log('Process terminated');
+  });
+});

@@ -1,21 +1,20 @@
 import rateLimit from 'express-rate-limit';
 import slowDown from 'express-slow-down';
+import logger from './logger.js';
 
-// Global Rate Limiting: Limit total requests to 15 per minute globally
 const globalLimiter = rateLimit({
-  windowMs: 60 * 1000, // 1 minute window
-  max: 15, // Max 15 requests per minute across all users
+  windowMs: 60 * 1000,
+  max: 15,
   message: 'Rate limit exceeded. Please try again after a minute.',
+  onLimitReached: (req) => {
+    logger.warn(`Rate limit exceeded for IP: ${req.ip}`);
+  },
 });
 
-// Slow down requests as the limit is approached (old behavior)
 const globalSpeedLimiter = slowDown({
-  windowMs: 60 * 1000, // 1 minute window
-  delayAfter: 10, // Allow 10 requests per minute at full speed
-  delayMs: (used, req) => {
-    const delayAfter = req.slowDown.limit;
-    return (used - delayAfter) * 500; // Delay increases by 500ms for each additional request
-  },
+  windowMs: 60 * 1000,
+  delayAfter: 10,
+  delayMs: (used, req) => (used - req.slowDown.limit) * 500,
 });
 
 export { globalLimiter, globalSpeedLimiter };

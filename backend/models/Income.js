@@ -1,28 +1,28 @@
 import mongoose from 'mongoose';
 
-// Define the Income schema
 const IncomeSchema = new mongoose.Schema({
   source: {
     type: String,
     required: true,
-    trim: true, // Trim whitespaces
+    trim: true,
   },
   amount: {
     type: Number,
     required: true,
-    min: [0, 'Amount must be a positive number'], // Ensure the amount is positive
+    min: [0, 'Amount must be a positive number'],
   },
   date: {
     type: Date,
-    default: Date.now, // Default to the current date if not provided
+    default: Date.now,
   },
   description: {
     type: String,
-    trim: true, // Optional description for the income source
+    trim: true,
   },
   user: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'User', // Reference to the user who created the income stream (optional)
+    ref: 'User',
+    // required: true,
   },
 });
 

@@ -10,10 +10,11 @@ router.post('/', async (req, res) => {
   logger.info('POST /api/expenses request received');
   const { category, amount, date, description, customCategory } = req.body;
 
-  // Validate the required fields
-  if (!category || !amount) {
-    logger.warn('Category and amount are required');
-    return res.status(400).json({ error: 'Category and amount are required.' });
+  if (!category || !amount || isNaN(amount)) {
+    logger.warn('Category and valid amount are required');
+    return res
+      .status(400)
+      .json({ error: 'Category and valid amount are required.' });
   }
 
   try {
@@ -54,15 +55,17 @@ router.put('/:id', async (req, res) => {
   logger.info(`PUT /api/expenses/${req.params.id} request received`);
   const { category, amount, date, description, customCategory } = req.body;
 
+  if (amount && isNaN(amount)) {
+    return res.status(400).json({ error: 'Invalid amount provided.' });
+  }
+
   try {
-    // Find the expense by ID and update it
     let expense = await Expense.findById(req.params.id);
     if (!expense) {
       logger.warn(`Expense not found for id: ${req.params.id}`);
       return res.status(404).json({ error: 'Expense not found' });
     }
 
-    // Update fields
     expense.category = category || expense.category;
     expense.amount = parseFloat(amount) || expense.amount;
     expense.date = date ? new Date(date) : expense.date;
@@ -70,7 +73,6 @@ router.put('/:id', async (req, res) => {
     expense.customCategory =
       customCategory !== undefined ? customCategory : expense.customCategory;
 
-    // Save the updated expense
     const updatedExpense = await expense.save();
     logger.info('Expense updated successfully:', updatedExpense);
     res.json(updatedExpense);
