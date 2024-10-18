@@ -1,11 +1,9 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import PropTypes from 'prop-types';
-
 import '../styles/ExpenseForm.css';
 
 const ExpenseForm = ({ onExpenseAdded }) => {
-  // State to manage form input values
   const [category, setCategory] = useState('');
   const [customCategoryName, setCustomCategoryName] = useState('');
   const [amount, setAmount] = useState('');
@@ -14,7 +12,6 @@ const ExpenseForm = ({ onExpenseAdded }) => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
-  // Predefined categories
   const predefinedCategories = [
     'Groceries',
     'Transportation',
@@ -22,25 +19,21 @@ const ExpenseForm = ({ onExpenseAdded }) => {
     'Utilities',
   ];
 
-  // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError('');
+    setSuccess('');
 
-    // Determine which category to send to the backend
     const finalCategory = category === 'custom' ? customCategoryName : category;
 
-    // Client-side validation
     if (!finalCategory || !amount || amount <= 0) {
       setError(
         'Please fill in all required fields and ensure the amount is greater than zero.'
       );
-      setSuccess('');
       return;
     }
 
     try {
-      // Send the data to the backend API
-      // const response = await axios.post('http://localhost:5000/api/expenses', {
       await axios.post('http://localhost:5000/api/expenses', {
         category: finalCategory,
         amount: parseFloat(amount),
@@ -48,20 +41,15 @@ const ExpenseForm = ({ onExpenseAdded }) => {
         description,
       });
 
-      // Trigger data re-fetch via the passed prop
       onExpenseAdded();
-
-      // Clear form and show success message
       setCategory('');
       setCustomCategoryName('');
       setAmount('');
       setDate('');
       setDescription('');
-      setError('');
       setSuccess('Expense added successfully!');
     } catch (err) {
       setError('Failed to add expense. Please try again.');
-      setSuccess('');
     }
   };
 
@@ -139,15 +127,9 @@ const ExpenseForm = ({ onExpenseAdded }) => {
             placeholder="Add a description (optional)"
           />
         </div>
-
-        {/* Submit Button */}
         <button type="submit">Add Expense</button>
       </form>
-
-      {/* Error Message */}
       {error && <p className="error-message">{error}</p>}
-
-      {/* Success Message */}
       {success && <p className="success-message">{success}</p>}
     </div>
   );

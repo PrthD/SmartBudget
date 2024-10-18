@@ -1,11 +1,9 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import PropTypes from 'prop-types';
-
 import '../styles/IncomeForm.css';
 
 const IncomeForm = ({ onIncomeAdded }) => {
-  // State management for form fields
   const [source, setSource] = useState('');
   const [amount, setAmount] = useState('');
   const [date, setDate] = useState('');
@@ -13,19 +11,17 @@ const IncomeForm = ({ onIncomeAdded }) => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
-  // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError('');
+    setSuccess('');
 
-    // Client-side validation
     if (!source || !amount || amount <= 0) {
       setError('Please provide a valid source and amount.');
-      setSuccess('');
       return;
     }
 
     try {
-      // Send the data to the backend API
       await axios.post('http://localhost:5000/api/income', {
         source,
         amount: parseFloat(amount),
@@ -33,19 +29,14 @@ const IncomeForm = ({ onIncomeAdded }) => {
         description,
       });
 
-      // Trigger data re-fetch via the passed prop
       onIncomeAdded();
-
-      // Clear form and show success message
       setSource('');
       setAmount('');
       setDate('');
       setDescription('');
-      setError('');
       setSuccess('Income added successfully!');
     } catch (err) {
       setError('Failed to add income. Please try again.');
-      setSuccess('');
     }
   };
 
@@ -102,15 +93,9 @@ const IncomeForm = ({ onIncomeAdded }) => {
             placeholder="Add a description (optional)"
           />
         </div>
-
-        {/* Submit Button */}
         <button type="submit">Add Income</button>
       </form>
-
-      {/* Error Message */}
       {error && <p className="error-message">{error}</p>}
-
-      {/* Success Message */}
       {success && <p className="success-message">{success}</p>}
     </div>
   );

@@ -6,33 +6,23 @@ import Dashboard from './pages/Dashboard.js';
 import axios from 'axios';
 
 function App() {
-  // Global state for income, expenses, and savings data
   const [incomeData, setIncomeData] = useState([]);
   const [expenseData, setExpenseData] = useState([]);
 
-  // Fetch income and expenses on component mount
   useEffect(() => {
-    fetchIncomeData();
-    fetchExpenseData();
+    fetchData();
   }, []);
 
-  // Function to fetch income data
-  const fetchIncomeData = async () => {
+  const fetchData = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/api/income');
-      setIncomeData(response.data);
+      const [incomeResponse, expenseResponse] = await Promise.all([
+        axios.get('http://localhost:5000/api/income'),
+        axios.get('http://localhost:5000/api/expenses'),
+      ]);
+      setIncomeData(incomeResponse.data);
+      setExpenseData(expenseResponse.data);
     } catch (error) {
-      console.error('Error fetching income data:', error);
-    }
-  };
-
-  // Function to fetch expense data
-  const fetchExpenseData = async () => {
-    try {
-      const response = await axios.get('http://localhost:5000/api/expenses');
-      setExpenseData(response.data);
-    } catch (error) {
-      console.error('Error fetching expense data:', error);
+      console.error('Error fetching data:', error);
     }
   };
 
@@ -46,13 +36,13 @@ function App() {
       {/* Expense Section */}
       <section className="expense-section">
         <h2>Expense Tracker</h2>
-        <ExpenseForm onExpenseAdded={fetchExpenseData} />
+        <ExpenseForm onExpenseAdded={fetchData} />
       </section>
 
       {/* Income Section */}
       <section className="income-section">
         <h2>Income Tracker</h2>
-        <IncomeForm onIncomeAdded={fetchIncomeData} />
+        <IncomeForm onIncomeAdded={fetchData} />
       </section>
 
       {/* AI Recommendations Section */}
