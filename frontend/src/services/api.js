@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const API = axios.create({
-  baseURL: 'http://localhost:5000', // The backend URL
+  baseURL: 'http://localhost:5000',
 });
 
 export const fetchExpenses = async () => {
@@ -10,5 +10,16 @@ export const fetchExpenses = async () => {
     return response.data;
   } catch (error) {
     console.error('Error fetching expenses:', error);
+    throw error;
+  }
+};
+
+export const fetchIncome = async () => {
+  try {
+    const response = await API.get('/income');
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching income:', error);
+    throw error;
   }
 };

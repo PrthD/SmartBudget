@@ -4,17 +4,15 @@ import PropTypes from 'prop-types';
 
 const MonthlyTrendsChart = ({ monthlyData }) => {
   const chartRef = useRef(null);
-  const chartInstanceRef = useRef(null); // Reference to store the Chart instance
+  const chartInstanceRef = useRef(null);
 
   useEffect(() => {
     const ctx = chartRef.current.getContext('2d');
 
-    // Destroy existing chart instance if it exists
     if (chartInstanceRef.current) {
       chartInstanceRef.current.destroy();
     }
 
-    // Create new Chart instance
     chartInstanceRef.current = new Chart(ctx, {
       type: 'line',
       data: {
@@ -44,7 +42,6 @@ const MonthlyTrendsChart = ({ monthlyData }) => {
       },
     });
 
-    // Cleanup function to destroy chart instance on component unmount
     return () => {
       if (chartInstanceRef.current) {
         chartInstanceRef.current.destroy();
@@ -59,7 +56,6 @@ const MonthlyTrendsChart = ({ monthlyData }) => {
   );
 };
 
-// Prop-types validation for the component props
 MonthlyTrendsChart.propTypes = {
   monthlyData: PropTypes.arrayOf(
     PropTypes.shape({

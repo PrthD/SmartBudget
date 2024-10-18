@@ -1,9 +1,8 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import '../styles/AIRecommendationForm.css'; // Create and style this CSS file as needed
+import '../styles/AIRecommendationForm.css';
 
 const AIRecommendationForm = () => {
-  // State management for form fields
   const [totalExpenses, setTotalExpenses] = useState('');
   const [totalIncome, setTotalIncome] = useState('');
   const [savings, setSavings] = useState('');
@@ -12,21 +11,17 @@ const AIRecommendationForm = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  // Predefined questions to display in the dropdown
   const predefinedQuestions = [
     'How should I allocate my budget?',
     'What savings goals should I set?',
     'How can I cut unnecessary expenses?',
   ];
 
-  // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Validate form fields
     if (!totalExpenses || !totalIncome || !savings || questionIndex === '') {
       setError('Please fill in all fields and select a question.');
-      setRecommendation('');
       return;
     }
 
@@ -35,7 +30,6 @@ const AIRecommendationForm = () => {
       setError('');
       setRecommendation('');
 
-      // Send request to the backend API
       const response = await axios.post(
         'http://localhost:5000/api/ai/recommendation',
         {
@@ -46,11 +40,10 @@ const AIRecommendationForm = () => {
         }
       );
 
-      // Display the AI-generated recommendation
       setRecommendation(response.data.data);
-      setLoading(false);
     } catch (err) {
       setError('Failed to fetch AI recommendation. Please try again.');
+    } finally {
       setLoading(false);
     }
   };
@@ -121,17 +114,11 @@ const AIRecommendationForm = () => {
             ))}
           </select>
         </div>
-
-        {/* Submit Button */}
         <button type="submit" disabled={loading}>
           {loading ? 'Loading...' : 'Get Recommendation'}
         </button>
       </form>
-
-      {/* Error Message */}
       {error && <p className="error-message">{error}</p>}
-
-      {/* Display Recommendation */}
       {recommendation && (
         <div className="recommendation-result">
           <h3>AI Budget Recommendation:</h3>
