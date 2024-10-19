@@ -1,19 +1,46 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
+import axios from 'axios';
 import '../styles/Dashboard.css';
 import IncomeVsExpensesChart from '../components/charts/IncomeVsExpensesChart';
 import MonthlyTrendsChart from '../components/charts/MonthlyTrendsChart';
 import SavingsChart from '../components/charts/SavingsChart';
 
 const Dashboard = ({ incomeData, expenseData }) => {
+  const [recurringExpenses, setRecurringExpenses] = useState([]);
+
+  useEffect(() => {
+    const fetchRecurringExpenses = async () => {
+      try {
+        const response = await axios.get(
+          'http://localhost:5000/api/expenses?recurring=true'
+        );
+        setRecurringExpenses(response.data);
+      } catch (error) {
+        console.error('Error fetching recurring expenses:', error);
+      }
+    };
+    fetchRecurringExpenses();
+  }, []);
+
+  const handleViewDetails = (expense) => {
+    const detailedInstances = recurringExpenses.filter(
+      (exp) =>
+        exp.category === expense.category && exp.frequency === expense.frequency
+    );
+    console.log(detailedInstances); // Here you can show this in a modal or expanded view
+  };
+
   const totalIncome = useMemo(
     () => incomeData.reduce((sum, income) => sum + income.amount, 0),
     [incomeData]
   );
+
   const totalExpenses = useMemo(
     () => expenseData.reduce((sum, expense) => sum + expense.amount, 0),
     [expenseData]
   );
+
   const savings = totalIncome - totalExpenses;
 
   const monthlyData = useMemo(() => {
@@ -48,6 +75,18 @@ const Dashboard = ({ incomeData, expenseData }) => {
     [monthlyData]
   );
 
+  const groupedRecurringExpenses = useMemo(() => {
+    const grouped = {};
+    recurringExpenses.forEach((expense) => {
+      const key = `${expense.category}-${expense.frequency}`;
+      if (!grouped[key]) {
+        grouped[key] = { ...expense, count: 0 };
+      }
+      grouped[key].count += 1;
+    });
+    return Object.values(grouped);
+  }, [recurringExpenses]);
+
   return (
     <div className="dashboard">
       <h1>SmartBudgetAI Dashboard</h1>
@@ -76,6 +115,47 @@ const Dashboard = ({ incomeData, expenseData }) => {
         />
         <MonthlyTrendsChart monthlyData={monthlyData} />
         <SavingsChart savingsData={savingsData} />
+      </div>
+
+      {/* Recurring Expenses Table */}
+      <div className="recurring-expenses">
+        <h2>Recurring Expenses</h2>
+        {groupedRecurringExpenses.length > 0 ? (
+          <table>
+            <thead>
+              <tr>
+                <th>Category</th>
+                <th>Amount</th>
+                <th>Frequency</th>
+                <th>Starting Date</th>
+                <th>Instances</th> {/* Number of recurring instances */}
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {groupedRecurringExpenses.map((expense) => (
+                <tr key={`${expense.category}-${expense.frequency}`}>
+                  <td>{expense.category}</td>
+                  <td>${expense.amount}</td>
+                  <td>
+                    {expense.frequency.charAt(0).toUpperCase() +
+                      expense.frequency.slice(1)}
+                  </td>
+                  <td>{new Date(expense.date).toLocaleDateString()}</td>
+                  <td>{expense.count} times</td>{' '}
+                  {/* Display how many times it's recurring */}
+                  <td>
+                    <button onClick={() => handleViewDetails(expense)}>
+                      View Details
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        ) : (
+          <p>No recurring expenses</p>
+        )}
       </div>
     </div>
   );
