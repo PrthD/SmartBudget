@@ -28,7 +28,7 @@ const Dashboard = ({ incomeData, expenseData }) => {
       (exp) =>
         exp.category === expense.category && exp.frequency === expense.frequency
     );
-    console.log(detailedInstances); // Here you can show this in a modal or expanded view
+    console.log(detailedInstances);
   };
 
   const totalIncome = useMemo(
@@ -128,7 +128,7 @@ const Dashboard = ({ incomeData, expenseData }) => {
                 <th>Amount</th>
                 <th>Frequency</th>
                 <th>Starting Date</th>
-                <th>Instances</th> {/* Number of recurring instances */}
+                <th>Instances</th>
                 <th>Actions</th>
               </tr>
             </thead>
@@ -138,12 +138,13 @@ const Dashboard = ({ incomeData, expenseData }) => {
                   <td>{expense.category}</td>
                   <td>${expense.amount}</td>
                   <td>
-                    {expense.frequency.charAt(0).toUpperCase() +
-                      expense.frequency.slice(1)}
+                    {expense.frequency
+                      ? expense.frequency.charAt(0).toUpperCase() +
+                        expense.frequency.slice(1)
+                      : 'N/A'}
                   </td>
                   <td>{new Date(expense.date).toLocaleDateString()}</td>
                   <td>{expense.count} times</td>{' '}
-                  {/* Display how many times it's recurring */}
                   <td>
                     <button onClick={() => handleViewDetails(expense)}>
                       View Details
