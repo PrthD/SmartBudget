@@ -74,3 +74,15 @@
   justify-content: center;
   text-align: center;
 }
+
+.your-expenses table th,
+.your-expenses table td {
+  padding: 8px 15px;
+  text-align: left;
+}
+
+.your-incomes table th,
+.your-incomes table td {
+  padding: 8px 15px;
+  text-align: left;
+}

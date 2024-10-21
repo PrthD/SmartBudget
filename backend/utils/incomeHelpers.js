@@ -1,4 +1,4 @@
-import Expense from '../models/Expense.js';
+import Income from '../models/Income.js';
 
 // Helper function to generate the next date based on frequency
 export const getNextDate = (currentDate, frequency) => {
@@ -22,17 +22,16 @@ export const getNextDate = (currentDate, frequency) => {
   return nextDate;
 };
 
-// Auto-generate future recurring expenses
-export const autoGenerateRecurringExpenses = async (expense) => {
-  const { frequency, amount, category, description } = expense;
+// Auto-generate future recurring incomes
+export const autoGenerateRecurringIncomes = async (income) => {
+  const { frequency, amount, source, description } = income;
 
-  const futureExpenses = [];
-  let nextDate = getNextDate(expense.date, frequency);
+  const futureIncomes = [];
+  let nextDate = getNextDate(income.date, frequency);
 
   for (let i = 0; i < 12; i++) {
-    futureExpenses.push({
-      category: category,
-      customCategory: expense.customCategory,
+    futureIncomes.push({
+      source: source,
       amount: amount,
       date: nextDate,
       description: description,
@@ -44,8 +43,8 @@ export const autoGenerateRecurringExpenses = async (expense) => {
   }
 
   try {
-    await Expense.insertMany(futureExpenses);
+    await Income.insertMany(futureIncomes);
   } catch (err) {
-    console.error('Error generating future recurring expenses:', err.message);
+    console.error('Error generating future recurring incomes:', err.message);
   }
 };

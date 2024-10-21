@@ -27,6 +27,7 @@ router.post('/', async (req, res) => {
       date: date ? new Date(date) : new Date(),
       description,
       frequency,
+      isOriginal: true,
     });
 
     const savedExpense = await expense.save();

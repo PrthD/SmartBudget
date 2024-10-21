@@ -8,8 +8,11 @@ const IncomeForm = ({ onIncomeAdded }) => {
   const [amount, setAmount] = useState('');
   const [date, setDate] = useState('');
   const [description, setDescription] = useState('');
+  const [frequency, setFrequency] = useState('once');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+
+  const frequencyOptions = ['once', 'weekly', 'biweekly', 'monthly', 'yearly'];
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -27,6 +30,7 @@ const IncomeForm = ({ onIncomeAdded }) => {
         amount: parseFloat(amount),
         date: date || new Date().toISOString(),
         description,
+        frequency,
       });
 
       onIncomeAdded();
@@ -34,6 +38,7 @@ const IncomeForm = ({ onIncomeAdded }) => {
       setAmount('');
       setDate('');
       setDescription('');
+      setFrequency('once');
       setSuccess('Income added successfully!');
     } catch (err) {
       setError('Failed to add income. Please try again.');
@@ -92,6 +97,21 @@ const IncomeForm = ({ onIncomeAdded }) => {
             onChange={(e) => setDescription(e.target.value)}
             placeholder="Add a description (optional)"
           />
+        </div>
+        {/* Frequency Selection */}
+        <div className="form-group">
+          <label htmlFor="frequency">Frequency</label>
+          <select
+            id="frequency"
+            value={frequency}
+            onChange={(e) => setFrequency(e.target.value)}
+          >
+            {frequencyOptions.map((option) => (
+              <option key={option} value={option}>
+                {option.charAt(0).toUpperCase() + option.slice(1)}
+              </option>
+            ))}
+          </select>
         </div>
         <button type="submit">Add Income</button>
       </form>

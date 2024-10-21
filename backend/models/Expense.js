@@ -28,6 +28,10 @@ const ExpenseSchema = new mongoose.Schema({
     enum: ['once', 'weekly', 'biweekly', 'monthly', 'yearly'],
     required: true,
   },
+  isOriginal: {
+    type: Boolean,
+    default: true,
+  },
   user: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
