@@ -95,7 +95,7 @@ const IncomeForm = ({ onIncomeAdded }) => {
             id="description"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            placeholder="Add a description (optional)"
+            placeholder="Add a description"
           />
         </div>
         {/* Frequency Selection */}

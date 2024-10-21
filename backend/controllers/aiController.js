@@ -29,18 +29,45 @@ const getAIRecommendation = async (req, res) => {
       .json({ error: 'Invalid financial values provided.' });
   }
 
-  const prompt = predefinedQuestions[questionIndex];
-  const contextPrompt = `
+  const netIncome = totalIncome - totalExpenses;
+
+  // const prompt = predefinedQuestions[questionIndex];
+  const prompt = `
     ${prompt}
-    My total monthly expenses are $${totalExpenses}, and my total monthly income is $${totalIncome}. 
-    I currently have $${savings} in savings. Based on this information, what would you recommend?
+    The user has provided the following financial details:
+    - Total monthly income: $${totalIncome}
+    - Total monthly expenses: $${totalExpenses}
+    - Current savings: $${savings}
+    - Net income (income minus expenses): $${netIncome}
+
+    Based on this information, please recommend a personalized budget plan by:
+    1. Allocating income into three categories:
+       - **Essentials (50-60% of net income)**
+       - **Savings (20-30% of net income)**
+       - **Non-essentials (10-20% of net income)**
+
+    2. Offering tips for optimizing savings and reducing unnecessary expenses.
+
+    Provide the budget in a clear, actionable format, using dollar amounts for each category. Break down expenses into detailed suggestions, and prioritize savings strategies.
   `;
 
   try {
-    const result = await model.generateContent(contextPrompt);
+    const result = await model.generateContent(prompt);
+    const aiResponse = result.response.text();
+
+    const formattedResponse = aiResponse
+      .replace(/\*\*/g, '')
+      .replace(/1\./g, '\n\n1. **Budget Breakdown:**')
+      .replace(/2\./g, '\n\n2. **Savings Optimization Tips:**')
+      .replace(/Track Your Spending/g, '**Track Your Spending**')
+      .replace(/Review Regularly/g, '**Review Regularly**')
+      .replace(/Essentials:/g, '**Essentials:**')
+      .replace(/Savings:/g, '**Savings:**')
+      .replace(/Non-essentials:/g, '**Non-essentials:**');
+
     res.status(200).json({
       success: true,
-      data: result.response.text(),
+      data: formattedResponse,
     });
   } catch (error) {
     console.error('Error with Gemini API:', error.message);
