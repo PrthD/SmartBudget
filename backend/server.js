@@ -7,6 +7,7 @@ import connectDB from './config/db.js';
 import aiRoutes from './routes/aiRoutes.js';
 import expenseRoutes from './routes/expenseRoutes.js';
 import incomeRoutes from './routes/incomeRoutes.js';
+import savingsGoalRoutes from './routes/savingsGoalRoutes.js';
 
 dotenv.config();
 
@@ -29,6 +30,7 @@ app.use(
 app.use('/api/ai', aiRoutes); // AI routes
 app.use('/api/expenses', expenseRoutes); // Expense routes
 app.use('/api/income', incomeRoutes); // Income routes
+app.use('/api/savings-goals', savingsGoalRoutes); // Savings goal routes
 
 // Global error-handling middleware
 app.use((err, res) => {

@@ -1,9 +1,11 @@
 import React, { useMemo, useEffect, useState } from 'react';
+import axios from 'axios';
 import PropTypes from 'prop-types';
 import '../styles/Dashboard.css';
 import IncomeVsExpensesChart from '../components/charts/IncomeVsExpensesChart';
 import MonthlyTrendsChart from '../components/charts/MonthlyTrendsChart';
 import SavingsChart from '../components/charts/SavingsChart';
+import SavingsForm from '../components/savings/SavingsForm';
 
 const Dashboard = ({
   incomeData,
@@ -13,8 +15,22 @@ const Dashboard = ({
 }) => {
   const [expandedIncome, setExpandedIncome] = useState({});
   const [expandedExpense, setExpandedExpense] = useState({});
+  const [savingsGoals, setSavingsGoals] = useState([]);
 
   useEffect(() => {
+    const fetchSavingsGoals = async () => {
+      try {
+        const response = await axios.get(
+          'http://localhost:5000/api/savings-goals'
+        );
+        setSavingsGoals(response.data);
+      } catch (error) {
+        console.error('Error fetching savings goals:', error);
+      }
+    };
+
+    fetchSavingsGoals();
+
     if (onIncomeAdded) onIncomeAdded();
     if (onExpenseAdded) onExpenseAdded();
   }, [onIncomeAdded, onExpenseAdded]);
@@ -111,6 +127,14 @@ const Dashboard = ({
     setExpandedExpense((prev) => ({ ...prev, [id]: !prev[id] }));
   };
 
+  const handleSaveGoal = (goal) => {
+    if (!goal || !goal.title || !goal.targetAmount) {
+      console.error('Invalid goal data', goal);
+      return;
+    }
+    setSavingsGoals((prevGoals) => [...prevGoals, goal]);
+  };
+
   return (
     <div className="dashboard">
       <h1>SmartBudgetAI Dashboard</h1>
@@ -129,6 +153,28 @@ const Dashboard = ({
           <h3>Savings</h3>
           <p>${savings}</p>
         </div>
+      </div>
+
+      {/* Savings Form */}
+      <SavingsForm onSave={handleSaveGoal} />
+
+      {/* Your Savings Goals */}
+      <div className="savings-goals">
+        <h2>Your Savings Goals</h2>
+        {savingsGoals.length > 0 ? (
+          savingsGoals.map((goal, index) => (
+            <div key={index} className="savings-goal">
+              <h3>{goal.title}</h3>
+              <p>Target Amount: ${goal.targetAmount}</p>
+              <p>Current Amount: ${savings}</p>
+              {goal.deadline && (
+                <p>Deadline: {new Date(goal.deadline).toLocaleDateString()}</p>
+              )}
+            </div>
+          ))
+        ) : (
+          <p>No savings goals set yet.</p>
+        )}
       </div>
 
       {/* Render Chart Components */}
@@ -271,8 +317,6 @@ Dashboard.propTypes = {
       date: PropTypes.string.isRequired,
       category: PropTypes.string.isRequired,
       description: PropTypes.string,
-      // frequency: PropTypes.string,
-      // isOriginal: PropTypes.bool,
     })
   ).isRequired,
   onIncomeAdded: PropTypes.func,

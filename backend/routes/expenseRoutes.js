@@ -20,6 +20,20 @@ router.post('/', async (req, res) => {
   }
 
   try {
+    const existingExpense = await Expense.findOne({
+      category,
+      customCategory,
+      amount,
+      date,
+      frequency,
+    });
+    if (existingExpense) {
+      logger.warn(`Expense with the same details already exists.`);
+      return res
+        .status(400)
+        .json({ error: 'Expense with the same details already exists.' });
+    }
+
     const expense = new Expense({
       category,
       customCategory: customCategory || false,

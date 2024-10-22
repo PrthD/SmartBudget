@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import ExpenseForm from './components/ExpenseForm.js';
-import IncomeForm from './components/IncomeForm.js';
-import AIRecommendationForm from './components/AIRecommendationForm.js';
+import ExpenseForm from './components/expenses/ExpenseForm.js';
+import IncomeForm from './components/incomes/IncomeForm.js';
+import AIRecommendationForm from './components/AI-Integrations/AIRecommendationForm.js';
 import Dashboard from './pages/Dashboard.js';
 import axios from 'axios';
 

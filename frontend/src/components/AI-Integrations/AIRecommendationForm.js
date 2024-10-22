@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import '../styles/AIRecommendationForm.css';
+import '../../styles/AIRecommendationForm.css';
 
 const AIRecommendationForm = () => {
   const [totalExpenses, setTotalExpenses] = useState('');

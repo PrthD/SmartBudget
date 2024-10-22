@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import PropTypes from 'prop-types';
-import '../styles/ExpenseForm.css';
+import '../../styles/ExpenseForm.css';
 
 const ExpenseForm = ({ onExpenseAdded }) => {
   const [category, setCategory] = useState('');

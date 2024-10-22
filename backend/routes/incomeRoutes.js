@@ -19,6 +19,19 @@ router.post('/', async (req, res) => {
   }
 
   try {
+    const existingIncome = await Income.findOne({
+      source,
+      amount,
+      date,
+      frequency,
+    });
+    if (existingIncome) {
+      logger.warn(`Income with the same details already exists.`);
+      return res
+        .status(400)
+        .json({ error: 'Income with the same details already exists.' });
+    }
+
     const income = new Income({
       source,
       amount: parseFloat(amount),
