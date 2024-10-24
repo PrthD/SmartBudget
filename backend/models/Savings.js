@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 
-const SavingsGoalSchema = new mongoose.Schema({
+const SavingsSchema = new mongoose.Schema({
   title: {
     type: String,
     required: true,
@@ -15,7 +15,7 @@ const SavingsGoalSchema = new mongoose.Schema({
   },
   deadline: {
     type: Date,
-    default: null, // Optional deadline for the goal
+    default: null,
   },
   user: {
     type: mongoose.Schema.Types.ObjectId,
@@ -24,5 +24,5 @@ const SavingsGoalSchema = new mongoose.Schema({
   },
 });
 
-const SavingsGoal = mongoose.model('SavingsGoal', SavingsGoalSchema);
-export default SavingsGoal;
+const Savings = mongoose.model('Savings', SavingsSchema);
+export default Savings;

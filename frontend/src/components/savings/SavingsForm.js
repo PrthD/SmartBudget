@@ -7,33 +7,30 @@ const SavingsForm = ({ onSave }) => {
   const [targetAmount, setTargetAmount] = useState('');
   const [deadline, setDeadline] = useState('');
   const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
+  const [success, setSuccess] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
-    setSuccess('');
+    setSuccess(false);
 
     if (!title || !targetAmount) {
-      setError('Please provide a title and target amount.');
+      setError('Please provide a valid title and target amount.');
       return;
     }
 
     try {
-      const response = await axios.post(
-        'http://localhost:5000/api/savings-goals',
-        {
-          title,
-          targetAmount: parseFloat(targetAmount),
-          deadline: deadline ? new Date(deadline).toISOString() : null,
-        }
-      );
+      const response = await axios.post('/api/savings', {
+        title,
+        targetAmount: parseFloat(targetAmount),
+        deadline: deadline ? new Date(deadline).toISOString() : null,
+      });
 
       onSave(response.data);
       setTitle('');
       setTargetAmount('');
       setDeadline('');
-      setSuccess('Savings goal added successfully!');
+      setSuccess(true);
     } catch (error) {
       setError('Failed to add savings goal. Please try again.');
     }

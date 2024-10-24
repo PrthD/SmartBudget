@@ -5,10 +5,10 @@ import { autoGenerateRecurringExpenses } from '../utils/expenseHelpers.js';
 
 const router = express.Router();
 
-// @route    POST /api/expenses
+// @route    POST /api/expense
 // @desc     Add a new expense
 router.post('/', async (req, res) => {
-  logger.info('POST /api/expenses request received');
+  logger.info('POST /api/expense request received');
   const { category, customCategory, amount, date, description, frequency } =
     req.body;
 
@@ -59,10 +59,10 @@ router.post('/', async (req, res) => {
   }
 });
 
-// @route    GET /api/expenses
+// @route    GET /api/expense
 // @desc     Get all expenses
 router.get('/', async (req, res) => {
-  logger.info('GET /api/expenses request received');
+  logger.info('GET /api/expense request received');
   try {
     const expenses = await Expense.find();
     logger.info('Expenses retrieved successfully');
@@ -73,10 +73,10 @@ router.get('/', async (req, res) => {
   }
 });
 
-// @route    PUT /api/expenses/:id
+// @route    PUT /api/expense/:id
 // @desc     Update an expense
 router.put('/:id', async (req, res) => {
-  logger.info(`PUT /api/expenses/${req.params.id} request received`);
+  logger.info(`PUT /api/expense/${req.params.id} request received`);
   const { category, customCategory, amount, date, description, frequency } =
     req.body;
 
@@ -115,10 +115,10 @@ router.put('/:id', async (req, res) => {
   }
 });
 
-// @route    DELETE /api/expenses/:id
+// @route    DELETE /api/expense/:id
 // @desc     Delete an expense
 router.delete('/:id', async (req, res) => {
-  logger.info(`DELETE /api/expenses/${req.params.id} request received`);
+  logger.info(`DELETE /api/expense/${req.params.id} request received`);
   try {
     const expense = await Expense.findById(req.params.id);
     if (!expense) {

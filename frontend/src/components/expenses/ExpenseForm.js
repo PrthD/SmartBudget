@@ -11,7 +11,7 @@ const ExpenseForm = ({ onExpenseAdded }) => {
   const [description, setDescription] = useState('');
   const [frequency, setFrequency] = useState('once');
   const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
+  const [success, setSuccess] = useState(false);
 
   const predefinedCategories = [
     'Groceries',
@@ -25,19 +25,17 @@ const ExpenseForm = ({ onExpenseAdded }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
-    setSuccess('');
+    setSuccess(false);
 
     const finalCategory = category === 'custom' ? customCategoryName : category;
 
     if (!finalCategory || !amount || amount <= 0) {
-      setError(
-        'Please fill in all required fields and ensure the amount is greater than zero.'
-      );
+      setError('Please Please provide valid category and amount.');
       return;
     }
 
     try {
-      await axios.post('http://localhost:5000/api/expenses', {
+      await axios.post('/api/expense', {
         category: finalCategory,
         amount: parseFloat(amount),
         date: date || new Date().toISOString(),
@@ -52,7 +50,7 @@ const ExpenseForm = ({ onExpenseAdded }) => {
       setDate('');
       setDescription('');
       setFrequency('once');
-      setSuccess('Expense added successfully!');
+      setSuccess(true);
     } catch (err) {
       setError('Failed to add expense. Please try again.');
     }
