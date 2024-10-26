@@ -146,7 +146,6 @@ const ExpenseForm = ({ onExpenseAdded }) => {
             ))}
           </select>
         </div>
-
         <button type="submit" disabled={loading}>
           {loading ? 'Adding...' : 'Add Expense'}
         </button>

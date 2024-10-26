@@ -26,7 +26,7 @@ const ExpensesPage = () => {
     handleExpenseAdded();
   }, []);
 
-  const totalExpenses = useMemo(
+  const totalExpense = useMemo(
     () =>
       expenseData
         .filter((expense) => new Date(expense.date) <= new Date())
@@ -46,7 +46,7 @@ const ExpensesPage = () => {
   return (
     <div className="expenses-page">
       <h2>Your Expenses</h2>
-      <h3>Total Expenses: ${totalExpenses}</h3>
+      <h3>Total Expenses: ${totalExpense}</h3>
       {loading ? (
         <p>Loading...</p>
       ) : error ? (

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import axios from 'axios';
 import PropTypes from 'prop-types';
+import { addIncome } from '../../services/incomeService';
+import { validateIncomeData } from '../../utils/incomeHelpers';
 import '../../styles/IncomeForm.css';
 
 const IncomeForm = ({ onIncomeAdded }) => {
@@ -9,40 +10,37 @@ const IncomeForm = ({ onIncomeAdded }) => {
   const [date, setDate] = useState('');
   const [description, setDescription] = useState('');
   const [frequency, setFrequency] = useState('once');
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState('');
 
   const frequencyOptions = ['once', 'weekly', 'biweekly', 'monthly', 'yearly'];
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
-    setSuccess('');
-
-    if (!source || !amount || amount <= 0) {
-      setError('Please provide a valid source and amount.');
-      return;
-    }
+    setLoading(true);
+    setMessage('');
 
     try {
-      const response = await axios.post('http://localhost:5000/api/income', {
+      validateIncomeData({ source, amount });
+
+      const response = await addIncome({
         source,
         amount: parseFloat(amount),
         date: date || new Date().toISOString(),
         description,
         frequency,
       });
-
       onIncomeAdded(response.data);
-      setSource('');
-      setAmount('');
-      setDate('');
-      setDescription('');
-      setFrequency('once');
-      setSuccess('Income added successfully!');
-    } catch (err) {
-      setError('Failed to add income. Please try again.');
+      setMessage('Income added successfully!');
+    } catch (error) {
+      setMessage(error.message || 'An error occurred');
     }
+    setLoading(false);
+    setSource('');
+    setAmount('');
+    setDate('');
+    setDescription('');
+    setFrequency('once');
   };
 
   return (
@@ -113,10 +111,11 @@ const IncomeForm = ({ onIncomeAdded }) => {
             ))}
           </select>
         </div>
-        <button type="submit">Add Income</button>
+        <button type="submit" disabled={loading}>
+          {loading ? 'Adding...' : 'Add Income'}
+        </button>
       </form>
-      {error && <p className="error-message">{error}</p>}
-      {success && <p className="success-message">{success}</p>}
+      {message && <p className="message">{message}</p>}
     </div>
   );
 };

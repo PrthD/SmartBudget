@@ -1,29 +1,30 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import axios from 'axios';
-import PropTypes from 'prop-types';
+import { fetchIncomes } from '../services/incomeService';
+import { groupIncomesBySource } from '../utils/incomeHelpers';
 import IncomeForm from '../components/incomes/IncomeForm';
 // import '../styles/IncomePage.css';
 
 const IncomesPage = () => {
   const [incomeData, setIncomeData] = useState([]);
   const [expandedIncome, setExpandedIncome] = useState({});
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
-  const fetchData = async () => {
+  const handleIncomeAdded = async () => {
     try {
-      const incomes = await axios.get('http://localhost:5000/api/income');
-      setIncomeData(incomes.data);
+      setLoading(true);
+      const incomes = await fetchIncomes();
+      setIncomeData(incomes);
     } catch (error) {
-      console.error('Error fetching incomes:', error);
+      setError(error.message);
+    } finally {
+      setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchData();
+    handleIncomeAdded();
   }, []);
-
-  const handleIncomeAdded = () => {
-    fetchData();
-  };
 
   const totalIncome = useMemo(
     () =>
@@ -33,22 +34,10 @@ const IncomesPage = () => {
     [incomeData]
   );
 
-  const groupedIncomes = useMemo(() => {
-    const grouped = {};
-    incomeData.forEach((income) => {
-      const key = `${income.source}-${income.frequency}`;
-      if (income.isOriginal) {
-        if (!grouped[key]) {
-          grouped[key] = { ...income, futureInstances: [] };
-        }
-      } else {
-        if (grouped[key]) {
-          grouped[key].futureInstances.push(income);
-        }
-      }
-    });
-    return Object.values(grouped);
-  }, [incomeData]);
+  const groupedIncomes = useMemo(
+    () => groupIncomesBySource(incomeData),
+    [incomeData]
+  );
 
   const toggleExpandIncome = (id) => {
     setExpandedIncome((prev) => ({ ...prev, [id]: !prev[id] }));
@@ -58,66 +47,71 @@ const IncomesPage = () => {
     <div className="incomes-page">
       <h2>Your Incomes</h2>
       <h3>Total Income: ${totalIncome}</h3>
-
-      {/* Render the Income Form */}
-      <IncomeForm onIncomeAdded={handleIncomeAdded} />
-
-      {/* Render the Income Table */}
-      {groupedIncomes.length > 0 ? (
-        <table>
-          <thead>
-            <tr>
-              <th>Source</th>
-              <th>Amount</th>
-              <th>Frequency</th>
-              <th>Date Added</th>
-              <th>Description</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {groupedIncomes.map((income) => (
-              <React.Fragment key={income._id}>
-                <tr>
-                  <td>{income.source}</td>
-                  <td>${income.amount}</td>
-                  <td>{income.frequency}</td>
-                  <td>{new Date(income.date).toLocaleDateString()}</td>
-                  <td>{income.description || ''}</td>
-                  <td>
-                    {income.frequency !== 'once' && (
-                      <button onClick={() => toggleExpandIncome(income._id)}>
-                        {expandedIncome[income._id] ? 'Collapse' : 'Expand'}
-                      </button>
-                    )}
-                  </td>
-                </tr>
-
-                {/* Collapsible section for future recurring instances */}
-                {expandedIncome[income._id] &&
-                  income.futureInstances.length > 0 &&
-                  income.futureInstances.map((instance) => (
-                    <tr key={instance._id}>
-                      <td colSpan="2">
-                        Recurring on:{' '}
-                        {new Date(instance.date).toLocaleDateString()}
-                      </td>
-                      <td colSpan="2">Amount: ${instance.amount}</td>
-                    </tr>
-                  ))}
-              </React.Fragment>
-            ))}
-          </tbody>
-        </table>
+      {loading ? (
+        <p>Loading...</p>
+      ) : error ? (
+        <p className="error">{error}</p>
       ) : (
-        <p>No recurring incomes</p>
+        <>
+          {/* Render the Income Form */}
+          <IncomeForm onIncomeAdded={handleIncomeAdded} />
+
+          {/* Render the Income Table */}
+          {groupedIncomes.length > 0 ? (
+            <table>
+              <thead>
+                <tr>
+                  <th>Source</th>
+                  <th>Amount</th>
+                  <th>Frequency</th>
+                  <th>Date Added</th>
+                  <th>Description</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {groupedIncomes.map((income) => (
+                  <React.Fragment key={income._id}>
+                    <tr>
+                      <td>{income.source}</td>
+                      <td>${income.amount}</td>
+                      <td>{income.frequency}</td>
+                      <td>{new Date(income.date).toLocaleDateString()}</td>
+                      <td>{income.description || ''}</td>
+                      <td>
+                        {income.frequency !== 'once' && (
+                          <button
+                            onClick={() => toggleExpandIncome(income._id)}
+                          >
+                            {expandedIncome[income._id] ? 'Collapse' : 'Expand'}
+                          </button>
+                        )}
+                      </td>
+                    </tr>
+
+                    {/* Collapsible section for future recurring instances */}
+                    {expandedIncome[income._id] &&
+                      income.futureInstances.length > 0 &&
+                      income.futureInstances.map((instance) => (
+                        <tr key={instance._id}>
+                          <td colSpan="2">
+                            Recurring on:{' '}
+                            {new Date(instance.date).toLocaleDateString()}
+                          </td>
+                          <td colSpan="2">Amount: ${instance.amount}</td>
+                        </tr>
+                      ))}
+                  </React.Fragment>
+                ))}
+              </tbody>
+            </table>
+          ) : (
+            <p>No recurring incomes</p>
+          )}
+        </>
       )}
     </div>
   );
-};
-
-IncomesPage.propTypes = {
-  onIncomeAdded: PropTypes.func,
 };
 
 export default IncomesPage;
