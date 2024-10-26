@@ -1,6 +1,12 @@
-import React, { useEffect, useMemo, useState } from 'react';
-import axios from 'axios';
-import PropTypes from 'prop-types';
+import React, { useEffect, useState, useMemo } from 'react';
+import { fetchIncomes } from '../services/incomeService';
+import { fetchExpenses } from '../services/expenseService';
+import { calculateTotalIncome } from '../utils/incomeHelpers';
+import { calculateTotalExpense } from '../utils/expenseHelpers';
+import {
+  generateMonthlyData,
+  generateSavingsData,
+} from '../utils/chartHelpers';
 import IncomeVsExpenseChart from '../components/charts/IncomeVsExpenseChart';
 import MonthlyTrendsChart from '../components/charts/MonthlyTrendsChart';
 import SavingsChart from '../components/charts/SavingsChart';
@@ -9,88 +15,68 @@ import SavingsChart from '../components/charts/SavingsChart';
 const ChartsPage = () => {
   const [incomeData, setIncomeData] = useState([]);
   const [expenseData, setExpenseData] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  const fetchChartData = async () => {
+    try {
+      setLoading(true);
+      const incomes = await fetchIncomes();
+      const expenses = await fetchExpenses();
+      setIncomeData(incomes);
+      setExpenseData(expenses);
+    } catch (error) {
+      setError(error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const incomes = await axios.get('http://localhost:5000/api/income');
-        const expenses = await axios.get('http://localhost:5000/api/expense');
-        setIncomeData(incomes.data);
-        setExpenseData(expenses.data);
-      } catch (error) {
-        console.error('Error fetching chart data:', error);
-      }
-    };
-
-    fetchData();
+    fetchChartData();
   }, []);
 
   const totalIncome = useMemo(
-    () =>
-      incomeData
-        .filter((income) => new Date(income.date) <= new Date())
-        .reduce((sum, income) => sum + income.amount, 0),
+    () => calculateTotalIncome(incomeData),
     [incomeData]
   );
 
   const totalExpense = useMemo(
-    () =>
-      expenseData
-        .filter((expense) => new Date(expense.date) <= new Date())
-        .reduce((sum, expense) => sum + expense.amount, 0),
+    () => calculateTotalExpense(expenseData),
     [expenseData]
   );
 
-  const monthlyData = useMemo(() => {
-    const monthlyTotals = {};
-    incomeData.forEach((income) => {
-      const month = new Date(income.date).toLocaleString('default', {
-        month: 'short',
-      });
-      monthlyTotals[month] = monthlyTotals[month] || { income: 0, expenses: 0 };
-      monthlyTotals[month].income += income.amount;
-    });
-    expenseData.forEach((expense) => {
-      const month = new Date(expense.date).toLocaleString('default', {
-        month: 'short',
-      });
-      monthlyTotals[month] = monthlyTotals[month] || { income: 0, expenses: 0 };
-      monthlyTotals[month].expenses += expense.amount;
-    });
-    return Object.keys(monthlyTotals).map((month) => ({
-      month,
-      income: monthlyTotals[month].income,
-      expenses: monthlyTotals[month].expenses,
-    }));
-  }, [incomeData, expenseData]);
+  const monthlyData = useMemo(
+    () => generateMonthlyData(incomeData, expenseData),
+    [incomeData, expenseData]
+  );
 
   const savingsData = useMemo(
-    () =>
-      monthlyData.map((data) => ({
-        month: data.month,
-        savings: data.income - data.expenses,
-      })),
+    () => generateSavingsData(monthlyData),
     [monthlyData]
   );
 
   return (
     <div className="charts-page">
       <h2>Charts & Analytics</h2>
-      <IncomeVsExpenseChart
-        totalIncome={totalIncome}
-        totalExpense={totalExpense}
-      />
-      <h2>Monthly Trends</h2>
-      <MonthlyTrendsChart monthlyData={monthlyData} />
-      <h2>Savings</h2>
-      <SavingsChart savingsData={savingsData} />
+      {loading ? (
+        <p>Loading...</p>
+      ) : error ? (
+        <p className="error">{error}</p>
+      ) : (
+        <>
+          <IncomeVsExpenseChart
+            totalIncome={totalIncome}
+            totalExpense={totalExpense}
+          />
+          <h2>Monthly Trends</h2>
+          <MonthlyTrendsChart monthlyData={monthlyData} />
+          <h2>Savings</h2>
+          <SavingsChart savingsData={savingsData} />
+        </>
+      )}
     </div>
   );
-};
-
-ChartsPage.propTypes = {
-  onIncomeAdded: PropTypes.func,
-  onExpenseAdded: PropTypes.func,
 };
 
 export default ChartsPage;

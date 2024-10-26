@@ -5,20 +5,30 @@ export const validateExpenseData = ({ category, amount }) => {
   }
 };
 
+// Calculate total expense
+export const calculateTotalExpense = (expenseData) =>
+  expenseData
+    .filter((expense) => new Date(expense.date) <= new Date())
+    .reduce((sum, expense) => sum + expense.amount, 0);
+
 // Group expenses by category and frequency
 export const groupExpensesByCategory = (expenses) => {
   const grouped = {};
+
   expenses.forEach((expense) => {
+    // Use a unique key for each expense category and frequency
     const key = `${expense.category}-${expense.frequency}`;
+
     if (expense.isOriginal) {
-      if (!grouped[key]) {
-        grouped[key] = { ...expense, futureInstances: [] };
-      }
+      grouped[key] = { ...expense, futureInstances: [] };
     } else {
-      if (grouped[key]) {
-        grouped[key].futureInstances.push(expense);
+      // Use `originalId` to locate the main entry for grouping
+      const originalKey = `${expense.category}-${expense.frequency}`;
+      if (grouped[originalKey]) {
+        grouped[originalKey].futureInstances.push(expense);
       }
     }
   });
+
   return Object.values(grouped);
 };

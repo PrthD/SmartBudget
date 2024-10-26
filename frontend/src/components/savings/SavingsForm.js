@@ -1,38 +1,37 @@
 import React, { useState } from 'react';
-import axios from 'axios';
 import PropTypes from 'prop-types';
+import { addSavingsGoal } from '../../services/savingsService';
+import { validateSavingsData } from '../../utils/savingsHelpers';
 
 const SavingsForm = ({ onSave }) => {
   const [title, setTitle] = useState('');
   const [targetAmount, setTargetAmount] = useState('');
   const [deadline, setDeadline] = useState('');
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState('');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
-    setSuccess('');
-
-    if (!title || !targetAmount) {
-      setError('Please provide a valid title and target amount.');
-      return;
-    }
+    setLoading(true);
+    setMessage('');
 
     try {
-      const response = await axios.post('http://localhost:5000/api/savings', {
+      validateSavingsData({ title, targetAmount });
+
+      const response = await addSavingsGoal({
         title,
         targetAmount: parseFloat(targetAmount),
         deadline: deadline ? new Date(deadline).toISOString() : null,
       });
-
       onSave(response.data);
+      setMessage('Savings goal added successfully!');
+    } catch (error) {
+      setMessage(error.message || 'An error occurred');
+    } finally {
+      setLoading(false);
       setTitle('');
       setTargetAmount('');
       setDeadline('');
-      setSuccess('Savings goal added successfully!');
-    } catch (error) {
-      setError('Failed to add savings goal. Please try again.');
     }
   };
 
@@ -78,11 +77,11 @@ const SavingsForm = ({ onSave }) => {
           />
         </div>
 
-        <button type="submit">Save Goal</button>
+        <button type="submit" disabled={loading}>
+          {loading ? 'Adding...' : 'Add Expense'}
+        </button>
       </form>
-
-      {error && <p className="error-message">{error}</p>}
-      {success && <p className="success-message">{success}</p>}
+      {message && <p className="message">{message}</p>}
     </div>
   );
 };

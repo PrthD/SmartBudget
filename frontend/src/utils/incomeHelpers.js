@@ -5,20 +5,31 @@ export const validateIncomeData = ({ source, amount }) => {
   }
 };
 
+// Calculate total income
+export const calculateTotalIncome = (incomeData) =>
+  incomeData
+    .filter((income) => new Date(income.date) <= new Date())
+    .reduce((sum, income) => sum + income.amount, 0);
+
 // Group incomes by source and frequency
 export const groupIncomesBySource = (incomes) => {
   const grouped = {};
+
   incomes.forEach((income) => {
-    const key = `${income.category}-${income.frequency}`;
+    // Use a unique key for each income source and frequency
+    const key = `${income.source}-${income.frequency}`;
+
     if (income.isOriginal) {
-      if (!grouped[key]) {
-        grouped[key] = { ...income, futureInstances: [] };
-      }
+      // Initialize each entry with unique ID to avoid overwriting
+      grouped[key] = { ...income, futureInstances: [] };
     } else {
-      if (grouped[key]) {
-        grouped[key].futureInstances.push(income);
+      // Find the original entry to group recurring instances
+      const originalKey = `${income.source}-${income.frequency}`;
+      if (grouped[originalKey]) {
+        grouped[originalKey].futureInstances.push(income);
       }
     }
   });
+
   return Object.values(grouped);
 };

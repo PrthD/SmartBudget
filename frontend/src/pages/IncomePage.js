@@ -1,6 +1,9 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { fetchIncomes } from '../services/incomeService';
-import { groupIncomesBySource } from '../utils/incomeHelpers';
+import {
+  calculateTotalIncome,
+  groupIncomesBySource,
+} from '../utils/incomeHelpers';
 import IncomeForm from '../components/incomes/IncomeForm';
 // import '../styles/IncomePage.css';
 
@@ -27,10 +30,7 @@ const IncomesPage = () => {
   }, []);
 
   const totalIncome = useMemo(
-    () =>
-      incomeData
-        .filter((income) => new Date(income.date) <= new Date())
-        .reduce((sum, income) => sum + income.amount, 0),
+    () => calculateTotalIncome(incomeData),
     [incomeData]
   );
 
@@ -39,8 +39,8 @@ const IncomesPage = () => {
     [incomeData]
   );
 
-  const toggleExpandIncome = (id) => {
-    setExpandedIncome((prev) => ({ ...prev, [id]: !prev[id] }));
+  const toggleExpandIncome = (key) => {
+    setExpandedIncome((prev) => ({ ...prev, [key]: !prev[key] }));
   };
 
   return (
@@ -71,7 +71,7 @@ const IncomesPage = () => {
               </thead>
               <tbody>
                 {groupedIncomes.map((income) => (
-                  <React.Fragment key={income._id}>
+                  <React.Fragment key={`${income.source}-${income.frequency}`}>
                     <tr>
                       <td>{income.source}</td>
                       <td>${income.amount}</td>
@@ -81,16 +81,24 @@ const IncomesPage = () => {
                       <td>
                         {income.frequency !== 'once' && (
                           <button
-                            onClick={() => toggleExpandIncome(income._id)}
+                            onClick={() =>
+                              toggleExpandIncome(
+                                `${income.source}-${income.frequency}`
+                              )
+                            }
                           >
-                            {expandedIncome[income._id] ? 'Collapse' : 'Expand'}
+                            {expandedIncome[
+                              `${income.source}-${income.frequency}`
+                            ]
+                              ? 'Collapse'
+                              : 'Expand'}
                           </button>
                         )}
                       </td>
                     </tr>
 
                     {/* Collapsible section for future recurring instances */}
-                    {expandedIncome[income._id] &&
+                    {expandedIncome[`${income.source}-${income.frequency}`] &&
                       income.futureInstances.length > 0 &&
                       income.futureInstances.map((instance) => (
                         <tr key={instance._id}>

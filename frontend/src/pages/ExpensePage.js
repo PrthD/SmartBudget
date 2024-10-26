@@ -1,6 +1,9 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { fetchExpenses } from '../services/expenseService';
-import { groupExpensesByCategory } from '../utils/expenseHelpers';
+import {
+  calculateTotalExpense,
+  groupExpensesByCategory,
+} from '../utils/expenseHelpers';
 import ExpenseForm from '../components/expenses/ExpenseForm';
 // import '../styles/ExpensePage.css';
 
@@ -27,10 +30,7 @@ const ExpensesPage = () => {
   }, []);
 
   const totalExpense = useMemo(
-    () =>
-      expenseData
-        .filter((expense) => new Date(expense.date) <= new Date())
-        .reduce((sum, expense) => sum + expense.amount, 0),
+    () => calculateTotalExpense(expenseData),
     [expenseData]
   );
 
@@ -39,8 +39,8 @@ const ExpensesPage = () => {
     [expenseData]
   );
 
-  const toggleExpandExpense = (id) => {
-    setExpandedExpense((prev) => ({ ...prev, [id]: !prev[id] }));
+  const toggleExpandExpense = (key) => {
+    setExpandedExpense((prev) => ({ ...prev, [key]: !prev[key] }));
   };
 
   return (
@@ -71,7 +71,9 @@ const ExpensesPage = () => {
               </thead>
               <tbody>
                 {groupedExpenses.map((expense) => (
-                  <React.Fragment key={expense._id}>
+                  <React.Fragment
+                    key={`${expense.category}-${expense.frequency}`}
+                  >
                     <tr>
                       <td>{expense.category}</td>
                       <td>${expense.amount}</td>
@@ -81,9 +83,15 @@ const ExpensesPage = () => {
                       <td>
                         {expense.frequency !== 'once' && (
                           <button
-                            onClick={() => toggleExpandExpense(expense._id)}
+                            onClick={() =>
+                              toggleExpandExpense(
+                                `${expense.category}-${expense.frequency}`
+                              )
+                            }
                           >
-                            {expandedExpense[expense._id]
+                            {expandedExpense[
+                              `${expense.category}-${expense.frequency}`
+                            ]
                               ? 'Collapse'
                               : 'Expand'}
                           </button>
@@ -92,7 +100,9 @@ const ExpensesPage = () => {
                     </tr>
 
                     {/* Collapsible section for future recurring instances */}
-                    {expandedExpense[expense._id] &&
+                    {expandedExpense[
+                      `${expense.category}-${expense.frequency}`
+                    ] &&
                       expense.futureInstances.length > 0 &&
                       expense.futureInstances.map((instance) => (
                         <tr key={instance._id}>
