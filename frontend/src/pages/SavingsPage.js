@@ -30,6 +30,14 @@ const SavingsPage = ({ onSavingsGoalAdded }) => {
     if (onSavingsGoalAdded) onSavingsGoalAdded();
   }, [onSavingsGoalAdded]);
 
+  const handleSaveGoal = (goal) => {
+    if (!goal || !goal.title || !goal.targetAmount) {
+      console.error('Invalid goal data', goal);
+      return;
+    }
+    setSavingsGoals((prevGoals) => [...prevGoals, goal]);
+  };
+
   const totalIncome = useMemo(
     () =>
       incomeData
@@ -47,14 +55,6 @@ const SavingsPage = ({ onSavingsGoalAdded }) => {
   );
 
   const totalSavings = totalIncome - totalExpenses;
-
-  const handleSaveGoal = (goal) => {
-    if (!goal || !goal.title || !goal.targetAmount) {
-      console.error('Invalid goal data', goal);
-      return;
-    }
-    setSavingsGoals((prevGoals) => [...prevGoals, goal]);
-  };
 
   return (
     <div className="savings-page">

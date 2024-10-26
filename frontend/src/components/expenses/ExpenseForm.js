@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import axios from 'axios';
 import PropTypes from 'prop-types';
+import { addExpense } from '../../services/expenseService';
+import { validateExpenseData } from '../../utils/expenseHelpers';
 import '../../styles/ExpenseForm.css';
 
 const ExpenseForm = ({ onExpenseAdded }) => {
@@ -10,8 +11,8 @@ const ExpenseForm = ({ onExpenseAdded }) => {
   const [date, setDate] = useState('');
   const [description, setDescription] = useState('');
   const [frequency, setFrequency] = useState('once');
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState('');
 
   const predefinedCategories = [
     'Groceries',
@@ -24,18 +25,15 @@ const ExpenseForm = ({ onExpenseAdded }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
-    setSuccess(false);
-
-    const finalCategory = category === 'custom' ? customCategoryName : category;
-
-    if (!finalCategory || !amount || amount <= 0) {
-      setError('Please Please provide valid category and amount.');
-      return;
-    }
+    setLoading(true);
+    setMessage('');
 
     try {
-      await axios.post('/api/expense', {
+      const finalCategory =
+        category === 'custom' ? customCategoryName : category;
+      validateExpenseData({ finalCategory, amount });
+
+      const response = await addExpense({
         category: finalCategory,
         amount: parseFloat(amount),
         date: date || new Date().toISOString(),
@@ -43,16 +41,18 @@ const ExpenseForm = ({ onExpenseAdded }) => {
         frequency,
       });
 
-      onExpenseAdded();
+      onExpenseAdded(response.data);
+      setMessage('Expense added successfully!');
+    } catch (error) {
+      setMessage(error.message || 'An error occurred');
+    } finally {
+      setLoading(false);
       setCategory('');
       setCustomCategoryName('');
       setAmount('');
       setDate('');
       setDescription('');
       setFrequency('once');
-      setSuccess(true);
-    } catch (err) {
-      setError('Failed to add expense. Please try again.');
     }
   };
 
@@ -147,10 +147,11 @@ const ExpenseForm = ({ onExpenseAdded }) => {
           </select>
         </div>
 
-        <button type="submit">Add Expense</button>
+        <button type="submit" disabled={loading}>
+          {loading ? 'Adding...' : 'Add Expense'}
+        </button>
       </form>
-      {error && <p className="error-message">{error}</p>}
-      {success && <p className="success-message">{success}</p>}
+      {message && <p>{message}</p>}
     </div>
   );
 };

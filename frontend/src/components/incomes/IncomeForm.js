@@ -10,14 +10,14 @@ const IncomeForm = ({ onIncomeAdded }) => {
   const [description, setDescription] = useState('');
   const [frequency, setFrequency] = useState('once');
   const [error, setError] = useState('');
-  const [success, setSuccess] = useState(false);
+  const [success, setSuccess] = useState('');
 
   const frequencyOptions = ['once', 'weekly', 'biweekly', 'monthly', 'yearly'];
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
-    setSuccess(false);
+    setSuccess('');
 
     if (!source || !amount || amount <= 0) {
       setError('Please provide a valid source and amount.');
@@ -25,7 +25,7 @@ const IncomeForm = ({ onIncomeAdded }) => {
     }
 
     try {
-      await axios.post('/api/income', {
+      const response = await axios.post('http://localhost:5000/api/income', {
         source,
         amount: parseFloat(amount),
         date: date || new Date().toISOString(),
@@ -33,13 +33,13 @@ const IncomeForm = ({ onIncomeAdded }) => {
         frequency,
       });
 
-      onIncomeAdded();
+      onIncomeAdded(response.data);
       setSource('');
       setAmount('');
       setDate('');
       setDescription('');
       setFrequency('once');
-      setSuccess(true);
+      setSuccess('Income added successfully!');
     } catch (err) {
       setError('Failed to add income. Please try again.');
     }

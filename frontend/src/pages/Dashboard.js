@@ -1,7 +1,7 @@
 import React, { useMemo, useEffect, useState } from 'react';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
-import IncomeVsExpensesChart from '../components/charts/IncomeVsExpensesChart';
+import IncomeVsExpenseChart from '../components/charts/IncomeVsExpenseChart';
 import MonthlyTrendsChart from '../components/charts/MonthlyTrendsChart';
 import SavingsChart from '../components/charts/SavingsChart';
 import '../styles/Dashboard.css';
@@ -98,9 +98,9 @@ const Dashboard = () => {
       {/* Basic Charts Overview */}
       <div className="charts-overview">
         <h2>Income vs Expenses Overview</h2>
-        <IncomeVsExpensesChart
+        <IncomeVsExpenseChart
           totalIncome={totalIncome}
-          totalExpenses={totalExpenses}
+          totalExpense={totalExpenses}
         />
         <h2>Monthly Trends Overview</h2>
         <MonthlyTrendsChart monthlyData={monthlyData} />
@@ -110,10 +110,10 @@ const Dashboard = () => {
 
       {/* Navigation Links */}
       <div className="dashboard-navigation">
-        <Link to="/expenses">
+        <Link to="/expense">
           <button className="dashboard-btn">Manage Expenses</button>
         </Link>
-        <Link to="/incomes">
+        <Link to="/income">
           <button className="dashboard-btn">Manage Incomes</button>
         </Link>
         <Link to="/savings">

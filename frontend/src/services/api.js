@@ -6,7 +6,7 @@ const API = axios.create({
 
 export const fetchExpenses = async () => {
   try {
-    const response = await API.get('/expenses');
+    const response = await API.get('/expense');
     return response.data;
   } catch (error) {
     console.error('Error fetching expenses:', error);

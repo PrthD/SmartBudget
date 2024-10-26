@@ -25,7 +25,7 @@ const MonthlyTrendsChart = ({ monthlyData }) => {
             fill: false,
           },
           {
-            label: 'Expenses',
+            label: 'Expense',
             data: monthlyData.map((data) => data.expenses),
             borderColor: '#ff6384',
             fill: false,

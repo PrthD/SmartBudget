@@ -1,7 +1,7 @@
 import express from 'express';
 import Expense from '../models/Expense.js';
 import logger from '../config/logger.js';
-import { autoGenerateRecurringExpenses } from '../utils/expenseHelpers.js';
+import { autoGenerateRecurringExpenses } from '../utils/expenseHelpersBackend.js';
 
 const router = express.Router();
 

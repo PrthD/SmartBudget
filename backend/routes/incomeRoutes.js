@@ -1,7 +1,7 @@
 import express from 'express';
 import Income from '../models/Income.js';
 import logger from '../config/logger.js';
-import { autoGenerateRecurringIncomes } from '../utils/incomeHelpers.js';
+import { autoGenerateRecurringIncomes } from '../utils/incomeHelpersBackend.js';
 
 const router = express.Router();
 

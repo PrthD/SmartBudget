@@ -4,24 +4,26 @@ import PropTypes from 'prop-types';
 import IncomeForm from '../components/incomes/IncomeForm';
 // import '../styles/IncomePage.css';
 
-const IncomesPage = ({ onIncomeAdded }) => {
+const IncomesPage = () => {
   const [incomeData, setIncomeData] = useState([]);
   const [expandedIncome, setExpandedIncome] = useState({});
 
+  const fetchData = async () => {
+    try {
+      const incomes = await axios.get('http://localhost:5000/api/income');
+      setIncomeData(incomes.data);
+    } catch (error) {
+      console.error('Error fetching incomes:', error);
+    }
+  };
+
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const incomes = await axios.get('http://localhost:5000/api/income');
-        setIncomeData(incomes.data);
-      } catch (error) {
-        console.error('Error fetching incomes:', error);
-      }
-    };
-
     fetchData();
+  }, []);
 
-    if (onIncomeAdded) onIncomeAdded();
-  }, [onIncomeAdded]);
+  const handleIncomeAdded = () => {
+    fetchData();
+  };
 
   const totalIncome = useMemo(
     () =>
@@ -58,7 +60,7 @@ const IncomesPage = ({ onIncomeAdded }) => {
       <h3>Total Income: ${totalIncome}</h3>
 
       {/* Render the Income Form */}
-      <IncomeForm onIncomeAdded={onIncomeAdded} />
+      <IncomeForm onIncomeAdded={handleIncomeAdded} />
 
       {/* Render the Income Table */}
       {groupedIncomes.length > 0 ? (

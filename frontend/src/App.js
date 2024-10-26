@@ -1,7 +1,7 @@
 import React from 'react';
 import { Route, Routes } from 'react-router-dom';
-import ExpensesPage from './pages/ExpensesPage';
-import IncomesPage from './pages/IncomesPage';
+import ExpensePage from './pages/ExpensePage';
+import IncomePage from './pages/IncomePage';
 import SavingsPage from './pages/SavingsPage';
 import ChartsPage from './pages/ChartsPage';
 import Dashboard from './pages/Dashboard';
@@ -14,11 +14,11 @@ function App() {
         {/* Dashboard Page */}
         <Route path="/" element={<Dashboard />} />
 
-        {/* Expenses Page */}
-        <Route path="/expenses" element={<ExpensesPage />} />
+        {/* Expense Page */}
+        <Route path="/expense" element={<ExpensePage />} />
 
-        {/* Incomes Page */}
-        <Route path="/incomes" element={<IncomesPage />} />
+        {/* Income Page */}
+        <Route path="/income" element={<IncomePage />} />
 
         {/* Savings Page */}
         <Route path="/savings" element={<SavingsPage />} />

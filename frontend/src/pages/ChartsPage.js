@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import axios from 'axios';
 import PropTypes from 'prop-types';
-import IncomeVsExpensesChart from '../components/charts/IncomeVsExpensesChart';
+import IncomeVsExpensesChart from '../components/charts/IncomeVsExpenseChart';
 import MonthlyTrendsChart from '../components/charts/MonthlyTrendsChart';
 import SavingsChart from '../components/charts/SavingsChart';
 // import '../styles/ChartsPage.css';

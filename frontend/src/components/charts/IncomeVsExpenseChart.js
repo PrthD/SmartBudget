@@ -2,7 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import { Chart } from 'chart.js/auto';
 import PropTypes from 'prop-types';
 
-const IncomeVsExpensesChart = ({ totalIncome, totalExpenses }) => {
+const IncomeVsExpenseChart = ({ totalIncome, totalExpense }) => {
   const chartRef = useRef(null);
   const chartInstanceRef = useRef(null);
 
@@ -16,11 +16,11 @@ const IncomeVsExpensesChart = ({ totalIncome, totalExpenses }) => {
     chartInstanceRef.current = new Chart(ctx, {
       type: 'pie',
       data: {
-        labels: ['Total Income', 'Total Expenses'],
+        labels: ['Total Income', 'Total Expense'],
         datasets: [
           {
-            label: 'Income vs Expenses',
-            data: [totalIncome, totalExpenses],
+            label: 'Income vs Expense',
+            data: [totalIncome, totalExpense],
             backgroundColor: ['#36a2eb', '#ff6384'],
           },
         ],
@@ -40,7 +40,7 @@ const IncomeVsExpensesChart = ({ totalIncome, totalExpenses }) => {
         chartInstanceRef.current.destroy();
       }
     };
-  }, [totalIncome, totalExpenses]);
+  }, [totalIncome, totalExpense]);
 
   return (
     <div className="chart">
@@ -49,9 +49,9 @@ const IncomeVsExpensesChart = ({ totalIncome, totalExpenses }) => {
   );
 };
 
-IncomeVsExpensesChart.propTypes = {
+IncomeVsExpenseChart.propTypes = {
   totalIncome: PropTypes.number.isRequired,
-  totalExpenses: PropTypes.number.isRequired,
+  totalExpense: PropTypes.number.isRequired,
 };
 
-export default IncomeVsExpensesChart;
+export default IncomeVsExpenseChart;
