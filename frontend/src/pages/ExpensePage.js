@@ -4,28 +4,27 @@ import { groupExpensesByCategory } from '../utils/expenseHelpers';
 import ExpenseForm from '../components/expenses/ExpenseForm';
 // import '../styles/ExpensePage.css';
 
-const ExpensesPage = (onExpenseAdded) => {
+const ExpensesPage = () => {
   const [expenseData, setExpenseData] = useState([]);
   const [expandedExpense, setExpandedExpense] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
-  useEffect(() => {
-    const loadExpenses = async () => {
+  const handleExpenseAdded = async () => {
+    try {
       setLoading(true);
-      try {
-        const expenses = await fetchExpenses();
-        setExpenseData(expenses);
-      } catch (error) {
-        setError(error.message);
-      } finally {
-        setLoading(false);
-      }
-    };
+      const expenses = await fetchExpenses();
+      setExpenseData(expenses);
+    } catch (error) {
+      setError(error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    loadExpenses();
-    onExpenseAdded();
-  }, [onExpenseAdded]);
+  useEffect(() => {
+    handleExpenseAdded();
+  }, []);
 
   const totalExpenses = useMemo(
     () =>
@@ -55,7 +54,7 @@ const ExpensesPage = (onExpenseAdded) => {
       ) : (
         <>
           {/* Render the Expense Form */}
-          <ExpenseForm onExpenseAdded={setExpenseData(fetchExpenses())} />
+          <ExpenseForm onExpenseAdded={handleExpenseAdded} />
 
           {/* Render the Expenses Table */}
           {groupedExpenses.length > 0 ? (

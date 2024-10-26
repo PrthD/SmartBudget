@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import axios from 'axios';
 import PropTypes from 'prop-types';
-import IncomeVsExpensesChart from '../components/charts/IncomeVsExpenseChart';
+import IncomeVsExpenseChart from '../components/charts/IncomeVsExpenseChart';
 import MonthlyTrendsChart from '../components/charts/MonthlyTrendsChart';
 import SavingsChart from '../components/charts/SavingsChart';
 // import '../styles/ChartsPage.css';
@@ -33,7 +33,7 @@ const ChartsPage = () => {
     [incomeData]
   );
 
-  const totalExpenses = useMemo(
+  const totalExpense = useMemo(
     () =>
       expenseData
         .filter((expense) => new Date(expense.date) <= new Date())
@@ -76,9 +76,9 @@ const ChartsPage = () => {
   return (
     <div className="charts-page">
       <h2>Charts & Analytics</h2>
-      <IncomeVsExpensesChart
+      <IncomeVsExpenseChart
         totalIncome={totalIncome}
-        totalExpenses={totalExpenses}
+        totalExpense={totalExpense}
       />
       <h2>Monthly Trends</h2>
       <MonthlyTrendsChart monthlyData={monthlyData} />

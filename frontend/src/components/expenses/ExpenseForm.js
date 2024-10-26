@@ -31,7 +31,7 @@ const ExpenseForm = ({ onExpenseAdded }) => {
     try {
       const finalCategory =
         category === 'custom' ? customCategoryName : category;
-      validateExpenseData({ finalCategory, amount });
+      validateExpenseData({ category: finalCategory, amount });
 
       const response = await addExpense({
         category: finalCategory,
@@ -151,7 +151,7 @@ const ExpenseForm = ({ onExpenseAdded }) => {
           {loading ? 'Adding...' : 'Add Expense'}
         </button>
       </form>
-      {message && <p>{message}</p>}
+      {message && <p className="message">{message}</p>}
     </div>
   );
 };
