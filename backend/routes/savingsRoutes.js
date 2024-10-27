@@ -1,35 +1,20 @@
 import express from 'express';
 import Savings from '../models/Savings.js';
 import logger from '../config/logger.js';
+import {
+  validateSavingsGoal,
+  checkDuplicateGoal,
+} from '../middleware/savingsValidation.js';
 
 const router = express.Router();
 
-// @route POST /api/savings
-// @desc Add a new savings goal
-router.post('/', async (req, res) => {
+// @route   POST /api/savings
+// @desc    Add a new savings goal
+router.post('/', validateSavingsGoal, checkDuplicateGoal, async (req, res) => {
   logger.info('POST /api/savings request received');
   const { title, targetAmount, deadline } = req.body;
 
-  if (!title || !targetAmount) {
-    logger.warn('Title and target amount are required.');
-    return res
-      .status(400)
-      .json({ error: 'Title and target amount are required.' });
-  }
-
   try {
-    const existingGoal = await Savings.findOne({
-      title,
-      targetAmount,
-      deadline,
-    });
-    if (existingGoal) {
-      logger.warn(`Goal with the same details already exists.`);
-      return res
-        .status(400)
-        .json({ error: 'Goal with the same details already exists.' });
-    }
-
     const newGoal = new Savings({
       title,
       targetAmount,
@@ -48,8 +33,8 @@ router.post('/', async (req, res) => {
   }
 });
 
-// @route GET /api/savings
-// @desc Get all savings goals
+// @route   GET /api/savings
+// @desc    Get all savings goals
 router.get('/', async (req, res) => {
   logger.info('GET /api/savings request received');
   try {
@@ -64,14 +49,14 @@ router.get('/', async (req, res) => {
   }
 });
 
-// @route PUT /api/savings/:id
-// @desc Update a savings goal
-router.put('/:id', async (req, res) => {
+// @route    PUT /api/savings/:id
+// @desc     Update a savings goal
+router.put('/:id', validateSavingsGoal, async (req, res) => {
   logger.info(`PUT /api/savings/${req.params.id} request received`);
   const { title, targetAmount, currentAmount, deadline } = req.body;
 
   try {
-    let goal = await Savings.findById(req.params.id);
+    const goal = await Savings.findById(req.params.id);
     if (!goal) {
       logger.warn(`Savings goal not found for id: ${req.params.id}`);
       return res.status(404).json({ error: 'Savings goal not found' });
@@ -93,8 +78,8 @@ router.put('/:id', async (req, res) => {
   }
 });
 
-// @route DELETE /api/savings/:id
-// @desc Delete a savings goal
+// @route    DELETE /api/savings/:id
+// @desc     Delete a savings goal
 router.delete('/:id', async (req, res) => {
   logger.info(`DELETE /api/savings/${req.params.id} request received`);
   try {

@@ -1,23 +1,32 @@
 import Expense from '../models/Expense.js';
+import logger from '../config/logger.js';
+
+// Frequency constants
+export const FREQUENCY = {
+  WEEKLY: 'weekly',
+  BIWEEKLY: 'biweekly',
+  MONTHLY: 'monthly',
+  YEARLY: 'yearly',
+};
 
 // Helper function to generate the next date based on frequency
 export const getNextDate = (currentDate, frequency) => {
   const nextDate = new Date(currentDate);
   switch (frequency) {
-    case 'weekly':
+    case FREQUENCY.WEEKLY:
       nextDate.setDate(nextDate.getDate() + 7);
       break;
-    case 'biweekly':
+    case FREQUENCY.BIWEEKLY:
       nextDate.setDate(nextDate.getDate() + 14);
       break;
-    case 'monthly':
+    case FREQUENCY.MONTHLY:
       nextDate.setMonth(nextDate.getMonth() + 1);
       break;
-    case 'yearly':
+    case FREQUENCY.YEARLY:
       nextDate.setFullYear(nextDate.getFullYear() + 1);
       break;
     default:
-      break;
+      throw new Error('Invalid frequency');
   }
   return nextDate;
 };
@@ -25,7 +34,6 @@ export const getNextDate = (currentDate, frequency) => {
 // Auto-generate future recurring expenses
 export const autoGenerateRecurringExpenses = async (expense) => {
   const { frequency, amount, category, description } = expense;
-
   const futureExpenses = [];
   let nextDate = getNextDate(expense.date, frequency);
 
@@ -46,6 +54,6 @@ export const autoGenerateRecurringExpenses = async (expense) => {
   try {
     await Expense.insertMany(futureExpenses);
   } catch (err) {
-    console.error('Error generating future recurring expenses:', err.message);
+    logger.error('Error generating future recurring expenses:', err.message);
   }
 };

@@ -2,36 +2,20 @@ import express from 'express';
 import Income from '../models/Income.js';
 import logger from '../config/logger.js';
 import { autoGenerateRecurringIncomes } from '../utils/incomeHelpers.js';
+import {
+  validateIncome,
+  checkDuplicateIncome,
+} from '../middleware/incomeValidation.js';
 
 const router = express.Router();
 
 // @route    POST /api/income
 // @desc     Add a new income entry
-router.post('/', async (req, res) => {
+router.post('/', validateIncome, checkDuplicateIncome, async (req, res) => {
   logger.info('POST /api/income request received');
   const { source, amount, date, description, frequency } = req.body;
 
-  if (!source || !amount || isNaN(amount)) {
-    logger.warn('Source and valid amount are required');
-    return res
-      .status(400)
-      .json({ error: 'Source and valid amount are required.' });
-  }
-
   try {
-    const existingIncome = await Income.findOne({
-      source,
-      amount,
-      date,
-      frequency,
-    });
-    if (existingIncome) {
-      logger.warn(`Income with the same details already exists.`);
-      return res
-        .status(400)
-        .json({ error: 'Income with the same details already exists.' });
-    }
-
     const income = new Income({
       source,
       amount: parseFloat(amount),
@@ -72,14 +56,9 @@ router.get('/', async (req, res) => {
 
 // @route    PUT /api/income/:id
 // @desc     Update an income entry
-router.put('/:id', async (req, res) => {
+router.put('/:id', validateIncome, async (req, res) => {
   logger.info(`PUT /api/income/${req.params.id} request received`);
   const { source, amount, date, description, frequency } = req.body;
-
-  if (amount && isNaN(amount)) {
-    logger.warn('Valid amount is required');
-    return res.status(400).json({ error: 'Invalid amount provided.' });
-  }
 
   try {
     let income = await Income.findById(req.params.id);

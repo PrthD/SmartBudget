@@ -2,38 +2,21 @@ import express from 'express';
 import Expense from '../models/Expense.js';
 import logger from '../config/logger.js';
 import { autoGenerateRecurringExpenses } from '../utils/expenseHelpers.js';
+import {
+  validateExpense,
+  checkDuplicateExpense,
+} from '../middleware/expenseValidation.js';
 
 const router = express.Router();
 
 // @route    POST /api/expense
 // @desc     Add a new expense
-router.post('/', async (req, res) => {
+router.post('/', validateExpense, checkDuplicateExpense, async (req, res) => {
   logger.info('POST /api/expense request received');
   const { category, customCategory, amount, date, description, frequency } =
     req.body;
 
-  if (!category || !amount || isNaN(amount)) {
-    logger.warn('Category and valid amount are required');
-    return res
-      .status(400)
-      .json({ error: 'Category and valid amount are required.' });
-  }
-
   try {
-    const existingExpense = await Expense.findOne({
-      category,
-      customCategory,
-      amount,
-      date,
-      frequency,
-    });
-    if (existingExpense) {
-      logger.warn(`Expense with the same details already exists.`);
-      return res
-        .status(400)
-        .json({ error: 'Expense with the same details already exists.' });
-    }
-
     const expense = new Expense({
       category,
       customCategory: customCategory || false,
@@ -68,27 +51,21 @@ router.get('/', async (req, res) => {
     logger.info('Expenses retrieved successfully');
     res.status(200).json(expenses);
   } catch (err) {
-    logger.error('Error fetching expenses: ' + err.message);
-    res.status(500).json({ error: 'Failed to fetch expenses' });
+    logger.error('Error fetching expense entries: ' + err.message);
+    res.status(500).json({ error: 'Failed to fetch expense entries' });
   }
 });
 
 // @route    PUT /api/expense/:id
 // @desc     Update an expense
-router.put('/:id', async (req, res) => {
+router.put('/:id', validateExpense, async (req, res) => {
   logger.info(`PUT /api/expense/${req.params.id} request received`);
   const { category, customCategory, amount, date, description, frequency } =
     req.body;
 
-  if (amount && isNaN(amount)) {
-    logger.warn('Valid amount is required');
-    return res.status(400).json({ error: 'Invalid amount provided.' });
-  }
-
   try {
     let expense = await Expense.findById(req.params.id);
     if (!expense) {
-      logger.warn(`Expense not found for id: ${req.params.id}`);
       return res.status(404).json({ error: 'Expense not found' });
     }
 
@@ -111,7 +88,7 @@ router.put('/:id', async (req, res) => {
     res.status(200).json(updatedExpense);
   } catch (err) {
     logger.error('Error updating expense: ' + err.message);
-    res.status(500).json({ error: 'Server Error' });
+    res.status(500).json({ error: 'Failed to update expense entry' });
   }
 });
 
@@ -122,7 +99,6 @@ router.delete('/:id', async (req, res) => {
   try {
     const expense = await Expense.findById(req.params.id);
     if (!expense) {
-      logger.warn(`Expense not found for id: ${req.params.id}`);
       return res.status(404).json({ error: 'Expense not found' });
     }
 
@@ -130,8 +106,8 @@ router.delete('/:id', async (req, res) => {
     logger.info('Expense removed successfully');
     res.status(200).json({ message: 'Expense removed successfully' });
   } catch (err) {
-    logger.error('Error deleting expense: ' + err.message);
-    res.status(500).json({ error: 'Failed to delete expense' });
+    logger.error('Error deleting expense entry: ' + err.message);
+    res.status(500).json({ error: 'Failed to delete expense entry' });
   }
 });
 
