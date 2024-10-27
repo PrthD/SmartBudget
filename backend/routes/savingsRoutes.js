@@ -4,7 +4,7 @@ import logger from '../config/logger.js';
 import {
   validateSavingsGoal,
   checkDuplicateGoal,
-} from '../middleware/savingsValidation.js';
+} from '../middlewares/savingsValidation.js';
 
 const router = express.Router();
 

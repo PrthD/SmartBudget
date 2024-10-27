@@ -5,7 +5,7 @@ import { autoGenerateRecurringIncomes } from '../utils/incomeHelpers.js';
 import {
   validateIncome,
   checkDuplicateIncome,
-} from '../middleware/incomeValidation.js';
+} from '../middlewares/incomeValidation.js';
 
 const router = express.Router();
 

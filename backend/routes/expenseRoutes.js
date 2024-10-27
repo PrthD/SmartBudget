@@ -5,7 +5,7 @@ import { autoGenerateRecurringExpenses } from '../utils/expenseHelpers.js';
 import {
   validateExpense,
   checkDuplicateExpense,
-} from '../middleware/expenseValidation.js';
+} from '../middlewares/expenseValidation.js';
 
 const router = express.Router();
 
