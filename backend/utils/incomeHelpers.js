@@ -2,16 +2,22 @@ import Income from '../models/Income.js';
 import logger from '../config/logger.js';
 
 // Frequency constants
-const FREQUENCY = {
+export const FREQUENCY = {
   WEEKLY: 'weekly',
   BIWEEKLY: 'biweekly',
   MONTHLY: 'monthly',
   YEARLY: 'yearly',
 };
 
-// Helper function to generate the next date based on frequency
+/**
+ * Calculate the next date based on the provided frequency.
+ * @param {Date} currentDate - The current date.
+ * @param {string} frequency - Frequency for the recurrence.
+ * @returns {Date} The calculated next date.
+ */
 export const getNextDate = (currentDate, frequency) => {
   const nextDate = new Date(currentDate);
+
   switch (frequency) {
     case FREQUENCY.WEEKLY:
       nextDate.setDate(nextDate.getDate() + 7);
@@ -26,18 +32,26 @@ export const getNextDate = (currentDate, frequency) => {
       nextDate.setFullYear(nextDate.getFullYear() + 1);
       break;
     default:
-      break;
+      throw new Error('Invalid frequency type provided.');
   }
+
   return nextDate;
 };
 
-// Auto-generate future recurring incomes
-export const autoGenerateRecurringIncomes = async (income) => {
+/**
+ * Generate future recurring incomes based on an initial income entry.
+ * @param {Object} income - The income to base future entries on.
+ * @param {number} recurrenceCount - Number of future occurrences (default: 12).
+ */
+export const autoGenerateRecurringIncomes = async (
+  income,
+  recurrenceCount = 12
+) => {
   const { frequency, amount, source, description } = income;
-  const futureIncomes = [];
   let nextDate = getNextDate(income.date, frequency);
+  const futureIncomes = [];
 
-  for (let i = 0; i < 12; i++) {
+  for (let i = 0; i < recurrenceCount; i++) {
     futureIncomes.push({
       source: source,
       amount: amount,
@@ -52,6 +66,7 @@ export const autoGenerateRecurringIncomes = async (income) => {
 
   try {
     await Income.insertMany(futureIncomes);
+    logger.info(`Generated ${recurrenceCount} recurring incomes successfully.`);
   } catch (err) {
     logger.error('Error generating future recurring incomes:', err.message);
   }

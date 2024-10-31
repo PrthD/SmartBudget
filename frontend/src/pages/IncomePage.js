@@ -5,11 +5,13 @@ import {
   groupIncomesBySource,
 } from '../utils/incomeHelpers';
 import IncomeForm from '../components/incomes/IncomeForm';
-// import '../styles/IncomePage.css';
+import '../styles/IncomePage.css';
 
 const IncomesPage = () => {
   const [incomeData, setIncomeData] = useState([]);
   const [expandedIncome, setExpandedIncome] = useState({});
+  const [editMode, setEditMode] = useState(false);
+  const [incomeToEdit, setIncomeToEdit] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -22,6 +24,25 @@ const IncomesPage = () => {
       setError(error.message);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleEditIncome = (income) => {
+    setEditMode(true);
+    setIncomeToEdit(income);
+  };
+
+  const handleIncomeUpdated = async () => {
+    try {
+      setLoading(true);
+      const updatedIncomes = await fetchIncomes();
+      setIncomeData(updatedIncomes);
+    } catch (error) {
+      setError(error.message);
+    } finally {
+      setLoading(false);
+      setEditMode(false);
+      setIncomeToEdit(null);
     }
   };
 
@@ -54,7 +75,12 @@ const IncomesPage = () => {
       ) : (
         <>
           {/* Render the Income Form */}
-          <IncomeForm onIncomeAdded={handleIncomeAdded} />
+          <IncomeForm
+            onIncomeAdded={handleIncomeAdded}
+            onIncomeUpdated={handleIncomeUpdated}
+            incomeToEdit={incomeToEdit}
+            mode={editMode ? 'edit' : 'add'}
+          />
 
           {/* Render the Income Table */}
           {groupedIncomes.length > 0 ? (
@@ -76,24 +102,39 @@ const IncomesPage = () => {
                       <td>{income.source}</td>
                       <td>${income.amount}</td>
                       <td>{income.frequency}</td>
-                      <td>{new Date(income.date).toLocaleDateString()}</td>
+                      <td>
+                        {new Date(income.date).toLocaleDateString(undefined, {
+                          timeZone: 'UTC',
+                        })}
+                      </td>
                       <td>{income.description || ''}</td>
                       <td>
-                        {income.frequency !== 'once' && (
-                          <button
-                            onClick={() =>
-                              toggleExpandIncome(
-                                `${income.source}-${income.frequency}`
-                              )
-                            }
-                          >
-                            {expandedIncome[
-                              `${income.source}-${income.frequency}`
-                            ]
-                              ? 'Collapse'
-                              : 'Expand'}
+                        <div
+                          style={{
+                            display: 'flex',
+                            gap: '10px',
+                            justifyContent: 'center',
+                          }}
+                        >
+                          <button onClick={() => handleEditIncome(income)}>
+                            Edit
                           </button>
-                        )}
+                          {income.frequency !== 'once' && (
+                            <button
+                              onClick={() =>
+                                toggleExpandIncome(
+                                  `${income.source}-${income.frequency}`
+                                )
+                              }
+                            >
+                              {expandedIncome[
+                                `${income.source}-${income.frequency}`
+                              ]
+                                ? 'Collapse'
+                                : 'Expand'}
+                            </button>
+                          )}
+                        </div>
                       </td>
                     </tr>
 
@@ -104,7 +145,10 @@ const IncomesPage = () => {
                         <tr key={instance._id}>
                           <td colSpan="2">
                             Recurring on:{' '}
-                            {new Date(instance.date).toLocaleDateString()}
+                            {new Date(instance.date).toLocaleDateString(
+                              undefined,
+                              { timeZone: 'UTC' }
+                            )}
                           </td>
                           <td colSpan="2">Amount: ${instance.amount}</td>
                         </tr>

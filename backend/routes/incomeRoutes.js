@@ -9,10 +9,10 @@ import {
 
 const router = express.Router();
 
-// @route    POST /api/income
+// @route    POST /api/income/new
 // @desc     Add a new income entry
-router.post('/', validateIncome, checkDuplicateIncome, async (req, res) => {
-  logger.info('POST /api/income request received');
+router.post('/new', validateIncome, checkDuplicateIncome, async (req, res) => {
+  logger.info('POST /api/income/new - Adding a new income');
   const { source, amount, date, description, frequency } = req.body;
 
   try {
@@ -26,45 +26,45 @@ router.post('/', validateIncome, checkDuplicateIncome, async (req, res) => {
     });
 
     const savedIncome = await income.save();
-    logger.info('Income saved successfully:', savedIncome);
+    logger.info('New income saved successfully:', savedIncome);
 
-    // Auto-generate future recurring incomes
+    // Auto-generate recurring incomes if frequency is specified
     if (frequency && frequency !== 'once') {
       await autoGenerateRecurringIncomes(savedIncome);
     }
 
     res.status(201).json(savedIncome);
   } catch (err) {
-    logger.error('Error saving income: ' + err.message);
+    logger.error('Error saving new income: ' + err.message);
     res.status(500).json({ error: 'Server Error' });
   }
 });
 
-// @route    GET /api/income
+// @route    GET /api/income/all
 // @desc     Get all income entries
-router.get('/', async (req, res) => {
-  logger.info('GET /api/income request received');
+router.get('/all', async (req, res) => {
+  logger.info('GET /api/income/all - Retrieving all incomes');
   try {
-    const incomeEntries = await Income.find();
-    logger.info('Income entries retrieved successfully');
-    res.status(200).json(incomeEntries);
+    const incomes = await Income.find();
+    logger.info('All incomes retrieved successfully');
+    res.status(200).json(incomes);
   } catch (err) {
-    logger.error('Error fetching income entries: ' + err.message);
-    res.status(500).json({ error: 'Failed to fetch income entries' });
+    logger.error('Error retrieving incomes: ' + err.message);
+    res.status(500).json({ error: 'Failed to fetch incomes' });
   }
 });
 
-// @route    PUT /api/income/:id
-// @desc     Update an income entry
-router.put('/:id', validateIncome, async (req, res) => {
-  logger.info(`PUT /api/income/${req.params.id} request received`);
+// @route    PUT /api/income/update/:id
+// @desc     Update an existing income entry
+router.put('/update/:id', validateIncome, async (req, res) => {
+  logger.info(`PUT /api/income/update/${req.params.id} - Updating an income`);
   const { source, amount, date, description, frequency } = req.body;
 
   try {
     let income = await Income.findById(req.params.id);
     if (!income) {
-      logger.warn(`Income entry not found for id: ${req.params.id}`);
-      return res.status(404).json({ error: 'Income entry not found' });
+      logger.warn(`Income not found for id: ${req.params.id}`);
+      return res.status(404).json({ error: 'Income not found' });
     }
 
     income.source = source || income.source;
@@ -76,7 +76,7 @@ router.put('/:id', validateIncome, async (req, res) => {
     const updatedIncome = await income.save();
     logger.info('Income updated successfully:', updatedIncome);
 
-    // Auto-generate future recurring expenses if the frequency is updated
+    // Regenerate future incomes if frequency has changed
     if (frequency && frequency !== 'once') {
       await autoGenerateRecurringIncomes(updatedIncome);
     }
@@ -88,22 +88,24 @@ router.put('/:id', validateIncome, async (req, res) => {
   }
 });
 
-// @route    DELETE /api/income/:id
-// @desc     Delete an income entry
-router.delete('/:id', async (req, res) => {
-  logger.info(`DELETE /api/income/${req.params.id} request received`);
+// @route    DELETE /api/income/delete/:id
+// @desc     Delete an income entry by ID
+router.delete('/delete/:id', async (req, res) => {
+  logger.info(
+    `DELETE /api/income/delete/${req.params.id} - Deleting an income`
+  );
   try {
     const income = await Income.findById(req.params.id);
     if (!income) {
-      logger.warn(`Income entry not found for id: ${req.params.id}`);
-      return res.status(404).json({ error: 'Income entry not found' });
+      logger.warn(`Income not found for id: ${req.params.id}`);
+      return res.status(404).json({ error: 'Income not found' });
     }
 
     await Income.findByIdAndDelete(req.params.id);
-    logger.info('Income entry removed successfully');
-    res.status(200).json({ message: 'Income entry removed successfully' });
+    logger.info('Income deleted successfully');
+    res.status(200).json({ message: 'Income deleted successfully' });
   } catch (err) {
-    logger.error('Error deleting income entry: ' + err.message);
+    logger.error('Error deleting income: ' + err.message);
     res.status(500).json({ error: 'Failed to delete income entry' });
   }
 });

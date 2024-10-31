@@ -9,9 +9,15 @@ export const FREQUENCY = {
   YEARLY: 'yearly',
 };
 
-// Helper function to generate the next date based on frequency
+/**
+ * Calculate the next date based on the provided frequency.
+ * @param {Date} currentDate - The current date.
+ * @param {string} frequency - Frequency for the recurrence.
+ * @returns {Date} The calculated next date.
+ */
 export const getNextDate = (currentDate, frequency) => {
   const nextDate = new Date(currentDate);
+
   switch (frequency) {
     case FREQUENCY.WEEKLY:
       nextDate.setDate(nextDate.getDate() + 7);
@@ -26,21 +32,29 @@ export const getNextDate = (currentDate, frequency) => {
       nextDate.setFullYear(nextDate.getFullYear() + 1);
       break;
     default:
-      throw new Error('Invalid frequency');
+      throw new Error('Invalid frequency type provided.');
   }
+
   return nextDate;
 };
 
-// Auto-generate future recurring expenses
-export const autoGenerateRecurringExpenses = async (expense) => {
-  const { frequency, amount, category, description } = expense;
-  const futureExpenses = [];
+/**
+ * Generate future recurring expenses based on an initial expense entry.
+ * @param {Object} expense - The expense to base future entries on.
+ * @param {number} recurrenceCount - Number of future occurrences (default: 12).
+ */
+export const autoGenerateRecurringExpenses = async (
+  expense,
+  recurrenceCount = 12
+) => {
+  const { frequency, amount, category, customCategory, description } = expense;
   let nextDate = getNextDate(expense.date, frequency);
+  const futureExpenses = [];
 
-  for (let i = 0; i < 12; i++) {
+  for (let i = 0; i < recurrenceCount; i++) {
     futureExpenses.push({
       category: category,
-      customCategory: expense.customCategory,
+      customCategory: customCategory || false,
       amount: amount,
       date: nextDate,
       description: description,
@@ -53,6 +67,9 @@ export const autoGenerateRecurringExpenses = async (expense) => {
 
   try {
     await Expense.insertMany(futureExpenses);
+    logger.info(
+      `Generated ${recurrenceCount} recurring expenses successfully.`
+    );
   } catch (err) {
     logger.error('Error generating future recurring expenses:', err.message);
   }

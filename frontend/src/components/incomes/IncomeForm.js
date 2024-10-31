@@ -1,19 +1,35 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import { addIncome } from '../../services/incomeService';
+import { addIncome, updateIncome } from '../../services/incomeService';
 import { validateIncomeData } from '../../utils/incomeHelpers';
 import '../../styles/IncomeForm.css';
 
-const IncomeForm = ({ onIncomeAdded }) => {
-  const [source, setSource] = useState('');
-  const [amount, setAmount] = useState('');
-  const [date, setDate] = useState('');
-  const [description, setDescription] = useState('');
-  const [frequency, setFrequency] = useState('once');
+const IncomeForm = ({ onIncomeAdded, incomeToEdit, onIncomeUpdated, mode }) => {
+  const [source, setSource] = useState(incomeToEdit?.source || '');
+  const [amount, setAmount] = useState(incomeToEdit?.amount || '');
+  const [date, setDate] = useState(incomeToEdit?.date || '');
+  const [description, setDescription] = useState(
+    incomeToEdit?.description || ''
+  );
+  const [frequency, setFrequency] = useState(incomeToEdit?.frequency || 'once');
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
 
   const frequencyOptions = ['once', 'weekly', 'biweekly', 'monthly', 'yearly'];
+
+  useEffect(() => {
+    if (mode === 'edit' && incomeToEdit) {
+      setSource(incomeToEdit.source);
+      setAmount(incomeToEdit.amount);
+      setDate(
+        incomeToEdit.date
+          ? new Date(incomeToEdit.date).toISOString().split('T')[0]
+          : ''
+      );
+      setDescription(incomeToEdit.description);
+      setFrequency(incomeToEdit.frequency);
+    }
+  }, [incomeToEdit, mode]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -23,29 +39,41 @@ const IncomeForm = ({ onIncomeAdded }) => {
     try {
       validateIncomeData({ source, amount });
 
-      const response = await addIncome({
-        source,
+      const incomeData = {
+        source: source.trim(),
         amount: parseFloat(amount),
-        date: date || new Date().toISOString(),
-        description,
+        date: date
+          ? new Date(date).toISOString().split('T')[0]
+          : new Date().toISOString().split('T')[0],
+        description: description.trim(),
         frequency,
-      });
-      onIncomeAdded(response.data);
-      setMessage('Income added successfully!');
+      };
+
+      if (mode === 'add') {
+        const response = await addIncome(incomeData);
+        onIncomeAdded(response.data);
+        setMessage('Income added successfully!');
+      } else if (mode === 'edit') {
+        const response = await updateIncome(incomeToEdit._id, incomeData);
+        onIncomeUpdated(response.data);
+        setMessage('Income updated successfully!');
+      }
+
+      setSource('');
+      setAmount('');
+      setDate('');
+      setDescription('');
+      setFrequency('once');
     } catch (error) {
       setMessage(error.message || 'An error occurred');
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
-    setSource('');
-    setAmount('');
-    setDate('');
-    setDescription('');
-    setFrequency('once');
   };
 
   return (
     <div className="income-form">
-      <h2>Add a New Income</h2>
+      <h2>{mode === 'add' ? 'Add a New Income' : 'Edit Income'}</h2>
       <form onSubmit={handleSubmit}>
         {/* Source Input */}
         <div className="form-group">
@@ -96,6 +124,7 @@ const IncomeForm = ({ onIncomeAdded }) => {
             placeholder="Add a description"
           />
         </div>
+
         {/* Frequency Selection */}
         <div className="form-group">
           <label htmlFor="frequency">Frequency</label>
@@ -112,7 +141,13 @@ const IncomeForm = ({ onIncomeAdded }) => {
           </select>
         </div>
         <button type="submit" disabled={loading}>
-          {loading ? 'Adding...' : 'Add Income'}
+          {loading
+            ? mode === 'add'
+              ? 'Adding...'
+              : 'Updating...'
+            : mode === 'add'
+              ? 'Add Income'
+              : 'Update Income'}
         </button>
       </form>
       {message && <p className="message">{message}</p>}
@@ -122,6 +157,15 @@ const IncomeForm = ({ onIncomeAdded }) => {
 
 IncomeForm.propTypes = {
   onIncomeAdded: PropTypes.func.isRequired,
+  onIncomeUpdated: PropTypes.func,
+  incomeToEdit: PropTypes.object,
+  mode: PropTypes.oneOf(['add', 'edit']).isRequired,
+};
+
+IncomeForm.defaultProps = {
+  onIncomeAdded: () => {},
+  onIncomeUpdated: () => {},
+  incomeToEdit: null,
 };
 
 export default IncomeForm;

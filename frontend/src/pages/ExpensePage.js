@@ -5,23 +5,44 @@ import {
   groupExpensesByCategory,
 } from '../utils/expenseHelpers';
 import ExpenseForm from '../components/expenses/ExpenseForm';
-// import '../styles/ExpensePage.css';
+import '../styles/ExpensePage.css';
 
 const ExpensesPage = () => {
   const [expenseData, setExpenseData] = useState([]);
   const [expandedExpense, setExpandedExpense] = useState({});
+  const [editMode, setEditMode] = useState(false);
+  const [expenseToEdit, setExpenseToEdit] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
   const handleExpenseAdded = async () => {
     try {
       setLoading(true);
-      const expenses = await fetchExpenses();
-      setExpenseData(expenses);
+      const updatedExpenses = await fetchExpenses();
+      setExpenseData(updatedExpenses);
     } catch (error) {
       setError(error.message);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleEditExpense = (expense) => {
+    setEditMode(true);
+    setExpenseToEdit(expense);
+  };
+
+  const handleExpenseUpdated = async () => {
+    try {
+      setLoading(true);
+      const updatedExpenses = await fetchExpenses();
+      setExpenseData(updatedExpenses);
+    } catch (error) {
+      setError(error.message);
+    } finally {
+      setLoading(false);
+      setEditMode(false);
+      setExpenseToEdit(null);
     }
   };
 
@@ -54,7 +75,12 @@ const ExpensesPage = () => {
       ) : (
         <>
           {/* Render the Expense Form */}
-          <ExpenseForm onExpenseAdded={handleExpenseAdded} />
+          <ExpenseForm
+            onExpenseAdded={handleExpenseAdded}
+            onExpenseUpdated={handleExpenseUpdated}
+            expenseToEdit={expenseToEdit}
+            mode={editMode ? 'edit' : 'add'}
+          />
 
           {/* Render the Expenses Table */}
           {groupedExpenses.length > 0 ? (
@@ -78,24 +104,39 @@ const ExpensesPage = () => {
                       <td>{expense.category}</td>
                       <td>${expense.amount}</td>
                       <td>{expense.frequency}</td>
-                      <td>{new Date(expense.date).toLocaleDateString()}</td>
+                      <td>
+                        {new Date(expense.date).toLocaleDateString(undefined, {
+                          timeZone: 'UTC',
+                        })}
+                      </td>
                       <td>{expense.description || ''}</td>
                       <td>
-                        {expense.frequency !== 'once' && (
-                          <button
-                            onClick={() =>
-                              toggleExpandExpense(
-                                `${expense.category}-${expense.frequency}`
-                              )
-                            }
-                          >
-                            {expandedExpense[
-                              `${expense.category}-${expense.frequency}`
-                            ]
-                              ? 'Collapse'
-                              : 'Expand'}
+                        <div
+                          style={{
+                            display: 'flex',
+                            gap: '10px',
+                            justifyContent: 'center',
+                          }}
+                        >
+                          <button onClick={() => handleEditExpense(expense)}>
+                            Edit
                           </button>
-                        )}
+                          {expense.frequency !== 'once' && (
+                            <button
+                              onClick={() =>
+                                toggleExpandExpense(
+                                  `${expense.category}-${expense.frequency}`
+                                )
+                              }
+                            >
+                              {expandedExpense[
+                                `${expense.category}-${expense.frequency}`
+                              ]
+                                ? 'Collapse'
+                                : 'Expand'}
+                            </button>
+                          )}
+                        </div>
                       </td>
                     </tr>
 
@@ -108,7 +149,10 @@ const ExpensesPage = () => {
                         <tr key={instance._id}>
                           <td colSpan="2">
                             Recurring on:{' '}
-                            {new Date(instance.date).toLocaleDateString()}
+                            {new Date(instance.date).toLocaleDateString(
+                              undefined,
+                              { timeZone: 'UTC' }
+                            )}
                           </td>
                           <td colSpan="2">Amount: ${instance.amount}</td>
                         </tr>

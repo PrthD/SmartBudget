@@ -1,16 +1,27 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import { addExpense } from '../../services/expenseService';
+import { addExpense, updateExpense } from '../../services/expenseService';
 import { validateExpenseData } from '../../utils/expenseHelpers';
 import '../../styles/ExpenseForm.css';
 
-const ExpenseForm = ({ onExpenseAdded }) => {
-  const [category, setCategory] = useState('');
-  const [customCategoryName, setCustomCategoryName] = useState('');
-  const [amount, setAmount] = useState('');
-  const [date, setDate] = useState('');
-  const [description, setDescription] = useState('');
-  const [frequency, setFrequency] = useState('once');
+const ExpenseForm = ({
+  onExpenseAdded,
+  expenseToEdit,
+  onExpenseUpdated,
+  mode,
+}) => {
+  const [category, setCategory] = useState(expenseToEdit?.category || '');
+  const [customCategoryName, setCustomCategoryName] = useState(
+    expenseToEdit?.customCategoryName || ''
+  );
+  const [amount, setAmount] = useState(expenseToEdit?.amount || '');
+  const [date, setDate] = useState(expenseToEdit?.date || '');
+  const [description, setDescription] = useState(
+    expenseToEdit?.description || ''
+  );
+  const [frequency, setFrequency] = useState(
+    expenseToEdit?.frequency || 'once'
+  );
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
 
@@ -20,8 +31,27 @@ const ExpenseForm = ({ onExpenseAdded }) => {
     'Entertainment',
     'Utilities',
   ];
-
   const frequencyOptions = ['once', 'weekly', 'biweekly', 'monthly', 'yearly'];
+
+  useEffect(() => {
+    if (mode === 'edit' && expenseToEdit) {
+      // Populate fields if in edit mode
+      setCategory(
+        expenseToEdit.customCategory ? 'custom' : expenseToEdit.category
+      );
+      setCustomCategoryName(
+        expenseToEdit.customCategory ? expenseToEdit.category : ''
+      );
+      setAmount(expenseToEdit.amount);
+      setDate(
+        expenseToEdit.date
+          ? new Date(expenseToEdit.date).toISOString().split('T')[0]
+          : ''
+      );
+      setDescription(expenseToEdit.description);
+      setFrequency(expenseToEdit.frequency);
+    }
+  }, [expenseToEdit, mode]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -30,35 +60,46 @@ const ExpenseForm = ({ onExpenseAdded }) => {
 
     try {
       const finalCategory =
-        category === 'custom' ? customCategoryName : category;
+        category === 'custom' ? customCategoryName.trim() : category;
       validateExpenseData({ category: finalCategory, amount });
 
-      const response = await addExpense({
+      const expenseData = {
         category: finalCategory,
+        customCategory: category === 'custom',
         amount: parseFloat(amount),
-        date: date || new Date().toISOString(),
-        description,
+        date: date
+          ? new Date(date).toISOString().split('T')[0]
+          : new Date().toISOString().split('T')[0],
+        description: description.trim(),
         frequency,
-      });
+      };
 
-      onExpenseAdded(response.data);
-      setMessage('Expense added successfully!');
-    } catch (error) {
-      setMessage(error.message || 'An error occurred');
-    } finally {
-      setLoading(false);
+      if (mode === 'add') {
+        const response = await addExpense(expenseData);
+        onExpenseAdded(response.data);
+        setMessage('Expense added successfully!');
+      } else if (mode === 'edit') {
+        const response = await updateExpense(expenseToEdit._id, expenseData);
+        onExpenseUpdated(response.data);
+        setMessage('Expense updated successfully!');
+      }
+
       setCategory('');
       setCustomCategoryName('');
       setAmount('');
       setDate('');
       setDescription('');
       setFrequency('once');
+    } catch (error) {
+      setMessage(error.message || 'An error occurred');
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
     <div className="expense-form">
-      <h2>Add a New Expense</h2>
+      <h2>{mode === 'add' ? 'Add a New Expense' : 'Edit Expense'}</h2>
       <form onSubmit={handleSubmit}>
         {/* Category Input */}
         <div className="form-group">
@@ -147,7 +188,13 @@ const ExpenseForm = ({ onExpenseAdded }) => {
           </select>
         </div>
         <button type="submit" disabled={loading}>
-          {loading ? 'Adding...' : 'Add Expense'}
+          {loading
+            ? mode === 'add'
+              ? 'Adding...'
+              : 'Updating...'
+            : mode === 'add'
+              ? 'Add Expense'
+              : 'Update Expense'}
         </button>
       </form>
       {message && <p className="message">{message}</p>}
@@ -157,6 +204,15 @@ const ExpenseForm = ({ onExpenseAdded }) => {
 
 ExpenseForm.propTypes = {
   onExpenseAdded: PropTypes.func.isRequired,
+  onExpenseUpdated: PropTypes.func,
+  expenseToEdit: PropTypes.object,
+  mode: PropTypes.oneOf(['add', 'edit']).isRequired,
+};
+
+ExpenseForm.defaultProps = {
+  onExpenseAdded: () => {},
+  onExpenseUpdated: () => {},
+  expenseToEdit: null,
 };
 
 export default ExpenseForm;

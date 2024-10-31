@@ -9,63 +9,69 @@ import {
 
 const router = express.Router();
 
-// @route    POST /api/expense
-// @desc     Add a new expense
-router.post('/', validateExpense, checkDuplicateExpense, async (req, res) => {
-  logger.info('POST /api/expense request received');
-  const { category, customCategory, amount, date, description, frequency } =
-    req.body;
+// @route    POST /api/expense/new
+// @desc     Add a new expense entry
+router.post(
+  '/new',
+  validateExpense,
+  checkDuplicateExpense,
+  async (req, res) => {
+    logger.info('POST /api/expense/new - Adding a new expense');
+    const { category, customCategory, amount, date, description, frequency } =
+      req.body;
 
-  try {
-    const expense = new Expense({
-      category,
-      customCategory: customCategory || false,
-      amount: parseFloat(amount),
-      date: date ? new Date(date) : new Date(),
-      description,
-      frequency,
-      isOriginal: true,
-    });
+    try {
+      const expense = new Expense({
+        category,
+        customCategory: customCategory || false,
+        amount: parseFloat(amount),
+        date: date ? new Date(date) : new Date(),
+        description,
+        frequency,
+        isOriginal: true,
+      });
 
-    const savedExpense = await expense.save();
-    logger.info('Expense saved successfully:', savedExpense);
+      const savedExpense = await expense.save();
+      logger.info('New expense saved successfully:', savedExpense);
 
-    // Auto-generate future recurring expenses
-    if (frequency && frequency !== 'once') {
-      await autoGenerateRecurringExpenses(savedExpense);
+      // Auto-generate recurring expenses if frequency is specified
+      if (frequency && frequency !== 'once') {
+        await autoGenerateRecurringExpenses(savedExpense);
+      }
+
+      res.status(201).json(savedExpense);
+    } catch (err) {
+      logger.error('Error saving new expense:', err.message);
+      res.status(500).json({ error: 'Server Error' });
     }
-
-    res.status(201).json(savedExpense);
-  } catch (err) {
-    logger.error('Error saving expense: ' + err.message);
-    res.status(500).json({ error: 'Server Error' });
   }
-});
+);
 
-// @route    GET /api/expense
-// @desc     Get all expenses
-router.get('/', async (req, res) => {
-  logger.info('GET /api/expense request received');
+// @route    GET /api/expense/all
+// @desc     Get all expense entries
+router.get('/all', async (req, res) => {
+  logger.info('GET /api/expense/all - Retrieving all expenses');
   try {
     const expenses = await Expense.find();
-    logger.info('Expenses retrieved successfully');
+    logger.info('All expenses retrieved successfully');
     res.status(200).json(expenses);
   } catch (err) {
-    logger.error('Error fetching expense entries: ' + err.message);
-    res.status(500).json({ error: 'Failed to fetch expense entries' });
+    logger.error('Error retrieving expenses:', err.message);
+    res.status(500).json({ error: 'Failed to fetch expenses' });
   }
 });
 
-// @route    PUT /api/expense/:id
-// @desc     Update an expense
-router.put('/:id', validateExpense, async (req, res) => {
-  logger.info(`PUT /api/expense/${req.params.id} request received`);
+// @route    PUT /api/expense/update/:id
+// @desc     Update an existing expense entry
+router.put('/update/:id', validateExpense, async (req, res) => {
+  logger.info(`PUT /api/expense/update/${req.params.id} - Updating an expense`);
   const { category, customCategory, amount, date, description, frequency } =
     req.body;
 
   try {
     let expense = await Expense.findById(req.params.id);
     if (!expense) {
+      logger.warn(`Expense not found for id: ${req.params.id}`);
       return res.status(404).json({ error: 'Expense not found' });
     }
 
@@ -80,7 +86,7 @@ router.put('/:id', validateExpense, async (req, res) => {
     const updatedExpense = await expense.save();
     logger.info('Expense updated successfully:', updatedExpense);
 
-    // Auto-generate future recurring expenses if the frequency is updated
+    // Regenerate future expenses if frequency has changed
     if (frequency && frequency !== 'once') {
       await autoGenerateRecurringExpenses(updatedExpense);
     }
@@ -92,21 +98,24 @@ router.put('/:id', validateExpense, async (req, res) => {
   }
 });
 
-// @route    DELETE /api/expense/:id
-// @desc     Delete an expense
-router.delete('/:id', async (req, res) => {
-  logger.info(`DELETE /api/expense/${req.params.id} request received`);
+// @route    DELETE /api/expense/delete/:id
+// @desc     Delete an expense entry by ID
+router.delete('/delete/:id', async (req, res) => {
+  logger.info(
+    `DELETE /api/expense/delete/${req.params.id} - Deleting an expense`
+  );
   try {
     const expense = await Expense.findById(req.params.id);
     if (!expense) {
+      logger.warn(`Expense not found for id: ${req.params.id}`);
       return res.status(404).json({ error: 'Expense not found' });
     }
 
     await Expense.findByIdAndDelete(req.params.id);
-    logger.info('Expense removed successfully');
-    res.status(200).json({ message: 'Expense removed successfully' });
+    logger.info('Expense deleted successfully');
+    res.status(200).json({ message: 'Expense deleted successfully' });
   } catch (err) {
-    logger.error('Error deleting expense entry: ' + err.message);
+    logger.error('Error deleting expense: ' + err.message);
     res.status(500).json({ error: 'Failed to delete expense entry' });
   }
 });

@@ -1,0 +1,9 @@
+.incomes-page th {
+  text-align: center;
+}
+
+.incomes-page td div {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}

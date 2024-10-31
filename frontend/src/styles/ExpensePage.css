@@ -1,0 +1,9 @@
+.expenses-page th {
+  text-align: center;
+}
+
+.expenses-page td div {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}
