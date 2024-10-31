@@ -45,12 +45,14 @@ app.use((err, req, res) => {
 });
 
 const PORT = process.env.PORT || 5000;
-const server = app.listen(PORT, () =>
-  console.log(`Server running on port ${PORT}`)
-);
+const server = app.listen(PORT, () => {
+  logger.info(`Server running on port ${PORT}`);
+  console.log(`Server running on port ${PORT}`);
+});
 
-process.on('SIGTERM', () => {
+process.on('SIGTERM', async () => {
   server.close(async () => {
+    logger.info('Process terminated');
     console.log('Process terminated');
     await disconnectDB();
     process.exit(0);
