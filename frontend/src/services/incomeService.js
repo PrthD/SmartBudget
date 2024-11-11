@@ -38,13 +38,15 @@ export const updateIncome = async (id, updatedData) => {
   }
 };
 
-// Delete an income by ID
+// Delete an income by ID, including its recurrences
 export const deleteIncome = async (id) => {
   try {
     const response = await axios.delete(`${API_BASE_URL}/delete/${id}`);
     return response.data;
   } catch (error) {
-    const errorMsg = error.response?.data?.error || 'Failed to delete income';
+    const errorMsg =
+      error.response?.data?.error ||
+      'Failed to delete income and its recurrences';
     throw new Error(errorMsg);
   }
 };

@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { fetchIncomes } from '../services/incomeService';
+import { fetchIncomes, deleteIncome } from '../services/incomeService';
 import {
   calculateTotalIncome,
   groupIncomesBySource,
@@ -43,6 +43,18 @@ const IncomesPage = () => {
       setLoading(false);
       setEditMode(false);
       setIncomeToEdit(null);
+    }
+  };
+
+  const handleDeleteIncome = async (id) => {
+    try {
+      setLoading(true);
+      await deleteIncome(id);
+      await handleIncomeAdded();
+    } catch (error) {
+      setError(error.message);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -118,6 +130,11 @@ const IncomesPage = () => {
                         >
                           <button onClick={() => handleEditIncome(income)}>
                             Edit
+                          </button>
+                          <button
+                            onClick={() => handleDeleteIncome(income._id)}
+                          >
+                            Delete
                           </button>
                           {income.frequency !== 'once' && (
                             <button

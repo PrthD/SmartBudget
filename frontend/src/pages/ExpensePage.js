@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { fetchExpenses } from '../services/expenseService';
+import { fetchExpenses, deleteExpense } from '../services/expenseService';
 import {
   calculateTotalExpense,
   groupExpensesByCategory,
@@ -43,6 +43,18 @@ const ExpensesPage = () => {
       setLoading(false);
       setEditMode(false);
       setExpenseToEdit(null);
+    }
+  };
+
+  const handleDeleteExpense = async (id) => {
+    try {
+      setLoading(true);
+      await deleteExpense(id);
+      await handleExpenseAdded();
+    } catch (error) {
+      setError(error.message);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -120,6 +132,11 @@ const ExpensesPage = () => {
                         >
                           <button onClick={() => handleEditExpense(expense)}>
                             Edit
+                          </button>
+                          <button
+                            onClick={() => handleDeleteExpense(expense._id)}
+                          >
+                            Delete
                           </button>
                           {expense.frequency !== 'once' && (
                             <button

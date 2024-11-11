@@ -89,10 +89,10 @@ router.put('/update/:id', validateIncome, async (req, res) => {
 });
 
 // @route    DELETE /api/income/delete/:id
-// @desc     Delete an income entry by ID
+// @desc     Delete an income entry by ID and its recurrences
 router.delete('/delete/:id', async (req, res) => {
   logger.info(
-    `DELETE /api/income/delete/${req.params.id} - Deleting an income`
+    `DELETE /api/income/delete/${req.params.id} - Deleting an income and its recurrences`
   );
   try {
     const income = await Income.findById(req.params.id);
@@ -101,12 +101,19 @@ router.delete('/delete/:id', async (req, res) => {
       return res.status(404).json({ error: 'Income not found' });
     }
 
-    await Income.findByIdAndDelete(req.params.id);
-    logger.info('Income deleted successfully');
-    res.status(200).json({ message: 'Income deleted successfully' });
+    await Income.deleteMany({
+      source: income.source,
+      frequency: income.frequency,
+      isOriginal: { $in: [true, false] },
+    });
+
+    logger.info('Income and its recurrences deleted successfully');
+    res
+      .status(200)
+      .json({ message: 'Income and its recurrences deleted successfully' });
   } catch (err) {
     logger.error('Error deleting income: ' + err.message);
-    res.status(500).json({ error: 'Failed to delete income entry' });
+    res.status(500).json({ error: 'Failed to delete income and recurrences' });
   }
 });
 

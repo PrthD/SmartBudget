@@ -99,10 +99,10 @@ router.put('/update/:id', validateExpense, async (req, res) => {
 });
 
 // @route    DELETE /api/expense/delete/:id
-// @desc     Delete an expense entry by ID
+// @desc     Delete an expense entry by ID and its recurrences
 router.delete('/delete/:id', async (req, res) => {
   logger.info(
-    `DELETE /api/expense/delete/${req.params.id} - Deleting an expense`
+    `DELETE /api/expense/delete/${req.params.id} - Deleting an expense and its recurrences`
   );
   try {
     const expense = await Expense.findById(req.params.id);
@@ -111,12 +111,19 @@ router.delete('/delete/:id', async (req, res) => {
       return res.status(404).json({ error: 'Expense not found' });
     }
 
-    await Expense.findByIdAndDelete(req.params.id);
-    logger.info('Expense deleted successfully');
-    res.status(200).json({ message: 'Expense deleted successfully' });
+    await Expense.deleteMany({
+      category: expense.category,
+      frequency: expense.frequency,
+      isOriginal: { $in: [true, false] },
+    });
+
+    logger.info('Expense and its recurrences deleted successfully');
+    res
+      .status(200)
+      .json({ message: 'Expense and its recurrences deleted successfully' });
   } catch (err) {
     logger.error('Error deleting expense: ' + err.message);
-    res.status(500).json({ error: 'Failed to delete expense entry' });
+    res.status(500).json({ error: 'Failed to delete expense and recurrences' });
   }
 });
 

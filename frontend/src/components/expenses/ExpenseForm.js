@@ -69,7 +69,7 @@ const ExpenseForm = ({
         amount: parseFloat(amount),
         date: date
           ? new Date(date).toISOString().split('T')[0]
-          : new Date().toISOString().split('T')[0],
+          : new Date().toLocaleDateString('en-CA'),
         description: description.trim(),
         frequency,
       };
