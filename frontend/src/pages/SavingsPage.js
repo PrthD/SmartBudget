@@ -1,16 +1,21 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { fetchIncomes } from '../services/incomeService';
 import { fetchExpenses } from '../services/expenseService';
-import { fetchSavingsGoals } from '../services/savingsService';
+import {
+  fetchSavingsGoals,
+  deleteSavingsGoal,
+} from '../services/savingsService';
 import { calculateTotalIncome } from '../utils/incomeHelpers';
 import { calculateTotalExpense } from '../utils/expenseHelpers';
 import SavingsForm from '../components/savings/SavingsForm';
-// import '../styles/SavingsPage.css';
+import '../styles/SavingsPage.css';
 
 const SavingsPage = () => {
   const [incomeData, setIncomeData] = useState([]);
   const [expenseData, setExpenseData] = useState([]);
   const [savingsGoals, setSavingsGoals] = useState([]);
+  const [editMode, setEditMode] = useState(false);
+  const [goalToEdit, setGoalToEdit] = useState(null);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
 
@@ -38,8 +43,29 @@ const SavingsPage = () => {
       setLoading(true);
       const goals = await fetchSavingsGoals();
       setSavingsGoals(goals);
+      setEditMode(false);
+      setGoalToEdit(null);
     } catch (error) {
       setError(error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleEditGoal = (goal) => {
+    setEditMode(true);
+    setGoalToEdit(goal);
+  };
+
+  const handleDeleteGoal = async (id) => {
+    try {
+      setLoading(true);
+      await deleteSavingsGoal(id);
+      setSavingsGoals((prevGoals) =>
+        prevGoals.filter((goal) => goal._id !== id)
+      );
+    } catch (error) {
+      setError('Failed to delete savings goal');
     } finally {
       setLoading(false);
     }
@@ -68,7 +94,12 @@ const SavingsPage = () => {
       ) : (
         <>
           {/* Render the Savings Form */}
-          <SavingsForm onSave={handleSavingsGoalAdded} />
+          <SavingsForm
+            onSave={handleSavingsGoalAdded}
+            goalToEdit={goalToEdit}
+            editMode={editMode}
+            onUpdate={handleSavingsGoalAdded}
+          />
           <h2>Your Savings Goals</h2>
 
           {/* Render the Savings Goals Table */}
@@ -86,6 +117,18 @@ const SavingsPage = () => {
                     })}
                   </p>
                 )}
+                <div
+                  style={{
+                    display: 'flex',
+                    gap: '10px',
+                    justifyContent: 'center',
+                  }}
+                >
+                  <button onClick={() => handleEditGoal(goal)}>Edit</button>
+                  <button onClick={() => handleDeleteGoal(goal._id)}>
+                    Delete
+                  </button>
+                </div>
               </div>
             ))
           ) : (

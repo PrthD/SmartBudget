@@ -1,14 +1,32 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import { addSavingsGoal } from '../../services/savingsService';
+import {
+  addSavingsGoal,
+  updateSavingsGoal,
+} from '../../services/savingsService';
 import { validateSavingsData } from '../../utils/savingsHelpers';
+import '../../styles/SavingsForm.css';
 
-const SavingsForm = ({ onSave }) => {
-  const [title, setTitle] = useState('');
-  const [targetAmount, setTargetAmount] = useState('');
-  const [deadline, setDeadline] = useState('');
+const SavingsForm = ({ onSave, goalToEdit, editMode, onUpdate }) => {
+  const [title, setTitle] = useState(goalToEdit?.title || '');
+  const [targetAmount, setTargetAmount] = useState(
+    goalToEdit?.targetAmount || ''
+  );
+  const [deadline, setDeadline] = useState(goalToEdit?.deadline || '');
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
+
+  useEffect(() => {
+    if (editMode && goalToEdit) {
+      setTitle(goalToEdit.title);
+      setTargetAmount(goalToEdit.targetAmount);
+      setDeadline(
+        goalToEdit.deadline
+          ? new Date(goalToEdit.deadline).toISOString().split('T')[0]
+          : ''
+      );
+    }
+  }, [goalToEdit, editMode]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -18,13 +36,23 @@ const SavingsForm = ({ onSave }) => {
     try {
       validateSavingsData({ title, targetAmount });
 
-      const response = await addSavingsGoal({
-        title,
-        targetAmount: parseFloat(targetAmount),
-        deadline: deadline ? new Date(deadline).toISOString() : null,
-      });
-      onSave(response.data);
-      setMessage('Savings goal added successfully!');
+      if (editMode) {
+        const response = await updateSavingsGoal(goalToEdit._id, {
+          title,
+          targetAmount: parseFloat(targetAmount),
+          deadline: deadline ? new Date(deadline).toISOString() : null,
+        });
+        onUpdate(response.data);
+        setMessage('Savings goal updated successfully!');
+      } else {
+        const response = await addSavingsGoal({
+          title,
+          targetAmount: parseFloat(targetAmount),
+          deadline: deadline ? new Date(deadline).toISOString() : null,
+        });
+        onSave(response.data);
+        setMessage('Savings goal added successfully!');
+      }
     } catch (error) {
       setMessage(error.message || 'An error occurred');
     } finally {
@@ -37,7 +65,7 @@ const SavingsForm = ({ onSave }) => {
 
   return (
     <div className="savings-form">
-      <h2>Add a New Savings Goal</h2>
+      <h2>{editMode ? 'Edit Savings Goal' : 'Add a New Savings Goal'}</h2>
       <form onSubmit={handleSubmit}>
         {/* Goal Title Input */}
         <div className="form-group">
@@ -78,7 +106,13 @@ const SavingsForm = ({ onSave }) => {
         </div>
 
         <button type="submit" disabled={loading}>
-          {loading ? 'Adding...' : 'Add Expense'}
+          {loading
+            ? editMode
+              ? 'Updating...'
+              : 'Adding...'
+            : editMode
+              ? 'Update Goal'
+              : 'Add Goal'}
         </button>
       </form>
       {message && <p className="message">{message}</p>}
@@ -88,6 +122,15 @@ const SavingsForm = ({ onSave }) => {
 
 SavingsForm.propTypes = {
   onSave: PropTypes.func.isRequired,
+  goalToEdit: PropTypes.object,
+  editMode: PropTypes.bool,
+  onUpdate: PropTypes.func,
+};
+
+SavingsForm.defaultProps = {
+  goalToEdit: null,
+  editMode: false,
+  onUpdate: () => {},
 };
 
 export default SavingsForm;

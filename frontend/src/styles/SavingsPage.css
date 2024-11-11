@@ -1,0 +1,9 @@
+.savings-page th {
+  text-align: center;
+}
+
+.savings-page td div {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}
