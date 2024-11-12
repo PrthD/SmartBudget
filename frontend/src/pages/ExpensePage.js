@@ -5,6 +5,7 @@ import {
   groupExpensesByCategory,
 } from '../utils/expenseHelpers';
 import ExpenseForm from '../components/expenses/ExpenseForm';
+import NavBar from '../components/common/NavBar';
 import '../styles/ExpensePage.css';
 
 const ExpensesPage = () => {
@@ -78,111 +79,117 @@ const ExpensesPage = () => {
 
   return (
     <div className="expenses-page">
-      <h2>Your Expenses</h2>
-      <h3>Total Expenses: ${totalExpense}</h3>
-      {loading ? (
-        <p>Loading...</p>
-      ) : error ? (
-        <p className="error">{error}</p>
-      ) : (
-        <>
-          {/* Render the Expense Form */}
-          <ExpenseForm
-            onExpenseAdded={handleExpenseAdded}
-            onExpenseUpdated={handleExpenseUpdated}
-            expenseToEdit={expenseToEdit}
-            mode={editMode ? 'edit' : 'add'}
-          />
+      <NavBar />
+      <div className="content-container">
+        <h2>Your Expenses</h2>
+        <h3>Total Expenses: ${totalExpense}</h3>
+        {loading ? (
+          <p>Loading...</p>
+        ) : error ? (
+          <p className="error">{error}</p>
+        ) : (
+          <>
+            {/* Render the Expense Form */}
+            <ExpenseForm
+              onExpenseAdded={handleExpenseAdded}
+              onExpenseUpdated={handleExpenseUpdated}
+              expenseToEdit={expenseToEdit}
+              mode={editMode ? 'edit' : 'add'}
+            />
 
-          {/* Render the Expenses Table */}
-          {groupedExpenses.length > 0 ? (
-            <table>
-              <thead>
-                <tr>
-                  <th>Category</th>
-                  <th>Amount</th>
-                  <th>Frequency</th>
-                  <th>Date Added</th>
-                  <th>Description</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {groupedExpenses.map((expense) => (
-                  <React.Fragment
-                    key={`${expense.category}-${expense.frequency}`}
-                  >
-                    <tr>
-                      <td>{expense.category}</td>
-                      <td>${expense.amount}</td>
-                      <td>{expense.frequency}</td>
-                      <td>
-                        {new Date(expense.date).toLocaleDateString(undefined, {
-                          timeZone: 'UTC',
-                        })}
-                      </td>
-                      <td>{expense.description || ''}</td>
-                      <td>
-                        <div
-                          style={{
-                            display: 'flex',
-                            gap: '10px',
-                            justifyContent: 'center',
-                          }}
-                        >
-                          <button onClick={() => handleEditExpense(expense)}>
-                            Edit
-                          </button>
-                          <button
-                            onClick={() => handleDeleteExpense(expense._id)}
-                          >
-                            Delete
-                          </button>
-                          {expense.frequency !== 'once' && (
-                            <button
-                              onClick={() =>
-                                toggleExpandExpense(
-                                  `${expense.category}-${expense.frequency}`
-                                )
-                              }
-                            >
-                              {expandedExpense[
-                                `${expense.category}-${expense.frequency}`
-                              ]
-                                ? 'Collapse'
-                                : 'Expand'}
-                            </button>
+            {/* Render the Expenses Table */}
+            {groupedExpenses.length > 0 ? (
+              <table className="modern-table">
+                <thead>
+                  <tr>
+                    <th>Category</th>
+                    <th>Amount</th>
+                    <th>Frequency</th>
+                    <th>Date Added</th>
+                    <th>Description</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {groupedExpenses.map((expense) => (
+                    <React.Fragment
+                      key={`${expense.category}-${expense.frequency}`}
+                    >
+                      <tr>
+                        <td>{expense.category}</td>
+                        <td>${expense.amount}</td>
+                        <td>{expense.frequency}</td>
+                        <td>
+                          {new Date(expense.date).toLocaleDateString(
+                            undefined,
+                            {
+                              timeZone: 'UTC',
+                            }
                           )}
-                        </div>
-                      </td>
-                    </tr>
-
-                    {/* Collapsible section for future recurring instances */}
-                    {expandedExpense[
-                      `${expense.category}-${expense.frequency}`
-                    ] &&
-                      expense.futureInstances.length > 0 &&
-                      expense.futureInstances.map((instance) => (
-                        <tr key={instance._id}>
-                          <td colSpan="2">
-                            Recurring on:{' '}
-                            {new Date(instance.date).toLocaleDateString(
-                              undefined,
-                              { timeZone: 'UTC' }
+                        </td>
+                        <td>{expense.description || ''}</td>
+                        <td>
+                          <div
+                            style={{
+                              display: 'flex',
+                              gap: '10px',
+                              justifyContent: 'center',
+                            }}
+                          >
+                            <button onClick={() => handleEditExpense(expense)}>
+                              Edit
+                            </button>
+                            <button
+                              onClick={() => handleDeleteExpense(expense._id)}
+                            >
+                              Delete
+                            </button>
+                            {expense.frequency !== 'once' && (
+                              <button
+                                onClick={() =>
+                                  toggleExpandExpense(
+                                    `${expense.category}-${expense.frequency}`
+                                  )
+                                }
+                              >
+                                {expandedExpense[
+                                  `${expense.category}-${expense.frequency}`
+                                ]
+                                  ? 'Collapse'
+                                  : 'Expand'}
+                              </button>
                             )}
-                          </td>
-                          <td colSpan="2">Amount: ${instance.amount}</td>
-                        </tr>
-                      ))}
-                  </React.Fragment>
-                ))}
-              </tbody>
-            </table>
-          ) : (
-            <p>No recurring expenses</p>
-          )}
-        </>
-      )}
+                          </div>
+                        </td>
+                      </tr>
+
+                      {/* Collapsible section for future recurring instances */}
+                      {expandedExpense[
+                        `${expense.category}-${expense.frequency}`
+                      ] &&
+                        expense.futureInstances.length > 0 &&
+                        expense.futureInstances.map((instance) => (
+                          <tr key={instance._id}>
+                            <td colSpan="2">
+                              Recurring on:{' '}
+                              {new Date(instance.date).toLocaleDateString(
+                                undefined,
+                                { timeZone: 'UTC' }
+                              )}
+                            </td>
+                            <td colSpan="2">Amount: ${instance.amount}</td>
+                          </tr>
+                        ))}
+                    </React.Fragment>
+                  ))}
+                </tbody>
+              </table>
+            ) : (
+              <p>No recurring expenses</p>
+            )}
+          </>
+        )}
+      </div>
     </div>
   );
 };

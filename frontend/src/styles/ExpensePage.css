@@ -1,9 +1,48 @@
-.expenses-page th {
+.content-container {
+  padding: 20px;
+  background-color: #f9f9f9;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+h2, h3 {
   text-align: center;
 }
 
-.expenses-page td div {
-  display: flex;
-  gap: 10px;
-  justify-content: center;
+.modern-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 20px 0;
+}
+
+.modern-table th,
+.modern-table td {
+  padding: 10px;
+  text-align: center;
+  border: 1px solid #ddd;
+}
+
+.modern-table th {
+  background-color: #004c99;
+  color: #fff;
+}
+
+.modern-table tr:nth-child(even) {
+  background-color: #f2f2f2;
+}
+
+.modern-table tr:hover {
+  background-color: #f1f1f1;
+}
+
+button {
+  padding: 5px 10px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #004c99;
+  color: #fff;
 }
