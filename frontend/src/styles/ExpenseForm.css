@@ -1,56 +1,339 @@
+/* Expense Form Styling */
 .expense-form {
-  width: 300px;
-  margin: 0 auto;
-  padding: 20px;
-  border: 1px solid #ddd;
-  border-radius: 5px;
-  background-color: #f9f9f9;
+  width: 100%;
+  padding: 30px;
+  margin: 0;
+  background-color: transparent;
+  border-radius: 20px;
+  box-shadow: none;
+  transition: box-shadow 0.3s, transform 0.3s ease-in-out;
+  overflow: hidden;
+}
+
+.expense-form:hover {
+  box-shadow: 0 15px 35px rgba(0, 76, 153, 0.15);
 }
 
 .expense-form h2 {
   text-align: center;
+  color: #004c99;
+  font-weight: 600;
+  margin-bottom: 25px;
+  font-size: 2rem;
 }
 
-.form-group {
+/* Collapsible Section for Steps */
+.collapsible-section {
+  padding-bottom: 20px;
+}
+
+.collapsible-section h3 {
   margin-bottom: 15px;
+  color: #1e1e2d;
+  font-weight: 600;
+  font-size: 1.5rem;
 }
 
+/* Category Picker Styling */
+.category-picker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  margin-bottom: 20px;
+  justify-content: center;
+}
+
+.category-card {
+  flex: 1 1 calc(30% - 10px);
+  max-width: 180px;
+  background-color: #f0f0f5;
+  padding: 10px;
+  text-align: center;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: transform 0.3s, background-color 0.3s, border-color 0.3s;
+  border: 2px solid transparent;
+}
+
+.category-card:hover {
+  background-color: #e6e8f1;
+  border-color: #004c99;
+}
+
+.category-card.selected {
+  border: 2px solid #004c99;
+  background-color: #e0ebff;
+  transform: scale(1.05);
+}
+
+.category-card span {
+  display: block;
+  margin-top: 5px;
+  font-weight: bold;
+  color: #004c99;
+}
+
+/* Form Group Styling */
+.form-group {
+  margin-bottom: 20px;
+  max-width: 500px;
+  margin-left: auto;
+  margin-right: auto;
+  text-align: left;
+  position: relative;
+  padding: 0 15px;
+  box-sizing: border-box;
+}
+
+/* Label Styling */
 .form-group label {
   display: block;
   font-weight: bold;
+  margin-bottom: 8px;
+  color: #1e1e2d;
+  font-size: 1rem;
 }
 
-.form-group select,
-.form-group input,
-.form-group textarea {
+/* Input Container */
+.input-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+/* Custom Category Input Container Styling */
+.input-container.custom-category {
   width: 100%;
-  padding: 8px;
+  max-width: 500px;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 0 15px;
+  position: relative;
+  text-align: left;
+  box-sizing: border-box;
+}
+
+/* Custom Category Input Field Styling */
+.styled-input.custom-category-input {
+  padding: 12px 15px;
+  width: 100%;
+  border: 2px solid #d1d1d6;
+  border-radius: 30px;
+  font-size: 1rem;
+  box-sizing: border-box;
+  transition: border-color 0.3s, box-shadow 0.3s, transform 0.3s;
+  background-color: #f9f9fb;
+  box-shadow: inset 2px 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.input-container .styled-input,
+.input-container .styled-textarea,
+.input-container .styled-select {
+  width: 100%;
+  padding-left: 45px;
+  padding-right: 15px;
+  padding-top: 12px;
+  padding-bottom: 12px;
   margin-top: 5px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
+  border: 2px solid #d1d1d6;
+  border-radius: 30px;
+  font-size: 1rem;
+  box-sizing: border-box;
+  transition: border-color 0.3s, box-shadow 0.3s, transform 0.3s;
+  background-color: #f9f9fb;
+  box-shadow: inset 2px 2px 8px rgba(0, 0, 0, 0.05);
 }
 
-button {
-  display: block;
-  width: 100%;
-  padding: 10px;
-  background-color: #28a745;
-  color: white;
+.input-container .styled-input:hover,
+.input-container .styled-textarea:hover,
+.input-container .styled-select:hover {
+  border-color: #a3b3c9;
+}
+
+.input-container .styled-input:focus,
+.input-container .styled-textarea:focus,
+.input-container .styled-select:focus {
+  border-color: #004c99;
+  box-shadow: 0 0 15px rgba(0, 76, 153, 0.3);
+  outline: none;
+  background-color: #ffffff;
+  transform: scale(1.02);
+}
+
+.styled-input.custom-category-input:hover {
+  border-color: #a3b3c9;
+}
+
+.styled-input.custom-category-input:focus {
+  border-color: #004c99;
+  box-shadow: 0 0 15px rgba(0, 76, 153, 0.3);
+  outline: none;
+  transform: scale(1.02);
+}
+
+/* Icon Styling */
+.input-container .icon {
+  position: absolute;
+  left: 15px; /* Adjust horizontal position */
+  color: #a3b6c3;
+  font-size: 1.3rem;
+  transition: color 0.3s ease, transform 0.3s ease;
+  z-index: 1;
+}
+
+/* Adjust vertical alignment for different inputs */
+.input-container .icon {
+  top: 50%; /* Adjust vertical position */
+  transform: translateY(-50%); /* Center vertically */
+}
+
+/* Specific adjustments for Amount Input Icon */
+.input-container.amount .icon {
+  top: 52%;
+  left: 18px; /*Adjust horizontal position*/
+  transform: translateY(-50%); /* Center vertically */
+}
+
+/* Specific adjustments for Date Input Icon */
+.input-container.date .calendar-button {
+  position: absolute;
+  left: 3px; /* Adjust horizontal position */
+  top: 52%; /* Adjust vertical position */
+  transform: translateY(-50%);
+  background: transparent;
   border: none;
-  border-radius: 4px;
   cursor: pointer;
+  color: inherit;
+  padding: 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-button:hover {
-  background-color: #218838;
+.input-container.date .calendar-icon {
+  color: #a3b6c3;
+  font-size: 1.3rem;
+  transition: color 0.3s ease, transform 0.3s ease;
 }
 
-.error-message {
-  color: red;
+/* Specific adjustments for Description Input Icon */
+.input-container.description .icon {
+  left: 15px; /* Adjust horizontal position */
+  top: 24%; /* Adjust vertical position */
+}
+
+/* Specific adjustments for Frequency Select Icon */
+.input-container.frequency .icon {
+  left: 15px; /* Adjust horizontal position */
+  top: 50%; /* Adjust vertical position */
+  transform: translateY(-50%); /* Center vertically */
+}
+
+/* Highlight icon when input is focused, has value, or container is hovered */
+.input-container:hover .icon,
+.input-container:focus-within .icon,
+.input-container.input-has-value .icon {
+  color: #004c99;
+  transform: translateY(-50%) scale(1.05);
+}
+
+/* Styled Textarea Adjustments */
+.input-container .styled-textarea {
+  padding-top: 15px;
+  padding-bottom: 15px;
+  min-height: 120px;
+  border-radius: 20px;
+  resize: vertical;
+}
+
+/* Placeholder Styling */
+::placeholder {
+  color: #6c757d;
+  opacity: 1;
+  margin-left: 10px;
+}
+
+.input-container .styled-input::placeholder,
+.input-container .styled-textarea::placeholder {
+  color: #6c757d;
+}
+
+.input-container .styled-input:focus::placeholder,
+.input-container .styled-textarea:focus::placeholder {
+  opacity: 0.5;
+}
+
+/* Submit and Navigation Buttons */
+.form-navigation-buttons {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+  gap: 15px;
+}
+
+.form-navigation-buttons button,
+.submit-button {
+  background-color: #004c99;
+  color: #ffffff;
+  border: none;
+  padding: 15px 30px;
+  border-radius: 30px;
+  cursor: pointer;
+  transition: background-color 0.3s, transform 0.3s ease-in-out;
+  min-width: 140px;
+  font-size: 1.1rem;
+  font-weight: bold;
+}
+
+.form-navigation-buttons button:hover,
+.submit-button:hover {
+  background-color: #003366;
+  transform: translateY(-3px);
+}
+
+.submit-button:active {
+  transform: translateY(1px);
+}
+
+.expense-form.highlight {
+  animation: highlightAnimation 2s ease-out;
+}
+
+@keyframes highlightAnimation {
+  0% {
+    box-shadow: 0 0 15px 15px rgba(0, 150, 255, 0.5);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(0, 150, 255, 0);
+  }
+}
+
+/* Message Styling for Success/Error */
+.message {
   text-align: center;
+  margin-top: 25px;
+  font-size: 1rem;
 }
 
-.success-message {
-  color: green;
-  text-align: center;
+.message.success {
+  color: #28a745;
+}
+
+.message.error {
+  color: #ff4d4d;
+  font-weight: bold;
+}
+
+/* Apply Inter Font to the Expense Form */
+.expense-form,
+.expense-form * {
+  font-family: 'Inter', sans-serif;
+}
+
+/* Hide default date picker icon for WebKit browsers */
+input[type="date"]::-webkit-calendar-picker-indicator {
+  display: none;
+  opacity: 0;
+  -webkit-appearance: none;
 }

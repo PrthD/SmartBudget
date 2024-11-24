@@ -1,18 +1,41 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { FaBell, FaUserCircle } from 'react-icons/fa';
 import '../../styles/NavBar.css';
 
 const NavBar = () => {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
   const navigate = useNavigate();
+  const dropdownRef = useRef(null);
 
   const toggleDrawer = () => {
     setIsDrawerOpen(!isDrawerOpen);
   };
 
   const handleLogoClick = () => {
-    navigate('/'); // Redirect to the dashboard
+    navigate('/');
   };
+
+  const closeDrawer = () => {
+    setIsDrawerOpen(false);
+  };
+
+  const toggleProfileDropdown = () => {
+    setIsProfileDropdownOpen(!isProfileDropdownOpen);
+  };
+
+  useEffect(() => {
+    const handleOutsideClick = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsProfileDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleOutsideClick);
+    return () => {
+      document.removeEventListener('mousedown', handleOutsideClick);
+    };
+  }, []);
 
   const mainContentStyle = {
     marginLeft: isDrawerOpen ? '250px' : '0',
@@ -31,28 +54,61 @@ const NavBar = () => {
             onClick={handleLogoClick}
             style={{ cursor: 'pointer' }}
           >
-            Smart Budget
+            SMART BUDGET
+          </div>
+        </div>
+        <div className="nav-right">
+          <FaBell className="notification-icon" />
+          <div
+            className="profile-icon-wrapper"
+            onClick={toggleProfileDropdown}
+            ref={dropdownRef}
+          >
+            <FaUserCircle className="profile-icon" />
+            {isProfileDropdownOpen && (
+              <div className="profile-dropdown">
+                <button>Settings</button>
+                <button>Logout</button>
+              </div>
+            )}
           </div>
         </div>
         <div className={`drawer ${isDrawerOpen ? 'open' : ''}`}>
+          <div className="drawer-profile">
+            <div className="profile-placeholder">User</div>
+            <p className="profile-name">John Doe</p>
+          </div>
           <ul className="drawer-links">
             <li>
-              <a href="/expense" onClick={toggleDrawer}>
+              <a href="/" onClick={closeDrawer}>
+                Dashboard
+              </a>
+            </li>
+            <li>
+              <a href="/expense" onClick={closeDrawer}>
                 Expenses
               </a>
             </li>
             <li>
-              <a href="/income" onClick={toggleDrawer}>
+              <a href="/income" onClick={closeDrawer}>
                 Incomes
               </a>
             </li>
             <li>
-              <a href="/savings" onClick={toggleDrawer}>
+              <a href="/savings" onClick={closeDrawer}>
                 Savings
               </a>
             </li>
           </ul>
+          <button className="logout-button">
+            {' '}
+            {/*onClick={() => navigate('/logout')}*/}
+            Logout
+          </button>
         </div>
+        {isDrawerOpen && (
+          <div className="drawer-overlay" onClick={closeDrawer} />
+        )}
       </nav>
     </div>
   );

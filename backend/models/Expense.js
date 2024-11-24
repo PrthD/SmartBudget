@@ -33,6 +33,15 @@ const ExpenseSchema = new mongoose.Schema(
       type: Boolean,
       default: true,
     },
+    originalExpenseId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Expense',
+      default: null,
+    },
+    skippedDates: {
+      type: [Date],
+      default: [],
+    },
     user: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
