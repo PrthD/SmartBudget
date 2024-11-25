@@ -11,6 +11,7 @@ import {
   calculateNextRecurrence,
 } from '../utils/expenseHelpers';
 import ExpenseForm from '../components/expenses/ExpenseForm';
+import ExpenseSort from '../components/expenses/ExpenseSort';
 import NavBar from '../components/common/NavBar';
 import Chart from 'react-apexcharts';
 import ExpenseCard from '../components/expenses/ExpenseCard';
@@ -31,13 +32,18 @@ const ExpensesPage = () => {
   const [expenseToEdit, setExpenseToEdit] = useState(null);
   const [highlightForm, setHighlightForm] = useState(false);
   const [isExpensesListVisible, setIsExpensesListVisible] = useState(true);
+  const [sortedExpenses, setSortedExpenses] = useState([]);
 
   const formSectionRef = useRef(null);
 
-  // Fetch expenses on initial render
   useEffect(() => {
-    fetchInitialExpenses();
-  }, []);
+    if (expenseData.length > 0) {
+      const sorted = sortExpenses(expenseData, 'date', 'desc');
+      setSortedExpenses(sorted);
+    } else {
+      setSortedExpenses([]);
+    }
+  }, [expenseData]);
 
   // Fetch initial expenses from the server
   const fetchInitialExpenses = async () => {
@@ -197,6 +203,25 @@ const ExpensesPage = () => {
     setExpandedExpense((prev) => ({ ...prev, [id]: !prev[id] }));
   };
 
+  const sortExpenses = (expenses, field, order) => {
+    return [...expenses].sort((a, b) => {
+      let comparison = 0;
+      if (field === 'amount') {
+        comparison = a.amount - b.amount;
+      } else if (field === 'date') {
+        comparison = new Date(a.date) - new Date(b.date);
+      } else if (field === 'category') {
+        comparison = a.category.localeCompare(b.category);
+      }
+      return order === 'asc' ? comparison : -comparison;
+    });
+  };
+
+  const handleSortChange = (field, order) => {
+    const sorted = sortExpenses(expenseData, field, order);
+    setSortedExpenses(sorted);
+  };
+
   /* TODO: Replace the hardcoded budget value with a dynamic value */
   const budget = 10000;
   const percentage = (totalExpense / budget) * 100;
@@ -288,6 +313,9 @@ const ExpensesPage = () => {
           Your Expenses{' '}
           {isExpensesListVisible ? <FaChevronUp /> : <FaChevronDown />}
         </h3>
+        {isExpensesListVisible && (
+          <ExpenseSort onSortChange={handleSortChange} />
+        )}
         {loading ? (
           <p>Loading...</p>
         ) : error ? (
@@ -300,9 +328,9 @@ const ExpensesPage = () => {
             unmountOnExit
           >
             <div className="expense-cards-container">
-              {expenseData.length > 0 ? (
+              {sortedExpenses.length > 0 ? (
                 <TransitionGroup component={null}>
-                  {expenseData.map((expense) => (
+                  {sortedExpenses.map((expense) => (
                     <CSSTransition
                       key={expense._id}
                       timeout={500}

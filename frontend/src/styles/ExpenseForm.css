@@ -226,7 +226,7 @@
 /* Specific adjustments for Frequency Select Icon */
 .input-container.frequency .icon {
   left: 15px; /* Adjust horizontal position */
-  top: 50%; /* Adjust vertical position */
+  top: 53%; /* Adjust vertical position */
   transform: translateY(-50%); /* Center vertically */
 }
 
