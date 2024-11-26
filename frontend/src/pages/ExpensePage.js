@@ -1,4 +1,3 @@
-// Import necessary modules and components
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import {
   fetchExpenses,
@@ -6,11 +5,15 @@ import {
   skipNextRecurrence,
 } from '../services/expenseService';
 import {
+  formatExpenseData,
   calculateTotalExpense,
   groupExpensesByCategory,
   calculateNextRecurrence,
+  filterExpenses,
+  sortByFields,
 } from '../utils/expenseHelpers';
 import ExpenseForm from '../components/expenses/ExpenseForm';
+import ExpenseSearch from '../components/expenses/ExpenseSearch';
 import ExpenseSort from '../components/expenses/ExpenseSort';
 import NavBar from '../components/common/NavBar';
 import Chart from 'react-apexcharts';
@@ -25,7 +28,8 @@ import moment from 'moment-timezone';
 
 const ExpensesPage = () => {
   const [expenseData, setExpenseData] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [formLoading, setFormLoading] = useState(true);
+  const [listLoading, setListLoading] = useState(true);
   const [error, setError] = useState('');
   const [expandedExpense, setExpandedExpense] = useState({});
   const [editMode, setEditMode] = useState(false);
@@ -33,57 +37,54 @@ const ExpensesPage = () => {
   const [highlightForm, setHighlightForm] = useState(false);
   const [isExpensesListVisible, setIsExpensesListVisible] = useState(true);
   const [sortedExpenses, setSortedExpenses] = useState([]);
+  const [filteredExpenses, setFilteredExpenses] = useState([]);
 
   const formSectionRef = useRef(null);
 
   useEffect(() => {
+    fetchInitialExpenses();
+  }, []);
+
+  useEffect(() => {
+    setFilteredExpenses(sortedExpenses);
+  }, [sortedExpenses]);
+
+  useEffect(() => {
     if (expenseData.length > 0) {
-      const sorted = sortExpenses(expenseData, 'date', 'desc');
+      const sorted = sortByFields(expenseData, ['date'], ['desc']);
       setSortedExpenses(sorted);
     } else {
       setSortedExpenses([]);
     }
   }, [expenseData]);
 
-  // Fetch initial expenses from the server
   const fetchInitialExpenses = async () => {
     try {
-      setLoading(true);
+      setFormLoading(true);
+      setListLoading(true);
       const expenses = await fetchExpenses();
 
-      const formattedExpenses = expenses.map((expense) => ({
-        ...expense,
-        date: moment(expense.date).tz('America/Edmonton').format('YYYY-MM-DD'),
-        frequency: expense.frequency || 'once',
-        nextRecurrence: expense.nextRecurrence
-          ? moment(expense.nextRecurrence)
-              .tz('America/Edmonton')
-              .format('YYYY-MM-DD')
-          : null,
-      }));
+      const formattedExpenses = formatExpenseData(expenses);
 
       setExpenseData(formattedExpenses);
     } catch (error) {
       setError(error.message);
     } finally {
-      setLoading(false);
+      setFormLoading(false);
+      setListLoading(false);
     }
   };
 
-  // Handle adding a new expense
   const handleExpenseAdded = async (newExpense) => {
     if (newExpense.frequency && newExpense.frequency !== 'once') {
-      // For recurring expenses, re-fetch expenses to get future instances
-      setLoading(true);
+      setFormLoading(true);
       await fetchInitialExpenses();
-      setLoading(false);
+      setFormLoading(false);
     } else {
-      // For one-time expenses, just add the new expense to the state
       setExpenseData((prevExpenses) => [...prevExpenses, newExpense]);
     }
   };
 
-  // Handle editing an expense
   const handleEditExpense = (expense) => {
     setEditMode(true);
     setExpenseToEdit(expense);
@@ -105,15 +106,12 @@ const ExpensesPage = () => {
     }, 2000);
   };
 
-  // Handle updating an expense
   const handleExpenseUpdated = async (updatedExpense) => {
     if (updatedExpense.frequency && updatedExpense.frequency !== 'once') {
-      // For recurring expenses, re-fetch expenses to get updated future instances
-      setLoading(true);
+      setFormLoading(true);
       await fetchInitialExpenses();
-      setLoading(false);
+      setFormLoading(false);
     } else {
-      // For one-time expenses, just update the existing expense in the state
       setExpenseData((prevExpenses) =>
         prevExpenses.map((expense) =>
           expense._id === updatedExpense._id ? updatedExpense : expense
@@ -124,11 +122,9 @@ const ExpensesPage = () => {
     setExpenseToEdit(null);
   };
 
-  // Handle deleting an expense
   const handleDeleteExpense = async (id) => {
     try {
-      setLoading(true);
-      // Optimistically update the UI
+      setListLoading(true);
       setExpenseData((prevExpenses) =>
         prevExpenses.filter(
           (expense) => expense._id !== id && expense.originalExpenseId !== id
@@ -137,32 +133,26 @@ const ExpensesPage = () => {
       await deleteExpense(id);
     } catch (error) {
       setError(error.message);
-      // Re-fetch expenses in case of error
       await fetchInitialExpenses();
     } finally {
-      setLoading(false);
+      setListLoading(false);
     }
   };
 
-  // Handle skipping the next recurrence date for a recurring expense
   const handleSkipNextRecurrence = async (expenseId, dateToSkip) => {
     try {
-      setLoading(true);
+      setListLoading(true);
 
-      // Call the service to skip the next recurrence
       await skipNextRecurrence(expenseId, dateToSkip);
 
-      // Update local state
       setExpenseData((prevExpenses) =>
         prevExpenses.map((expense) => {
           if (expense._id === expenseId) {
-            // Add dateToSkip to skippedDates
             const updatedSkippedDates = [
               ...(expense.skippedDates || []),
               dateToSkip,
             ];
 
-            // Recalculate nextRecurrence
             const nextRecurrence = calculateNextRecurrence({
               ...expense,
               skippedDates: updatedSkippedDates,
@@ -184,11 +174,24 @@ const ExpensesPage = () => {
     } catch (error) {
       setError(error.message);
     } finally {
-      setLoading(false);
+      setListLoading(false);
     }
   };
 
-  // Calculate total expenses and group by category
+  const handleSearch = (query) => {
+    const filtered = filterExpenses(sortedExpenses, query);
+    setFilteredExpenses(filtered);
+  };
+
+  const handleSortChange = (field, order) => {
+    const sorted = sortByFields(
+      expenseData,
+      [field, 'date', 'amount'],
+      [order]
+    );
+    setSortedExpenses(sorted);
+  };
+
   const totalExpense = useMemo(
     () => calculateTotalExpense(expenseData),
     [expenseData]
@@ -203,28 +206,14 @@ const ExpensesPage = () => {
     setExpandedExpense((prev) => ({ ...prev, [id]: !prev[id] }));
   };
 
-  const sortExpenses = (expenses, field, order) => {
-    return [...expenses].sort((a, b) => {
-      let comparison = 0;
-      if (field === 'amount') {
-        comparison = a.amount - b.amount;
-      } else if (field === 'date') {
-        comparison = new Date(a.date) - new Date(b.date);
-      } else if (field === 'category') {
-        comparison = a.category.localeCompare(b.category);
-      }
-      return order === 'asc' ? comparison : -comparison;
-    });
-  };
-
-  const handleSortChange = (field, order) => {
-    const sorted = sortExpenses(expenseData, field, order);
-    setSortedExpenses(sorted);
-  };
-
   /* TODO: Replace the hardcoded budget value with a dynamic value */
   const budget = 10000;
   const percentage = (totalExpense / budget) * 100;
+
+  const noExpensesMessage =
+    expenseData.length === 0
+      ? 'No expenses recorded yet. Start by adding your first expense!'
+      : 'No expenses match your search.';
 
   return (
     <div className="expenses-page">
@@ -272,7 +261,7 @@ const ExpensesPage = () => {
             expenseToEdit={expenseToEdit}
             highlight={highlightForm}
           />
-          {loading && <p>Loading...</p>}
+          {formLoading && <p>Loading...</p>}
           {error && <p className="error-message">{error}</p>}
         </div>
 
@@ -314,9 +303,12 @@ const ExpensesPage = () => {
           {isExpensesListVisible ? <FaChevronUp /> : <FaChevronDown />}
         </h3>
         {isExpensesListVisible && (
-          <ExpenseSort onSortChange={handleSortChange} />
+          <>
+            <ExpenseSearch onSearch={handleSearch} />
+            <ExpenseSort onSortChange={handleSortChange} />
+          </>
         )}
-        {loading ? (
+        {listLoading ? (
           <p>Loading...</p>
         ) : error ? (
           <p className="error-message">{error}</p>
@@ -328,9 +320,9 @@ const ExpensesPage = () => {
             unmountOnExit
           >
             <div className="expense-cards-container">
-              {sortedExpenses.length > 0 ? (
+              {filteredExpenses.length > 0 ? (
                 <TransitionGroup component={null}>
-                  {sortedExpenses.map((expense) => (
+                  {filteredExpenses.map((expense) => (
                     <CSSTransition
                       key={expense._id}
                       timeout={500}
@@ -357,10 +349,7 @@ const ExpensesPage = () => {
                     alt="No expenses illustration"
                     className="no-expenses-illustration"
                   />
-                  <p>
-                    No expenses recorded yet. Start by adding your first
-                    expense!
-                  </p>
+                  <p>{noExpensesMessage}</p>
                 </div>
               )}
             </div>
