@@ -334,7 +334,7 @@ const ExpensesPage = () => {
                         onEdit={() => handleEditExpense(expense)}
                         onDelete={() => handleDeleteExpense(expense._id)}
                         onExpand={() => toggleExpandExpense(expense._id)}
-                        expanded={expandedExpense[expense._id]}
+                        expanded={!!expandedExpense[expense._id]}
                         onSkipNextRecurrence={(expenseId, dateToSkip) =>
                           handleSkipNextRecurrence(expenseId, dateToSkip)
                         }

@@ -102,13 +102,11 @@ router.delete('/delete/:id', async (req, res) => {
     `DELETE /api/expense/delete/${req.params.id} - Deleting an expense`
   );
   try {
-    const expense = await Expense.findById(req.params.id);
-    if (!expense) {
+    const deletedExpense = await Expense.findByIdAndDelete(req.params.id);
+    if (!deletedExpense) {
       logger.warn(`Expense not found for id: ${req.params.id}`);
       return res.status(404).json({ error: 'Expense not found' });
     }
-
-    await expense.remove();
 
     logger.info('Expense deleted successfully');
     res.status(200).json({ message: 'Expense deleted successfully' });
