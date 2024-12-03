@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { addIncome, updateIncome } from '../../services/incomeService';
 import { validateIncomeData } from '../../utils/incomeHelpers';
-import '../../styles/IncomeForm.css';
+import '../../styles/incomes/IncomeForm.css';
 
 const IncomeForm = ({ onIncomeAdded, incomeToEdit, onIncomeUpdated, mode }) => {
   const [source, setSource] = useState(incomeToEdit?.source || '');

@@ -5,7 +5,7 @@ import {
   groupIncomesBySource,
 } from '../utils/incomeHelpers';
 import IncomeForm from '../components/incomes/IncomeForm';
-import '../styles/IncomePage.css';
+import '../styles/incomes/IncomePage.css';
 
 const IncomesPage = () => {
   const [incomeData, setIncomeData] = useState([]);

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
-import '../../styles/ExpenseSearch.css';
+import '../../styles/expenses/ExpenseSearch.css';
 import { FaSearch, FaTimes } from 'react-icons/fa';
 
 const ExpenseSearch = ({ onSearch }) => {

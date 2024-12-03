@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { FaSortAmountDown, FaSortAmountUp } from 'react-icons/fa';
-import '../../styles/ExpenseSort.css';
+import '../../styles/expenses/ExpenseSort.css';
 
 const ExpenseSort = ({ onSortChange }) => {
   const [sortField, setSortField] = useState('date');

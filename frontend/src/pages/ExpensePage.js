@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect, useRef } from 'react';
+import React, { useState, useMemo, useEffect, useRef, useContext } from 'react';
 import {
   fetchExpenses,
   deleteExpense,
@@ -23,14 +23,16 @@ import { CircularProgressbar, buildStyles } from 'react-circular-progressbar';
 import 'react-circular-progressbar/dist/styles.css';
 import { CSSTransition, TransitionGroup } from 'react-transition-group';
 import noExpensesIllustration from '../assets/icons/no-expenses.svg';
-import '../styles/ExpensePage.css';
+import '../styles/expenses/ExpensePage.css';
 import moment from 'moment-timezone';
+import { LoadingContext } from '../contexts/LoadingContext';
+import { notifyError, notifySuccess } from '../utils/notificationService';
 
 const ExpensesPage = () => {
   const [expenseData, setExpenseData] = useState([]);
-  const [formLoading, setFormLoading] = useState(true);
-  const [listLoading, setListLoading] = useState(true);
-  const [error, setError] = useState('');
+  // const [formLoading, setFormLoading] = useState(true);
+  // const [listLoading, setListLoading] = useState(true);
+  // const [error, setError] = useState('');
   const [expandedExpense, setExpandedExpense] = useState({});
   const [editMode, setEditMode] = useState(false);
   const [expenseToEdit, setExpenseToEdit] = useState(null);
@@ -38,6 +40,8 @@ const ExpensesPage = () => {
   const [isExpensesListVisible, setIsExpensesListVisible] = useState(true);
   const [sortedExpenses, setSortedExpenses] = useState([]);
   const [filteredExpenses, setFilteredExpenses] = useState([]);
+
+  const { setLoading } = useContext(LoadingContext);
 
   const formSectionRef = useRef(null);
 
@@ -60,28 +64,36 @@ const ExpensesPage = () => {
 
   const fetchInitialExpenses = async () => {
     try {
-      setFormLoading(true);
-      setListLoading(true);
+      setLoading(true);
       const expenses = await fetchExpenses();
 
       const formattedExpenses = formatExpenseData(expenses);
 
       setExpenseData(formattedExpenses);
     } catch (error) {
-      setError(error.message);
+      const errorMessage =
+        error.response?.data?.error || 'Failed to fetch expenses.';
+      notifyError(errorMessage);
     } finally {
-      setFormLoading(false);
-      setListLoading(false);
+      setLoading(false);
     }
   };
 
   const handleExpenseAdded = async (newExpense) => {
-    if (newExpense.frequency && newExpense.frequency !== 'once') {
-      setFormLoading(true);
-      await fetchInitialExpenses();
-      setFormLoading(false);
-    } else {
-      setExpenseData((prevExpenses) => [...prevExpenses, newExpense]);
+    try {
+      setLoading(true);
+      if (newExpense.frequency && newExpense.frequency !== 'once') {
+        await fetchInitialExpenses();
+      } else {
+        setExpenseData((prevExpenses) => [...prevExpenses, newExpense]);
+      }
+      notifySuccess('Expense added successfully!');
+    } catch (error) {
+      const errorMessage =
+        error.response?.data?.error || 'Failed to add expense.';
+      notifyError(errorMessage);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -107,41 +119,52 @@ const ExpensesPage = () => {
   };
 
   const handleExpenseUpdated = async (updatedExpense) => {
-    if (updatedExpense.frequency && updatedExpense.frequency !== 'once') {
-      setFormLoading(true);
-      await fetchInitialExpenses();
-      setFormLoading(false);
-    } else {
-      setExpenseData((prevExpenses) =>
-        prevExpenses.map((expense) =>
-          expense._id === updatedExpense._id ? updatedExpense : expense
-        )
-      );
+    try {
+      setLoading(true);
+      if (updatedExpense.frequency && updatedExpense.frequency !== 'once') {
+        await fetchInitialExpenses();
+      } else {
+        setExpenseData((prevExpenses) =>
+          prevExpenses.map((expense) =>
+            expense._id === updatedExpense._id ? updatedExpense : expense
+          )
+        );
+      }
+      notifySuccess('Expense updated successfully!');
+      setEditMode(false);
+      setExpenseToEdit(null);
+    } catch (error) {
+      const errorMessage =
+        error.response?.data?.error || 'Failed to update expense.';
+      notifyError(errorMessage);
+    } finally {
+      setLoading(false);
     }
-    setEditMode(false);
-    setExpenseToEdit(null);
   };
 
   const handleDeleteExpense = async (id) => {
     try {
-      setListLoading(true);
+      setLoading(true);
       setExpenseData((prevExpenses) =>
         prevExpenses.filter(
           (expense) => expense._id !== id && expense.originalExpenseId !== id
         )
       );
       await deleteExpense(id);
+      notifySuccess('Expense deleted successfully.');
     } catch (error) {
-      setError(error.message);
+      const errorMessage =
+        error.response?.data?.error || 'Failed to delete expense.';
+      notifyError(errorMessage);
       await fetchInitialExpenses();
     } finally {
-      setListLoading(false);
+      setLoading(false);
     }
   };
 
   const handleSkipNextRecurrence = async (expenseId, dateToSkip) => {
     try {
-      setListLoading(true);
+      setLoading(true);
 
       await skipNextRecurrence(expenseId, dateToSkip);
 
@@ -171,10 +194,13 @@ const ExpensesPage = () => {
           return expense;
         })
       );
+      notifySuccess('Next recurrence skipped successfully.');
     } catch (error) {
-      setError(error.message);
+      const errorMessage =
+        error.response?.data?.error || 'Failed to skip next recurrence.';
+      notifyError(errorMessage);
     } finally {
-      setListLoading(false);
+      setLoading(false);
     }
   };
 
@@ -261,8 +287,8 @@ const ExpensesPage = () => {
             expenseToEdit={expenseToEdit}
             highlight={highlightForm}
           />
-          {formLoading && <p>Loading...</p>}
-          {error && <p className="error-message">{error}</p>}
+          {/* {formLoading && <p>Loading...</p>}
+          {error && <p className="error-message">{error}</p>} */}
         </div>
 
         {/* Overview Section - Single Graph Card */}
@@ -308,53 +334,53 @@ const ExpensesPage = () => {
             <ExpenseSort onSortChange={handleSortChange} />
           </>
         )}
-        {listLoading ? (
+        {/* {listLoading ? (
           <p>Loading...</p>
         ) : error ? (
           <p className="error-message">{error}</p>
-        ) : (
-          <CSSTransition
-            in={isExpensesListVisible}
-            timeout={300}
-            classNames="expenses-list-transition"
-            unmountOnExit
-          >
-            <div className="expense-cards-container">
-              {filteredExpenses.length > 0 ? (
-                <TransitionGroup component={null}>
-                  {filteredExpenses.map((expense) => (
-                    <CSSTransition
+        ) : ( */}
+        <CSSTransition
+          in={isExpensesListVisible}
+          timeout={300}
+          classNames="expenses-list-transition"
+          unmountOnExit
+        >
+          <div className="expense-cards-container">
+            {filteredExpenses.length > 0 ? (
+              <TransitionGroup component={null}>
+                {filteredExpenses.map((expense) => (
+                  <CSSTransition
+                    key={expense._id}
+                    timeout={500}
+                    classNames="expense-card-transition"
+                  >
+                    <ExpenseCard
                       key={expense._id}
-                      timeout={500}
-                      classNames="expense-card-transition"
-                    >
-                      <ExpenseCard
-                        key={expense._id}
-                        expense={expense}
-                        onEdit={() => handleEditExpense(expense)}
-                        onDelete={() => handleDeleteExpense(expense._id)}
-                        onExpand={() => toggleExpandExpense(expense._id)}
-                        expanded={!!expandedExpense[expense._id]}
-                        onSkipNextRecurrence={(expenseId, dateToSkip) =>
-                          handleSkipNextRecurrence(expenseId, dateToSkip)
-                        }
-                      />
-                    </CSSTransition>
-                  ))}
-                </TransitionGroup>
-              ) : (
-                <div className="no-expenses-container">
-                  <img
-                    src={noExpensesIllustration}
-                    alt="No expenses illustration"
-                    className="no-expenses-illustration"
-                  />
-                  <p>{noExpensesMessage}</p>
-                </div>
-              )}
-            </div>
-          </CSSTransition>
-        )}
+                      expense={expense}
+                      onEdit={() => handleEditExpense(expense)}
+                      onDelete={() => handleDeleteExpense(expense._id)}
+                      onExpand={() => toggleExpandExpense(expense._id)}
+                      expanded={!!expandedExpense[expense._id]}
+                      onSkipNextRecurrence={(expenseId, dateToSkip) =>
+                        handleSkipNextRecurrence(expenseId, dateToSkip)
+                      }
+                    />
+                  </CSSTransition>
+                ))}
+              </TransitionGroup>
+            ) : (
+              <div className="no-expenses-container">
+                <img
+                  src={noExpensesIllustration}
+                  alt="No expenses illustration"
+                  className="no-expenses-illustration"
+                />
+                <p>{noExpensesMessage}</p>
+              </div>
+            )}
+          </div>
+        </CSSTransition>
+        {/* )} */}
       </div>
     </div>
   );

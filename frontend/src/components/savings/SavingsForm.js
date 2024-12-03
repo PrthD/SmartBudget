@@ -5,7 +5,7 @@ import {
   updateSavingsGoal,
 } from '../../services/savingsService';
 import { validateSavingsData } from '../../utils/savingsHelpers';
-import '../../styles/SavingsForm.css';
+import '../../styles/savings/SavingsForm.css';
 
 const SavingsForm = ({ onSave, goalToEdit, editMode, onUpdate }) => {
   const [title, setTitle] = useState(goalToEdit?.title || '');

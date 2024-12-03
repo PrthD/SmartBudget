@@ -8,7 +8,7 @@ import {
 import { calculateTotalIncome } from '../utils/incomeHelpers';
 import { calculateTotalExpense } from '../utils/expenseHelpers';
 import SavingsForm from '../components/savings/SavingsForm';
-import '../styles/SavingsPage.css';
+import '../styles/savings/SavingsPage.css';
 
 const SavingsPage = () => {
   const [incomeData, setIncomeData] = useState([]);

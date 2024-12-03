@@ -2,8 +2,9 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { FaEdit, FaTrash, FaChevronDown, FaChevronUp } from 'react-icons/fa';
 import { CSSTransition } from 'react-transition-group';
-import '../../styles/ExpenseCard.css';
+import '../../styles/expenses/ExpenseCard.css';
 import moment from 'moment-timezone';
+import { confirmAction } from '../../utils/confirmationService';
 
 const ExpenseCard = ({
   expense,
@@ -15,6 +16,16 @@ const ExpenseCard = ({
 }) => {
   const handleExpandClick = () => {
     onExpand();
+  };
+
+  const handleDeleteClick = async () => {
+    const confirmed = await confirmAction(
+      'Are you sure you want to delete this expense?',
+      'This action cannot be undone.'
+    );
+    if (confirmed) {
+      onDelete();
+    }
   };
 
   return (
@@ -29,7 +40,7 @@ const ExpenseCard = ({
           <button className="edit-btn" onClick={onEdit}>
             <FaEdit />
           </button>
-          <button className="delete-btn" onClick={onDelete}>
+          <button className="delete-btn" onClick={handleDeleteClick}>
             <FaTrash />
           </button>
           <button className="expand-btn" onClick={handleExpandClick}>

@@ -13,8 +13,9 @@ import {
   FaPencilAlt,
   FaRedoAlt,
 } from 'react-icons/fa';
-import '../../styles/ExpenseForm.css';
+import '../../styles/expenses/ExpenseForm.css';
 import moment from 'moment-timezone';
+import { notifyError, notifySuccess } from '../../utils/notificationService';
 
 // Input Component for Amount
 const AmountInput = ({ value, onChange, placeholder = 'Enter amount' }) => (
@@ -115,8 +116,6 @@ const ExpenseForm = ({
   const formRef = useRef(null);
   const [currentStep, setCurrentStep] = useState(1);
   const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState('');
-  const [isError, setIsError] = useState(false);
 
   const [formData, setFormData] = useState({
     category: expenseToEdit?.category || '',
@@ -167,15 +166,15 @@ const ExpenseForm = ({
     }
   }, [highlight]);
 
-  useEffect(() => {
-    if (message) {
-      const timer = setTimeout(() => {
-        setMessage('');
-      }, 3000);
+  // useEffect(() => {
+  //   if (message) {
+  //     const timer = setTimeout(() => {
+  //       setMessage('');
+  //     }, 3000);
 
-      return () => clearTimeout(timer);
-    }
-  }, [message]);
+  //     return () => clearTimeout(timer);
+  //   }
+  // }, [message]);
 
   const handleInputChange = (field) => (e) => {
     setFormData({ ...formData, [field]: e.target.value });
@@ -189,7 +188,6 @@ const ExpenseForm = ({
     }
 
     setLoading(true);
-    setMessage('');
 
     try {
       const finalCategory =
@@ -214,23 +212,20 @@ const ExpenseForm = ({
       if (mode === 'add') {
         const newExpense = await addExpense(expenseData);
         onExpenseAdded(newExpense);
-        setMessage('Expense added successfully!');
-        setIsError(false);
+        notifySuccess('Expense added successfully!');
       } else if (mode === 'edit') {
         const updatedExpense = await updateExpense(
           expenseToEdit._id,
           expenseData
         );
         onExpenseUpdated(updatedExpense);
-        setMessage('Expense updated successfully!');
-        setIsError(false);
+        notifySuccess('Expense updated successfully!');
       }
 
       resetForm();
     } catch (error) {
       console.error('Error adding/updating expense:', error);
-      setMessage(error.message || 'An error occurred');
-      setIsError(true);
+      notifyError(error.message || 'An error occurred');
     } finally {
       setLoading(false);
     }
@@ -268,8 +263,7 @@ const ExpenseForm = ({
         setCurrentStep(3);
       }
     } catch (error) {
-      setMessage(error.message);
-      setIsError(true);
+      notifyError(error.message);
     }
   };
 
@@ -281,9 +275,9 @@ const ExpenseForm = ({
     <div className={`expense-form ${highlight ? 'highlight' : ''}`}>
       <h2>{mode === 'add' ? 'Add a New Expense' : 'Edit Expense'}</h2>
 
-      {message && (
+      {/* {message && (
         <p className={`message ${isError ? 'error' : 'success'}`}>{message}</p>
-      )}
+      )} */}
 
       <form onSubmit={handleSubmit}>
         <div ref={formRef} className="collapsible-section">

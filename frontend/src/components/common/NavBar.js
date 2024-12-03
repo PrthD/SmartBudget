@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FaBell, FaUserCircle } from 'react-icons/fa';
-import '../../styles/NavBar.css';
+import '../../styles/common/NavBar.css';
 
 const NavBar = () => {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
