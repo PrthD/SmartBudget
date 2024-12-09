@@ -37,6 +37,7 @@ const ExpensesPage = () => {
   const [isExpensesListVisible, setIsExpensesListVisible] = useState(true);
   const [sortedExpenses, setSortedExpenses] = useState([]);
   const [filteredExpenses, setFilteredExpenses] = useState([]);
+  const [errorNotified, setErrorNotified] = useState(false);
 
   const { setLoading } = useContext(LoadingContext);
 
@@ -67,20 +68,24 @@ const ExpensesPage = () => {
       const formattedExpenses = formatExpenseData(expenses);
 
       setExpenseData(formattedExpenses);
+      setErrorNotified(false);
     } catch (error) {
-      const errorMessage =
-        error.response?.data?.error || 'Failed to fetch expenses.';
-      notifyError(errorMessage);
+      if (!error.notified) {
+        const errorMessage =
+          error.response?.data?.error || 'Failed to fetch expenses.';
+        notifyError(errorMessage);
+        setErrorNotified(true);
+      }
     } finally {
       setLoading(false);
     }
   };
 
-  const handleExpenseAdded = async (newExpense, error = null) => {
-    if (error) {
-      notifyError(error);
-      return;
-    }
+  const handleValidationError = (message) => {
+    notifyError(message);
+  };
+
+  const handleExpenseAdded = async (newExpense) => {
     try {
       setLoading(true);
       if (newExpense.frequency && newExpense.frequency !== 'once') {
@@ -89,10 +94,14 @@ const ExpensesPage = () => {
         setExpenseData((prevExpenses) => [...prevExpenses, newExpense]);
       }
       notifySuccess('Expense added successfully!');
+      setErrorNotified(false);
     } catch (error) {
-      const errorMessage =
-        error.response?.data?.error || 'Failed to add expense.';
-      notifyError(errorMessage);
+      if (!error.notified) {
+        const errorMessage =
+          error.response?.data?.error || 'Failed to add expense.';
+        notifyError(errorMessage);
+        setErrorNotified(true);
+      }
     } finally {
       setLoading(false);
     }
@@ -119,11 +128,7 @@ const ExpensesPage = () => {
     }, 2000);
   };
 
-  const handleExpenseUpdated = async (updatedExpense, error = null) => {
-    if (error) {
-      notifyError(error);
-      return;
-    }
+  const handleExpenseUpdated = async (updatedExpense) => {
     try {
       setLoading(true);
       if (updatedExpense.frequency && updatedExpense.frequency !== 'once') {
@@ -138,10 +143,14 @@ const ExpensesPage = () => {
       notifySuccess('Expense updated successfully!');
       setEditMode(false);
       setExpenseToEdit(null);
+      setErrorNotified(false);
     } catch (error) {
-      const errorMessage =
-        error.response?.data?.error || 'Failed to update expense.';
-      notifyError(errorMessage);
+      if (!error.notified) {
+        const errorMessage =
+          error.response?.data?.error || 'Failed to update expense.';
+        notifyError(errorMessage);
+        setErrorNotified(true);
+      }
     } finally {
       setLoading(false);
     }
@@ -157,10 +166,14 @@ const ExpensesPage = () => {
       );
       await deleteExpense(id);
       notifySuccess('Expense deleted successfully.');
+      setErrorNotified(false);
     } catch (error) {
-      const errorMessage =
-        error.response?.data?.error || 'Failed to delete expense.';
-      notifyError(errorMessage);
+      if (!errorNotified) {
+        const errorMessage =
+          error.response?.data?.error || 'Failed to delete expense.';
+        notifyError(errorMessage);
+        setErrorNotified(true);
+      }
       await fetchInitialExpenses();
     } finally {
       setLoading(false);
@@ -200,10 +213,14 @@ const ExpensesPage = () => {
         })
       );
       notifySuccess('Next recurrence skipped successfully.');
+      setErrorNotified(false);
     } catch (error) {
-      const errorMessage =
-        error.response?.data?.error || 'Failed to skip next recurrence.';
-      notifyError(errorMessage);
+      if (!errorNotified) {
+        const errorMessage =
+          error.response?.data?.error || 'Failed to skip next recurrence.';
+        notifyError(errorMessage);
+        setErrorNotified(true);
+      }
     } finally {
       setLoading(false);
     }
@@ -288,6 +305,7 @@ const ExpensesPage = () => {
           <ExpenseForm
             onExpenseAdded={handleExpenseAdded}
             onExpenseUpdated={handleExpenseUpdated}
+            onValidationError={handleValidationError}
             mode={editMode ? 'edit' : 'add'}
             expenseToEdit={expenseToEdit}
             highlight={highlightForm}

@@ -15,7 +15,6 @@ import {
 } from 'react-icons/fa';
 import '../../styles/expenses/ExpenseForm.css';
 import moment from 'moment-timezone';
-import { notifyError } from '../../utils/notificationService';
 
 // Input Component for Amount
 const AmountInput = ({ value, onChange, placeholder = 'Enter amount' }) => (
@@ -109,6 +108,7 @@ const FrequencySelect = ({ value, onChange, options }) => (
 const ExpenseForm = ({
   onExpenseAdded = () => {},
   onExpenseUpdated = () => {},
+  onValidationError = () => {},
   expenseToEdit = null,
   highlight = false,
   mode,
@@ -212,8 +212,7 @@ const ExpenseForm = ({
 
       resetForm();
     } catch (error) {
-      console.error('Error adding/updating expense:', error);
-      onExpenseAdded(null, error.message || 'An error occurred');
+      onExpenseAdded(null, error.message);
     } finally {
       setLoading(false);
     }
@@ -251,7 +250,7 @@ const ExpenseForm = ({
         setCurrentStep(3);
       }
     } catch (error) {
-      notifyError(error.message);
+      onValidationError(error.message);
     }
   };
 
@@ -412,6 +411,7 @@ FrequencySelect.propTypes = {
 ExpenseForm.propTypes = {
   onExpenseAdded: PropTypes.func.isRequired,
   onExpenseUpdated: PropTypes.func,
+  onValidationError: PropTypes.func.isRequired,
   expenseToEdit: PropTypes.object,
   mode: PropTypes.oneOf(['add', 'edit']).isRequired,
   highlight: PropTypes.bool,
