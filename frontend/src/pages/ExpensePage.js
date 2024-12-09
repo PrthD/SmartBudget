@@ -30,9 +30,6 @@ import { notifyError, notifySuccess } from '../utils/notificationService';
 
 const ExpensesPage = () => {
   const [expenseData, setExpenseData] = useState([]);
-  // const [formLoading, setFormLoading] = useState(true);
-  // const [listLoading, setListLoading] = useState(true);
-  // const [error, setError] = useState('');
   const [expandedExpense, setExpandedExpense] = useState({});
   const [editMode, setEditMode] = useState(false);
   const [expenseToEdit, setExpenseToEdit] = useState(null);
@@ -79,7 +76,11 @@ const ExpensesPage = () => {
     }
   };
 
-  const handleExpenseAdded = async (newExpense) => {
+  const handleExpenseAdded = async (newExpense, error = null) => {
+    if (error) {
+      notifyError(error);
+      return;
+    }
     try {
       setLoading(true);
       if (newExpense.frequency && newExpense.frequency !== 'once') {
@@ -118,7 +119,11 @@ const ExpensesPage = () => {
     }, 2000);
   };
 
-  const handleExpenseUpdated = async (updatedExpense) => {
+  const handleExpenseUpdated = async (updatedExpense, error = null) => {
+    if (error) {
+      notifyError(error);
+      return;
+    }
     try {
       setLoading(true);
       if (updatedExpense.frequency && updatedExpense.frequency !== 'once') {
@@ -287,8 +292,6 @@ const ExpensesPage = () => {
             expenseToEdit={expenseToEdit}
             highlight={highlightForm}
           />
-          {/* {formLoading && <p>Loading...</p>}
-          {error && <p className="error-message">{error}</p>} */}
         </div>
 
         {/* Overview Section - Single Graph Card */}
@@ -334,11 +337,6 @@ const ExpensesPage = () => {
             <ExpenseSort onSortChange={handleSortChange} />
           </>
         )}
-        {/* {listLoading ? (
-          <p>Loading...</p>
-        ) : error ? (
-          <p className="error-message">{error}</p>
-        ) : ( */}
         <CSSTransition
           in={isExpensesListVisible}
           timeout={300}
@@ -380,7 +378,6 @@ const ExpensesPage = () => {
             )}
           </div>
         </CSSTransition>
-        {/* )} */}
       </div>
     </div>
   );

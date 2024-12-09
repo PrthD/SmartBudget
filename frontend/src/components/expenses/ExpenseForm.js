@@ -15,7 +15,7 @@ import {
 } from 'react-icons/fa';
 import '../../styles/expenses/ExpenseForm.css';
 import moment from 'moment-timezone';
-import { notifyError, notifySuccess } from '../../utils/notificationService';
+import { notifyError } from '../../utils/notificationService';
 
 // Input Component for Amount
 const AmountInput = ({ value, onChange, placeholder = 'Enter amount' }) => (
@@ -166,16 +166,6 @@ const ExpenseForm = ({
     }
   }, [highlight]);
 
-  // useEffect(() => {
-  //   if (message) {
-  //     const timer = setTimeout(() => {
-  //       setMessage('');
-  //     }, 3000);
-
-  //     return () => clearTimeout(timer);
-  //   }
-  // }, [message]);
-
   const handleInputChange = (field) => (e) => {
     setFormData({ ...formData, [field]: e.target.value });
   };
@@ -212,20 +202,18 @@ const ExpenseForm = ({
       if (mode === 'add') {
         const newExpense = await addExpense(expenseData);
         onExpenseAdded(newExpense);
-        notifySuccess('Expense added successfully!');
       } else if (mode === 'edit') {
         const updatedExpense = await updateExpense(
           expenseToEdit._id,
           expenseData
         );
         onExpenseUpdated(updatedExpense);
-        notifySuccess('Expense updated successfully!');
       }
 
       resetForm();
     } catch (error) {
       console.error('Error adding/updating expense:', error);
-      notifyError(error.message || 'An error occurred');
+      onExpenseAdded(null, error.message || 'An error occurred');
     } finally {
       setLoading(false);
     }
@@ -274,10 +262,6 @@ const ExpenseForm = ({
   return (
     <div className={`expense-form ${highlight ? 'highlight' : ''}`}>
       <h2>{mode === 'add' ? 'Add a New Expense' : 'Edit Expense'}</h2>
-
-      {/* {message && (
-        <p className={`message ${isError ? 'error' : 'success'}`}>{message}</p>
-      )} */}
 
       <form onSubmit={handleSubmit}>
         <div ref={formRef} className="collapsible-section">

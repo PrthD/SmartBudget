@@ -12,6 +12,10 @@ export const confirmAction = async (title, text) => {
     confirmButtonColor: '#004c99',
     cancelButtonColor: '#d33',
     confirmButtonText: 'Yes, do it!',
+    cancelButtonText: 'Cancel',
+    customClass: {
+      popup: 'swal2-popup-custom',
+    },
   });
 
   return result.isConfirmed;
