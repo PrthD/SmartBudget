@@ -6,7 +6,6 @@ import {
 } from '../services/expenseService';
 import {
   formatExpenseData,
-  calculateTotalExpense,
   groupExpensesByCategory,
   calculateNextRecurrence,
   filterExpenses,
@@ -18,8 +17,8 @@ import ExpenseSort from '../components/expenses/ExpenseSort';
 import NavBar from '../components/common/NavBar';
 import Chart from 'react-apexcharts';
 import ExpenseCard from '../components/expenses/ExpenseCard';
+import BudgetCard from '../components/expenses/BudgetCard';
 import { FaChevronDown, FaChevronUp } from 'react-icons/fa';
-import { CircularProgressbar, buildStyles } from 'react-circular-progressbar';
 import 'react-circular-progressbar/dist/styles.css';
 import { CSSTransition, TransitionGroup } from 'react-transition-group';
 import noExpensesIllustration from '../assets/icons/no-expenses.svg';
@@ -240,11 +239,6 @@ const ExpensesPage = () => {
     setSortedExpenses(sorted);
   };
 
-  const totalExpense = useMemo(
-    () => calculateTotalExpense(expenseData),
-    [expenseData]
-  );
-
   const groupedExpenses = useMemo(
     () => groupExpensesByCategory(expenseData),
     [expenseData]
@@ -253,10 +247,6 @@ const ExpensesPage = () => {
   const toggleExpandExpense = (id) => {
     setExpandedExpense((prev) => ({ ...prev, [id]: !prev[id] }));
   };
-
-  /* TODO: Replace the hardcoded budget value with a dynamic value */
-  const budget = 10000;
-  const percentage = (totalExpense / budget) * 100;
 
   const noExpensesMessage =
     expenseData.length === 0
@@ -267,27 +257,8 @@ const ExpensesPage = () => {
     <div className="expenses-page">
       <NavBar />
 
-      {/* Total Expenses Card with Circular Progress Bar */}
-      <div className="total-expenses-card">
-        <div className="card-content">
-          <div className="progress-container">
-            <CircularProgressbar
-              value={percentage}
-              text={`${Math.round(percentage)}%`}
-              styles={buildStyles({
-                textColor: '#003366',
-                pathColor: '#004c99',
-                trailColor: '#e6e8f1',
-              })}
-            />
-          </div>
-          <div className="expense-info">
-            <h3>Total Expenses</h3>
-            <p>
-              ${totalExpense.toFixed(2)} / ${budget}
-            </p>
-          </div>
-        </div>
+      <div className="budget-card-wrapper">
+        <BudgetCard expenses={expenseData} />
       </div>
 
       <div

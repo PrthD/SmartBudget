@@ -1,42 +1,9 @@
-/* Total Expenses Card Styling */
-.total-expenses-card {
-  width: 95%;
-  max-width: 600px;
-  background-color: #ffffff;
-  color: #004c99;
-  padding: 20px;
-  margin: 20px auto;
-  border-radius: 20px;
-  box-shadow: 0 10px 30px rgba(0, 76, 153, 0.1);
-  transition: box-shadow 0.3s;
-}
-
-.total-expenses-card:hover {
-  box-shadow: 0 15px 35px rgba(0, 76, 153, 0.15);
-}
-
-.card-content {
+.budget-card-wrapper {
   display: flex;
+  justify-content: center;
   align-items: center;
-}
-
-.progress-container {
-  width: 100px;
-  height: 100px;
-  margin-right: 20px;
-}
-
-.expense-info h3 {
-  margin: 0;
-  font-size: 1.8rem;
-  font-weight: bold;
-}
-
-.expense-info p {
-  margin: 5px 0 0;
-  font-size: 1.4rem;
-  font-weight: bold;
-  color: #003366;
+  margin-bottom: 10px;
+  width: 100%;
 }
 
 /* Split Screen Container Styling */
