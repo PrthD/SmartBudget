@@ -64,27 +64,3 @@ export const skipNextRecurrence = async (id, dateToSkip) => {
     throw new Error(errorMsg);
   }
 };
-
-// Fetch budget information
-export const fetchBudget = async () => {
-  try {
-    const response = await axios.get(`${API_BASE_URL}/budget`);
-    return response.data;
-  } catch (error) {
-    const errorMsg =
-      error.response?.data?.error || 'Failed to fetch budget information.';
-    throw new Error(errorMsg);
-  }
-};
-
-// Update budget information
-export const updateBudget = async (budgetData) => {
-  try {
-    const response = await axios.put(`${API_BASE_URL}/budget`, budgetData);
-    return response.data;
-  } catch (error) {
-    const errorMsg =
-      error.response?.data?.error || 'Failed to update budget information.';
-    throw new Error(errorMsg);
-  }
-};

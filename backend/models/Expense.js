@@ -47,16 +47,6 @@ const ExpenseSchema = new mongoose.Schema(
       type: [Date],
       default: [],
     },
-    totalBudget: {
-      type: Number,
-      default: 0,
-      min: 0,
-    },
-    categoryBudgets: {
-      type: Map,
-      of: Number,
-      default: {},
-    },
   },
   { timestamps: true }
 );

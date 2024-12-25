@@ -2,10 +2,7 @@ import express from 'express';
 import Expense from '../models/Expense.js';
 import logger from '../config/logger.js';
 import { calculateNextRecurrence } from '../utils/expenseHelpers.js';
-import {
-  validateExpense,
-  validateBudget,
-} from '../middlewares/expenseValidation.js';
+import { validateExpense } from '../middlewares/expenseValidation.js';
 import moment from 'moment-timezone';
 
 const router = express.Router();
@@ -145,63 +142,6 @@ router.post('/skip-next/:id', async (req, res) => {
   } catch (err) {
     logger.error('Error skipping recurrence date:', err.message);
     res.status(500).json({ error: 'Failed to skip recurrence date' });
-  }
-});
-
-// @route    GET /api/expense/budget
-// @desc     Fetch budget information
-router.get('/budget', async (req, res) => {
-  logger.info('GET /api/expense/budget - Fetching budget information');
-
-  try {
-    const expense = await Expense.findOne().exec();
-    if (!expense) {
-      logger.warn('No budget found');
-      return res.status(404).json({ error: 'No budget found.' });
-    }
-
-    const { totalBudget, categoryBudgets } = expense;
-    logger.info('Budget fetched successfully');
-    res.status(200).json({ totalBudget, categoryBudgets });
-  } catch (err) {
-    logger.error('Error fetching budget:', err.message);
-    res.status(500).json({ error: 'Failed to fetch budget information' });
-  }
-});
-
-// @route    PUT /api/expense/budget
-// @desc     Update budget information
-router.put('/budget', validateBudget, async (req, res) => {
-  logger.info('PUT /api/expense/budget - Updating budget information');
-  const { totalBudget, categoryBudgets } = req.body;
-
-  try {
-    let expense = await Expense.findOne().exec();
-    if (!expense) {
-      logger.warn('No budget found');
-      return res.status(404).json({ error: 'No budget record found.' });
-    }
-
-    if (categoryBudgets !== undefined) {
-      expense.categoryBudgets = categoryBudgets;
-
-      const updatedTotalBudget = Object.values(categoryBudgets).reduce(
-        (sum, budget) => sum + (budget || 0),
-        0
-      );
-      expense.totalBudget = updatedTotalBudget;
-    }
-
-    if (totalBudget !== undefined) expense.totalBudget = totalBudget;
-
-    const updatedBudget = await expense.save();
-    logger.info('Budget updated successfully:', updatedBudget);
-    res
-      .status(200)
-      .json({ message: 'Budget updated successfully', updatedBudget });
-  } catch (err) {
-    logger.error('Error updating budget:', err.message);
-    res.status(500).json({ error: 'Failed to update budget' });
   }
 });
 

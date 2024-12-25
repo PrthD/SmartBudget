@@ -6,6 +6,7 @@ import logger from './config/logger.js';
 import { connectDB, disconnectDB } from './config/db.js';
 import aiRoutes from './routes/aiRoutes.js';
 import expenseRoutes from './routes/expenseRoutes.js';
+import budgetRoutes from './routes/budgetRoutes.js';
 import incomeRoutes from './routes/incomeRoutes.js';
 import savingsRoutes from './routes/savingsRoutes.js';
 
@@ -30,6 +31,7 @@ app.use(
 // Routes
 app.use('/api/ai', aiRoutes); // AI routes
 app.use('/api/expense', expenseRoutes); // Expense routes
+app.use('/api/budget', budgetRoutes); // Budget routes
 app.use('/api/income', incomeRoutes); // Income routes
 app.use('/api/savings', savingsRoutes); // Savings routes
 

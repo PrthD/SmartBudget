@@ -2,6 +2,7 @@
   position: relative;
   display: flex;
   justify-content: center;
+  gap: 20px;
   align-items: center;
   width: 100%;
   max-width: 550px;
@@ -38,6 +39,8 @@
     align-items: center;
     justify-content: center;
     gap: 20px;
+    width: 100%;
+    text-align: left;
   }
   
   .progress-container {
@@ -60,5 +63,31 @@
     font-size: 1.4rem;
     font-weight: bold;
     color: #003366;
+  }
+
+  .no-budget-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    text-align: left;
+  }
+  
+  .no-budget-illustration {
+    max-width: 150px;
+    height: auto;
+    flex-shrink: 0;
+  }
+  
+  .no-budget-container h3 {
+    font-size: 1.6rem;
+    color: #004c99;
+    font-weight: bold;
+    margin-bottom: 5px;
+  }
+  
+  .no-budget-container p {
+    font-size: 1.2rem;
+    color: #555;
+    margin-top: 0;
   }
   

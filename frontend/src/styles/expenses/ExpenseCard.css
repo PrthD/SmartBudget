@@ -94,7 +94,6 @@
 
 .skip-next-btn:hover {
   background-color: #003366;
-  transform: translateY(-3px);
 }
 
 .expense-card-details {

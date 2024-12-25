@@ -8,19 +8,22 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 1000;
+  z-index: 1500;
   cursor: default;
-  opacity: 1;
-  visibility: visible;
 }
 
-.modal-content {
-  background: #ffffff;
-  padding: 20px;
-  border-radius: 12px;
-  width: 450px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+.modal-content.budget-modal {
+  background-color: #ffffff;
+  padding: 30px;
+  border-radius: 20px;
+  width: 500px;
+  box-shadow: 0 10px 30px rgba(0, 76, 153, 0.2);
   position: relative;
+  transition: box-shadow 0.3s;
+  font-family: 'Inter', sans-serif;
+}
+.modal-content.budget-modal:hover {
+  box-shadow: 0 15px 35px rgba(0, 76, 153, 0.25);
 }
 
 .modal-header {
@@ -31,7 +34,7 @@
 }
 
 .modal-title {
-  font-size: 1.6rem;
+  font-size: 1.8rem;
   font-weight: bold;
   color: #004c99;
   margin: 0;
@@ -50,11 +53,59 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  transition: background-color 0.2s ease-in-out;
+  transition: background-color 0.3s;
 }
 
 .close-btn:hover {
   background-color: #c9302c;
+}
+
+.new-category-row {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 10px;
+  margin-bottom: 20px;
+  position: relative;
+}
+
+.new-category-input {
+  flex: 1;
+  padding: 8px 12px;
+  border: 2px solid #d1d1d6;
+  border-radius: 30px;
+  font-size: 1rem;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease;
+  background-color: #f9f9fb;
+  color: #004c99;
+}
+.new-category-input:hover {
+  border-color: #a3b3c9;
+}
+.new-category-input:focus {
+  border-color: #004c99 !important;
+  box-shadow: 0 0 15px rgba(0, 76, 153, 0.3);
+  transform: scale(1.02);
+}
+
+.add-category-icon-btn {
+  background: none;
+  border: none;
+  color: #004c99;
+  cursor: pointer;
+  font-size: 1.5rem;
+  width: auto;
+  height: auto;
+  padding: 0;
+  transition: color 0.3s ease-in-out;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: auto;
+}
+.add-category-icon-btn:hover {
+  color: #003366;
+  background: none;
 }
 
 .budgets-list {
@@ -68,6 +119,7 @@
   font-size: 1rem;
   color: #555;
   text-align: center;
+  font-family: 'Inter', sans-serif;
 }
 
 .budget-item {
@@ -75,35 +127,53 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 15px;
+  gap: 10px;
 }
 
 .category-label {
   font-size: 1rem;
   color: #004c99;
   font-weight: bold;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.category-icon {
+  font-size: 1.2rem;
+  color: #004c99;
+}
+
+.budget-input-container {
+  position: relative;
+  flex: 0 1 180px;
 }
 
 .budget-input {
-  width: 120px;
-  padding: 5px;
-  border: 1px solid #ddd;
-  border-radius: 5px;
+  padding: 12px 8px;
+  width: 100%;
+  border: 2px solid #d1d1d6;
+  border-radius: 30px;
   font-size: 1rem;
-  text-align: right;
+  transition: border-color 0.3s, box-shadow 0.3s, transform 0.3s;
+  background-color: #f9f9fb;
   color: #004c99;
   outline: none;
-  transition: border-color 0.2s;
+  text-align: left;
 }
-
+.budget-input:hover {
+  border-color: #a3b3c9;
+}
 .budget-input:focus {
   border-color: #004c99;
-  box-shadow: 0 0 3px rgba(0, 76, 153, 0.3);
+  box-shadow: 0 0 15px rgba(0, 76, 153, 0.3);
+  transform: scale(1.02);
 }
 
 .modal-actions {
   display: flex;
-  justify-content: flex-end;
-  gap: 10px;
+  justify-content: center;
+  gap: 15px;
 }
 
 .cancel-btn,
@@ -111,11 +181,17 @@
   background-color: #004c99;
   color: #ffffff;
   border: none;
-  padding: 10px 20px;
-  font-size: 1rem;
-  border-radius: 5px;
+  padding: 15px 30px;
+  border-radius: 30px;
   cursor: pointer;
-  transition: background-color 0.2s;
+  transition: background-color 0.3s, transform 0.3s ease-in-out;
+  font-size: 1.1rem;
+  font-weight: bold;
+  font-family: 'Inter', sans-serif;
+}
+.cancel-btn:hover,
+.save-btn:hover {
+  background-color: #003366;
 }
 
 .cancel-btn {
@@ -126,16 +202,16 @@
   background-color: #c9302c;
 }
 
-.save-btn:hover {
-  background-color: #003366;
-}
-
 @media (max-width: 480px) {
-  .modal-content {
-    width: 90%;
+  .modal-content.budget-modal {
+    width: 95%;
+    padding: 20px;
   }
-
   .budget-input {
-    width: 100px;
+    width: 100%;
+  }
+  .budget-item {
+    flex-direction: column;
+    align-items: flex-start;
   }
 }

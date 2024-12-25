@@ -3,61 +3,130 @@ import PropTypes from 'prop-types';
 import { CircularProgressbar, buildStyles } from 'react-circular-progressbar';
 import 'react-circular-progressbar/dist/styles.css';
 import { notifyError, notifySuccess } from '../../utils/notificationService';
-import { fetchBudget, updateBudget } from '../../services/expenseService';
+import {
+  fetchBudget,
+  updateBudget,
+  createBudget,
+} from '../../services/budgetService';
 import {
   calculateTotalExpense,
-  getBudgetAlertColor,
   groupExpensesByCategory,
 } from '../../utils/expenseHelpers';
+import { getBudgetAlertColor } from '../../utils/budgetHelpers';
 import CategoryBudgetModal from './CategoryBudgetModal';
+import noBudgetsIllustration from '../../assets/icons/no-budgets.svg';
 import '../../styles/expenses/BudgetCard.css';
 
 const BudgetCard = ({ expenses }) => {
+  const [budgetId, setBudgetId] = useState(null);
   const [totalBudget, setTotalBudget] = useState(0);
   const [categoryBudgets, setCategoryBudgets] = useState({});
   const [showModal, setShowModal] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
+  const [budgetLoaded, setBudgetLoaded] = useState(false);
 
   useEffect(() => {
     const loadBudget = async () => {
       try {
-        const { totalBudget, categoryBudgets: fetchedCategoryBudgets } =
-          await fetchBudget();
+        const budgetResponse = await fetchBudget();
+        setBudgetId(budgetResponse._id);
+        setTotalBudget(Number(budgetResponse.totalBudget) || 0);
 
         const groupedCategories = groupExpensesByCategory(expenses);
-
-        const combinedBudgets = groupedCategories.reduce((acc, category) => {
-          acc[category.category] =
-            fetchedCategoryBudgets[category.category] || 0;
-          return acc;
-        }, {});
-
-        setTotalBudget(Number(totalBudget) || 0);
-        setCategoryBudgets(combinedBudgets);
+        const combined = { ...budgetResponse.categoryBudgets };
+        groupedCategories.forEach(({ category }) => {
+          if (!combined[category]) {
+            combined[category] = 0;
+          }
+        });
+        setCategoryBudgets(combined);
       } catch (error) {
-        notifyError('Failed to load budget information.');
+        if (!error.message.includes('No budget record found')) {
+          notifyError(error.message || 'Failed to load budget information.');
+        }
+      } finally {
+        setBudgetLoaded(true);
       }
     };
 
     loadBudget();
   }, [expenses]);
 
+  const handleCreateOrEditBudget = () => {
+    if (budgetId) {
+      setShowModal(true);
+      return;
+    }
+
+    setCategoryBudgets({});
+    setShowModal(true);
+  };
+
   const handleModalSave = async (updatedCategoryBudgets) => {
     try {
-      await updateBudget({ categoryBudgets: updatedCategoryBudgets });
+      if (!budgetId) {
+        const created = await createBudget({
+          categoryBudgets: updatedCategoryBudgets,
+        });
 
-      const { totalBudget, categoryBudgets: fetchedCategoryBudgets } =
-        await fetchBudget();
-
-      setTotalBudget(totalBudget);
-      setCategoryBudgets(fetchedCategoryBudgets);
-
+        setBudgetId(created._id);
+        setTotalBudget(Number(created.totalBudget) || 0);
+        setCategoryBudgets({ ...created.categoryBudgets });
+        notifySuccess('Budget created successfully!');
+      } else {
+        const result = await updateBudget(budgetId, {
+          categoryBudgets: updatedCategoryBudgets,
+        });
+        const updatedDoc = result.updatedBudget;
+        setTotalBudget(Number(updatedDoc.totalBudget) || 0);
+        setCategoryBudgets({ ...updatedDoc.categoryBudgets });
+        notifySuccess('Category budgets updated successfully!');
+      }
       setShowModal(false);
-      notifySuccess('Category budgets updated successfully!');
     } catch (error) {
-      notifyError('Failed to update category budgets.');
+      notifyError(error.message || 'Failed to save category budgets.');
     }
   };
+
+  if (!budgetLoaded) {
+    return (
+      <div className="budget-card loading-state">
+        <p>Loading Budget...</p>
+      </div>
+    );
+  }
+
+  if (!budgetId) {
+    return (
+      <div
+        className={`budget-card empty-state ${isHovered ? 'hovered' : ''}`}
+        onClick={handleCreateOrEditBudget}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+        role="button"
+        tabIndex={0}
+        onKeyDown={(e) => e.key === 'Enter' && handleCreateOrEditBudget()}
+      >
+        <img
+          src={noBudgetsIllustration}
+          alt="No budgets illustration"
+          className="no-budget-illustration"
+        />
+        <div className="no-budget-container">
+          <h3>No Budget Found</h3>
+          <p>Click to create your first budget!</p>
+        </div>
+
+        {showModal && (
+          <CategoryBudgetModal
+            categoryBudgets={categoryBudgets}
+            onClose={() => setShowModal(false)}
+            onSave={handleModalSave}
+          />
+        )}
+      </div>
+    );
+  }
 
   const totalSpent = calculateTotalExpense(expenses);
   const budgetPercentage =
@@ -67,12 +136,12 @@ const BudgetCard = ({ expenses }) => {
   return (
     <div
       className={`budget-card ${isHovered ? 'hovered' : ''}`}
-      onClick={() => setShowModal(true)}
+      onClick={handleCreateOrEditBudget}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       role="button"
       tabIndex={0}
-      onKeyDown={(e) => e.key === 'Enter' && setShowModal(true)}
+      onKeyDown={(e) => e.key === 'Enter' && handleCreateOrEditBudget()}
     >
       <div className="pencil-icon">&#9998;</div>
       <div className="card-content">

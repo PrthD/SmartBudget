@@ -289,11 +289,6 @@
 .form-navigation-buttons button:hover,
 .submit-button:hover {
   background-color: #003366;
-  transform: translateY(-3px);
-}
-
-.submit-button:active {
-  transform: translateY(1px);
 }
 
 .expense-form.highlight {
