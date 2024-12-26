@@ -1,17 +1,15 @@
 import express from 'express';
 import Income from '../models/Income.js';
 import logger from '../config/logger.js';
-import { autoGenerateRecurringIncomes } from '../utils/incomeHelpers.js';
-import {
-  validateIncome,
-  checkDuplicateIncome,
-} from '../middlewares/incomeValidation.js';
+import { calculateNextRecurrence } from '../utils/incomeHelpers.js';
+import { validateIncome } from '../middlewares/incomeValidation.js';
+import moment from 'moment-timezone';
 
 const router = express.Router();
 
 // @route    POST /api/income/new
 // @desc     Add a new income entry
-router.post('/new', validateIncome, checkDuplicateIncome, async (req, res) => {
+router.post('/new', validateIncome, async (req, res) => {
   logger.info('POST /api/income/new - Adding a new income');
   const { source, amount, date, description, frequency } = req.body;
 
@@ -19,7 +17,9 @@ router.post('/new', validateIncome, checkDuplicateIncome, async (req, res) => {
     const income = new Income({
       source,
       amount: parseFloat(amount),
-      date: date ? new Date(date) : new Date(),
+      date: date
+        ? moment.tz(date, 'America/Edmonton').utc().toDate()
+        : new Date(),
       description,
       frequency,
       isOriginal: true,
@@ -27,11 +27,6 @@ router.post('/new', validateIncome, checkDuplicateIncome, async (req, res) => {
 
     const savedIncome = await income.save();
     logger.info('New income saved successfully:', savedIncome);
-
-    // Auto-generate recurring incomes if frequency is specified
-    if (frequency && frequency !== 'once') {
-      await autoGenerateRecurringIncomes(savedIncome);
-    }
 
     res.status(201).json(savedIncome);
   } catch (err) {
@@ -47,7 +42,16 @@ router.get('/all', async (req, res) => {
   try {
     const incomes = await Income.find();
     logger.info('All incomes retrieved successfully');
-    res.status(200).json(incomes);
+
+    const incomesWithNextRecurrence = incomes.map((income) => {
+      const nextRecurrence = calculateNextRecurrence(income);
+      return {
+        ...income.toObject(),
+        nextRecurrence,
+      };
+    });
+
+    res.status(200).json(incomesWithNextRecurrence);
   } catch (err) {
     logger.error('Error retrieving incomes: ' + err.message);
     res.status(500).json({ error: 'Failed to fetch incomes' });
@@ -69,17 +73,14 @@ router.put('/update/:id', validateIncome, async (req, res) => {
 
     income.source = source || income.source;
     income.amount = parseFloat(amount) || income.amount;
-    income.date = date ? new Date(date) : income.date;
+    income.date = date
+      ? moment.tz(date, 'America/Edmonton').utc().toDate()
+      : income.date;
     income.description = description || income.description;
     income.frequency = frequency || income.frequency;
 
     const updatedIncome = await income.save();
     logger.info('Income updated successfully:', updatedIncome);
-
-    // Regenerate future incomes if frequency has changed
-    if (frequency && frequency !== 'once') {
-      await autoGenerateRecurringIncomes(updatedIncome);
-    }
 
     res.status(200).json(updatedIncome);
   } catch (err) {
@@ -89,31 +90,52 @@ router.put('/update/:id', validateIncome, async (req, res) => {
 });
 
 // @route    DELETE /api/income/delete/:id
-// @desc     Delete an income entry by ID and its recurrences
+// @desc     Delete an income entry by ID
 router.delete('/delete/:id', async (req, res) => {
   logger.info(
-    `DELETE /api/income/delete/${req.params.id} - Deleting an income and its recurrences`
+    `DELETE /api/income/delete/${req.params.id} - Deleting an income`
   );
   try {
-    const income = await Income.findById(req.params.id);
-    if (!income) {
+    const deletedIncome = await Income.findByIdAndDelete(req.params.id);
+    if (!deletedIncome) {
       logger.warn(`Income not found for id: ${req.params.id}`);
       return res.status(404).json({ error: 'Income not found' });
     }
 
-    await Income.deleteMany({
-      source: income.source,
-      frequency: income.frequency,
-      isOriginal: { $in: [true, false] },
-    });
-
-    logger.info('Income and its recurrences deleted successfully');
-    res
-      .status(200)
-      .json({ message: 'Income and its recurrences deleted successfully' });
+    logger.info('Income deleted successfully');
+    res.status(200).json({ message: 'Income deleted successfully' });
   } catch (err) {
     logger.error('Error deleting income: ' + err.message);
-    res.status(500).json({ error: 'Failed to delete income and recurrences' });
+    res.status(500).json({ error: 'Failed to delete income' });
+  }
+});
+
+// @route    POST /api/income/skip-next/:id
+// @desc     Skip a specific recurrence date for a recurring income
+router.post('/skip-next/:id', async (req, res) => {
+  const { id } = req.params;
+  const { dateToSkip } = req.body;
+  logger.info(`POST /api/income/skip-next/${id} - Skipping a recurrence date`);
+
+  try {
+    const income = await Income.findById(id);
+    if (!income) {
+      logger.warn(`Income not found for id: ${id}`);
+      return res.status(404).json({ error: 'Income not found' });
+    }
+
+    income.skippedDates = income.skippedDates || [];
+    income.skippedDates.push(
+      moment.tz(dateToSkip, 'America/Edmonton').utc().toDate()
+    );
+
+    await income.save();
+
+    logger.info(`Recurrence date ${dateToSkip} skipped successfully`);
+    res.status(200).json({ message: 'Recurrence date skipped successfully' });
+  } catch (err) {
+    logger.error('Error skipping recurrence date:', err.message);
+    res.status(500).json({ error: 'Failed to skip recurrence date' });
   }
 });
 

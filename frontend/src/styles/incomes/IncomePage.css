@@ -1,9 +1,178 @@
-.incomes-page th {
+/* Split Screen Container Styling */
+.split-screen-container {
+  display: flex;
+  gap: 30px;
+  max-width: 1250px;
+  margin: 0 auto;
+  width: 95%;
+  align-items: flex-start;
+  justify-content: center;
+  transition: transform 0.5s ease-in-out, padding 0.5s ease-in-out, justify-content 0.5s ease-in-out;
+  transform: translateX(0);
+  padding-right: 0;
+}
+
+.split-screen-container.centered {
+  justify-content: center;
+  transform: translateX(0);
+}
+
+.split-screen-container:not(.centered) {
+  justify-content: center;
+  transform: translateX(0);
+  padding-right: 0;
+}
+
+/* Form and Overview Sections Styling */
+.form-section {
+  flex: 1;
+  max-width: 600px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  background-color: transparent;
+  border: none;
+  box-shadow: none;
+  height: 100%;
+  transition: all 0.5s ease-in-out;
+  width: 100%;
+}
+
+.form-section.centered-horizontal {
+  margin: 0 auto;
+  transform: translateX(0);
+  opacity: 1;
+}
+
+/* Chart Section */
+.chart-section {
+  padding: 20px;
+  width: 100%;
+}
+
+.collapsible-header {
+  font-size: 1.5rem;
+  color: #004c99;
+  font-weight: 700;
+  margin-bottom: 20px;
+  text-align: center;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  transition: color 0.3s;
+}
+
+.collapsible-header::before,
+.collapsible-header::after {
+  content: '';
+  flex: 1;
+  border-bottom: 1px solid #e6e8f1;
+  margin: 0 10px;
+}
+
+.collapsible-header:hover::before,
+.collapsible-header:hover::after {
+  border-bottom: 1px solid #004c99;
+}
+
+.no-incomes-container {
+  text-align: center;
+  padding: 40px;
+}
+
+.no-incomes-illustration {
+  max-width: 400px;
+  margin-bottom: 20px;
+}
+
+.no-incomes-container p {
+  font-size: 1.2rem;
+  color: #555;
+}
+
+/* Incomes List Section Styling */
+.incomes-list {
+  width: 95%;
+  max-width: 1400px;
+  margin: 20px auto 30px;
+  border-radius: 12px;
+  padding: 0 15px;
+  position: relative;
+}
+
+/* Incomes List Title Styling */
+.incomes-list h3 {
+  font-size: 1.5rem;
+  color: #004c99;
+  font-weight: 700;
+  margin-bottom: 20px;
   text-align: center;
 }
 
-.incomes-page td div {
+/* Income Cards Container */
+.income-cards-container {
   display: flex;
-  gap: 10px;
-  justify-content: center;
+  flex-direction: column;
+  gap: 20px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Transition for Incomes List */
+.incomes-list-transition-enter {
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+}
+
+.incomes-list-transition-enter-active {
+  max-height: 1000px;
+  opacity: 1;
+  transition: max-height 500ms cubic-bezier(0.25, 1, 0.5, 1), opacity 500ms cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.incomes-list-transition-exit {
+  max-height: 1000px;
+  opacity: 1;
+}
+
+.incomes-list-transition-exit-active {
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  transition: max-height 500ms cubic-bezier(0.25, 1, 0.5, 1), opacity 500ms cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+/* Ensure no horizontal scrolling */
+body,
+html {
+  overflow-x: hidden;
+}
+
+/* Additional Transitions for Card Details */
+.card-details-transition-enter {
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+}
+
+.card-details-transition-enter-active {
+  max-height: 500px;
+  opacity: 1;
+  transition: max-height 300ms ease-in-out, opacity 300ms ease-in-out;
+}
+
+.card-details-transition-exit {
+  max-height: 500px;
+  opacity: 1;
+}
+
+.card-details-transition-exit-active {
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  transition: max-height 300ms ease-in-out, opacity 300ms ease-in-out;
 }

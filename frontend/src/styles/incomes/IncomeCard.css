@@ -1,0 +1,155 @@
+/* Income Card Styling */
+.income-card {
+    background-color: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0, 76, 153, 0.1);
+    margin-bottom: 5px;
+    padding: 20px;
+    transition: box-shadow 0.3s;
+  }
+  
+  .income-card:hover {
+    box-shadow: 0 15px 35px rgba(0, 76, 153, 0.15);
+  }
+  
+  /* Income Card Header */
+  .income-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    position: relative;
+  }
+  
+  .income-source {
+    display: flex;
+    align-items: center;
+    flex: 1;
+  }
+  
+  .source-name {
+    font-size: 1.4rem;
+    font-weight: bold;
+    color: #004c99;
+  }
+  
+  .income-amount {
+    font-size: 1.4rem;
+    font-weight: bold;
+    color: #003366;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    text-align: center;
+  }
+  
+  .income-actions {
+    display: flex;
+    gap: 10px;
+    margin-left: auto;
+  }
+  
+  /* Buttons Styling */
+  .edit-btn,
+  .delete-btn,
+  .expand-btn {
+    background-color: transparent;
+    border: none;
+    color: #004c99;
+    cursor: pointer;
+    font-size: 1.2rem;
+    padding: 8px;
+    transition: color 0.3s;
+  }
+  
+  .edit-btn:hover,
+  .delete-btn:hover,
+  .expand-btn:hover {
+    color: #003366;
+    background-color: transparent;
+  }
+  
+  /* Skip Next Recurrence Button */
+  .skip-next-btn {
+    background-color: #004c99;
+    border: none;
+    color: #ffffff;
+    cursor: pointer;
+    padding: 8px 15px;
+    font-size: 1rem;
+    font-weight: bold;
+    border-radius: 30px;
+    transition: background-color 0.3s, transform 0.3s;
+    margin-top: 10px;
+  }
+  
+  .skip-next-btn:hover {
+    background-color: #003366;
+  }
+  
+  .income-card-details {
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid #e6e8f1;
+  }
+  
+  .income-card-details p {
+    font-size: 1rem;
+    color: #004c99;
+    margin: 5px 0;
+    display: flex;
+    align-items: center;
+  }
+  
+  .income-card-details p strong {
+    margin-right: 5px;
+  }
+  
+  /* Income Card Transitions */
+  .income-card-transition-enter {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  
+  .income-card-transition-enter-active {
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity 500ms, transform 500ms;
+  }
+  
+  .income-card-transition-exit {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  
+  .income-card-transition-exit-active {
+    opacity: 0;
+    transform: translateY(-20px);
+    transition: opacity 500ms, transform 500ms;
+  }
+  
+  /* Card Details Transition */
+  .card-details-transition-enter {
+    max-height: 0;
+    opacity: 0;
+    overflow: hidden;
+  }
+  
+  .card-details-transition-enter-active {
+    max-height: 300px;
+    opacity: 1;
+    transition: max-height 300ms ease-in-out, opacity 300ms ease-in-out;
+  }
+  
+  .card-details-transition-exit {
+    max-height: 300px;
+    opacity: 1;
+  }
+  
+  .card-details-transition-exit-active {
+    max-height: 0;
+    opacity: 0;
+    overflow: hidden;
+    transition: max-height 300ms ease-in-out, opacity 300ms ease-in-out;
+  }
+  

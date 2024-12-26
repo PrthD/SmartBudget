@@ -1,0 +1,67 @@
+.income-sort {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+  }
+  
+  .sort-field {
+    display: flex;
+    align-items: center;
+  }
+  
+  .sort-field label {
+    margin-right: 8px;
+    font-weight: bold;
+    color: #1e1e2d;
+  }
+  
+  .sort-field select {
+    padding: 8px 12px;
+    border: 2px solid #d1d1d6;
+    border-radius: 8px;
+    background-color: #f9f9fb;
+    font-size: 1rem;
+    color: #1e1e2d;
+    transition: border-color 0.3s;
+  }
+  
+  .sort-field select:hover,
+  .sort-field select:focus {
+    border-color: #004c99;
+    outline: none;
+  }
+  
+  .sort-actions {
+    display: flex;
+    gap: 10px;
+    margin-left: auto;
+  }
+  
+  .sort-order-btn {
+    background-color: transparent;
+    background: none;
+    border: 2px solid transparent;
+    color: #004c99;
+    cursor: pointer;
+    font-size: 1.5rem;
+    padding: 6px;
+    transition: all 0.3s ease-in-out;
+  }
+  
+  .sort-order-btn:hover {
+    background: none;
+    border: 2px solid #004c99;
+    border-radius: 8px;
+    box-shadow: none;
+    transition: border-color 0.3s ease-in-out;
+  }
+  
+  .sort-order-btn:focus {
+    outline: none;
+  }
+  
+  .sort-icon {
+    font-size: 1.5rem;
+  }
+  

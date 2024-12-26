@@ -50,3 +50,17 @@ export const deleteIncome = async (id) => {
     throw new Error(errorMsg);
   }
 };
+
+// Skip the next recurrence of a recurring income
+export const skipNextRecurrence = async (id, dateToSkip) => {
+  try {
+    const response = await axios.post(`${API_BASE_URL}/skip-next/${id}`, {
+      dateToSkip,
+    });
+    return response.data;
+  } catch (error) {
+    const errorMsg =
+      error.response?.data?.error || 'Failed to skip next recurrence';
+    throw new Error(errorMsg);
+  }
+};

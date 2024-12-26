@@ -1,8 +1,8 @@
-import Income from '../models/Income.js';
-import logger from '../config/logger.js';
+import moment from 'moment-timezone';
 
 // Frequency constants
 export const FREQUENCY = {
+  ONCE: 'once',
   WEEKLY: 'weekly',
   BIWEEKLY: 'biweekly',
   MONTHLY: 'monthly',
@@ -11,63 +11,52 @@ export const FREQUENCY = {
 
 /**
  * Calculate the next date based on the provided frequency.
- * @param {Date} currentDate - The current date.
+ * @param {moment.Moment} currentDate - The current date as a moment object.
  * @param {string} frequency - Frequency for the recurrence.
- * @returns {Date} The calculated next date.
+ * @returns {moment.Moment} The calculated next date as a moment object.
  */
 export const getNextDate = (currentDate, frequency) => {
-  const nextDate = new Date(currentDate);
-
   switch (frequency) {
     case FREQUENCY.WEEKLY:
-      nextDate.setDate(nextDate.getDate() + 7);
-      break;
+      return currentDate.clone().add(1, 'week');
     case FREQUENCY.BIWEEKLY:
-      nextDate.setDate(nextDate.getDate() + 14);
-      break;
+      return currentDate.clone().add(2, 'weeks');
     case FREQUENCY.MONTHLY:
-      nextDate.setMonth(nextDate.getMonth() + 1);
-      break;
+      return currentDate.clone().add(1, 'month');
     case FREQUENCY.YEARLY:
-      nextDate.setFullYear(nextDate.getFullYear() + 1);
-      break;
+      return currentDate.clone().add(1, 'year');
     default:
       throw new Error('Invalid frequency type provided.');
   }
-
-  return nextDate;
 };
 
 /**
- * Generate future recurring incomes based on an initial income entry.
- * @param {Object} income - The income to base future entries on.
- * @param {number} recurrenceCount - Number of future occurrences (default: 12).
+ * Calculate the next recurrence date for a recurring income, considering skipped dates.
+ * @param {Object} income - The income object.
+ * @returns {Date|null} The next recurrence date or null if not applicable.
  */
-export const autoGenerateRecurringIncomes = async (
-  income,
-  recurrenceCount = 12
-) => {
-  const { frequency, amount, source, description } = income;
-  let nextDate = getNextDate(income.date, frequency);
-  const futureIncomes = [];
-
-  for (let i = 0; i < recurrenceCount; i++) {
-    futureIncomes.push({
-      source: source,
-      amount: amount,
-      date: nextDate,
-      description: description,
-      frequency: frequency,
-      isOriginal: false,
-      //   user: expense.user,
-    });
-    nextDate = getNextDate(nextDate, frequency);
+export const calculateNextRecurrence = (income) => {
+  if (!income.frequency || income.frequency === 'once') {
+    return null;
   }
 
-  try {
-    await Income.insertMany(futureIncomes);
-    logger.info(`Generated ${recurrenceCount} recurring incomes successfully.`);
-  } catch (err) {
-    logger.error('Error generating future recurring incomes:', err.message);
+  let nextDate = moment(income.date).tz('America/Edmonton').startOf('day');
+  const today = moment().tz('America/Edmonton').startOf('day');
+  const futureLimit = today.clone().add(5, 'years');
+
+  const skippedDates = (income.skippedDates || []).map((date) =>
+    moment(date).tz('America/Edmonton').startOf('day').format('YYYY-MM-DD')
+  );
+
+  while (
+    nextDate.isSameOrBefore(today) ||
+    skippedDates.includes(nextDate.format('YYYY-MM-DD'))
+  ) {
+    nextDate = getNextDate(nextDate, income.frequency);
+    if (nextDate.isAfter(futureLimit)) {
+      return null;
+    }
   }
+
+  return nextDate.toDate();
 };

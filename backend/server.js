@@ -29,11 +29,11 @@ app.use(
 );
 
 // Routes
-app.use('/api/ai', aiRoutes); // AI routes
-app.use('/api/expense', expenseRoutes); // Expense routes
-app.use('/api/budget', budgetRoutes); // Budget routes
-app.use('/api/income', incomeRoutes); // Income routes
-app.use('/api/savings', savingsRoutes); // Savings routes
+app.use('/api/ai', aiRoutes);
+app.use('/api/expense', expenseRoutes);
+app.use('/api/budget', budgetRoutes);
+app.use('/api/income', incomeRoutes);
+app.use('/api/savings', savingsRoutes);
 
 // Centralized error-handling middleware
 app.use((err, req, res) => {

@@ -247,6 +247,9 @@ const ExpenseForm = ({
         if (!formData.amount || formData.amount <= 0) {
           throw new Error('Please enter a valid amount greater than 0.');
         }
+        if (!formData.date) {
+          throw new Error('Please select a valid date.');
+        }
         setCurrentStep(3);
       }
     } catch (error) {
@@ -348,15 +351,7 @@ const ExpenseForm = ({
             </button>
           )}
           {currentStep < 3 ? (
-            <button
-              key="next"
-              type="button"
-              onClick={nextStep}
-              disabled={
-                (currentStep === 1 && !formData.category) ||
-                (currentStep === 2 && (!formData.amount || !formData.date))
-              }
-            >
+            <button key="next" type="button" onClick={nextStep}>
               Next
             </button>
           ) : (

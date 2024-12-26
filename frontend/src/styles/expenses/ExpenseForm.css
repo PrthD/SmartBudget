@@ -115,7 +115,10 @@
 
 /* Custom Category Input Field Styling */
 .styled-input.custom-category-input {
-  padding: 12px 15px;
+  padding-left: 15px;
+  padding-right: 15px;
+  padding-top: 12px;
+  padding-bottom: 12px;
   width: 100%;
   border: 2px solid #d1d1d6;
   border-radius: 30px;
@@ -124,6 +127,10 @@
   transition: border-color 0.3s, box-shadow 0.3s, transform 0.3s;
   background-color: #f9f9fb;
   box-shadow: inset 2px 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.input-container.custom-category .styled-input.custom-category-input {
+  padding-left: 15px !important;
 }
 
 .input-container .styled-input,
