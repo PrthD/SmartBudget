@@ -46,3 +46,16 @@ export const updateBudget = async (budgetId, categoryBudgets) => {
     throw new Error(errorMsg);
   }
 };
+
+/**
+ * Permanently delete a budget record (DELETE /api/budget/:id).
+ */
+export const deleteBudget = async (budgetId) => {
+  try {
+    const response = await axios.delete(`${API_BASE_URL}/${budgetId}`);
+    return response.data;
+  } catch (error) {
+    const errorMsg = error.response?.data?.error || 'Failed to delete budget.';
+    throw new Error(errorMsg);
+  }
+};

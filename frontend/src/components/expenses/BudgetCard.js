@@ -1,12 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { CircularProgressbar, buildStyles } from 'react-circular-progressbar';
+import { FaTrash } from 'react-icons/fa';
 import 'react-circular-progressbar/dist/styles.css';
 import { notifyError, notifySuccess } from '../../utils/notificationService';
+import { confirmAction } from '../../utils/confirmationService';
 import {
   fetchBudget,
   updateBudget,
   createBudget,
+  deleteBudget,
 } from '../../services/budgetService';
 import {
   calculateTotalExpense,
@@ -63,6 +66,16 @@ const BudgetCard = ({ expenses }) => {
   };
 
   const handleModalSave = async (updatedCategoryBudgets) => {
+    const total = Object.values(updatedCategoryBudgets).reduce(
+      (sum, val) => sum + val,
+      0
+    );
+
+    if (total === 0) {
+      notifyError('Budget cannot be 0. Please set a valid amount.');
+      return;
+    }
+
     try {
       if (!budgetId) {
         const created = await createBudget({
@@ -80,12 +93,33 @@ const BudgetCard = ({ expenses }) => {
         const updatedDoc = result.updatedBudget;
         setTotalBudget(Number(updatedDoc.totalBudget) || 0);
         setCategoryBudgets({ ...updatedDoc.categoryBudgets });
-        notifySuccess('Category budgets updated successfully!');
+        notifySuccess('Budget updated successfully!');
       }
       setIsHovered(false);
       setShowModal(false);
     } catch (error) {
-      notifyError(error.message || 'Failed to save category budgets.');
+      notifyError(error.message || 'Failed to save budget.');
+    }
+  };
+
+  const handleDeleteBudget = async () => {
+    const confirmed = await confirmAction(
+      'Delete Budget',
+      'Are you sure you want to delete your budget? This action cannot be undone.'
+    );
+
+    if (!confirmed) return;
+
+    try {
+      if (budgetId) {
+        await deleteBudget(budgetId);
+        notifySuccess('Budget deleted successfully.');
+        setBudgetId(null);
+        setTotalBudget(0);
+        setCategoryBudgets({});
+      }
+    } catch (error) {
+      notifyError(error.message || 'Failed to delete budget.');
     }
   };
 
@@ -109,14 +143,16 @@ const BudgetCard = ({ expenses }) => {
         onKeyDown={(e) => e.key === 'Enter' && handleCreateOrEditBudget()}
       >
         <div className="pencil-icon">&#9998;</div>
-        <img
-          src={noBudgetsIllustration}
-          alt="No budgets illustration"
-          className="no-budget-illustration"
-        />
-        <div className="no-budget-container">
-          <h3>Looks like you don’t have a budget yet!</h3>
-          <p>Get started by creating your first budget now 🎉</p>
+        <div className="no-budget-content">
+          <img
+            src={noBudgetsIllustration}
+            alt="No budgets illustration"
+            className="no-budget-illustration"
+          />
+          <div className="no-budget-container">
+            <h3>Looks like you don’t have a budget yet!</h3>
+            <p>Get started by creating your budget now 🎉</p>
+          </div>
         </div>
 
         {showModal && (
@@ -165,6 +201,17 @@ const BudgetCard = ({ expenses }) => {
           </p>
         </div>
       </div>
+      <button
+        className="delete-icon-btn"
+        onClick={(e) => {
+          e.stopPropagation();
+          handleDeleteBudget();
+        }}
+        title="Delete Budget"
+      >
+        <FaTrash />
+      </button>
+
       {showModal && (
         <CategoryBudgetModal
           categoryBudgets={categoryBudgets}

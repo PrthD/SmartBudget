@@ -94,4 +94,25 @@ router.put('/:id', validateBudget, async (req, res) => {
   }
 });
 
+/**
+ * @route   DELETE /api/budget/:id
+ * @desc    Permanently delete an existing budget record
+ */
+router.delete('/:id', async (req, res) => {
+  logger.info(`DELETE /api/budget/${req.params.id} - Deleting budget`);
+  try {
+    const deletedBudget = await Budget.findByIdAndDelete(req.params.id);
+    if (!deletedBudget) {
+      logger.warn(`Budget not found for id: ${req.params.id}`);
+      return res.status(404).json({ error: 'Budget not found' });
+    }
+
+    logger.info('Budget deleted successfully:', deletedBudget);
+    return res.status(200).json({ message: 'Budget deleted successfully' });
+  } catch (err) {
+    logger.error('Error deleting budget:', err.message);
+    return res.status(500).json({ error: 'Failed to delete budget' });
+  }
+});
+
 export default router;
