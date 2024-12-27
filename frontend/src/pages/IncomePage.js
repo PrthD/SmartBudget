@@ -245,8 +245,8 @@ const IncomePage = () => {
 
   const noIncomesMessage =
     incomeData.length === 0
-      ? 'No incomes recorded yet. Start by adding your first income!'
-      : 'No incomes match your search.';
+      ? 'Nothing here yet! Add your first income to kick things off 💵'
+      : 'No incomes match your search. Try refining your filters.';
 
   return (
     <div className="incomes-page">

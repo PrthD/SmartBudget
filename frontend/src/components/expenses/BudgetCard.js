@@ -82,6 +82,7 @@ const BudgetCard = ({ expenses }) => {
         setCategoryBudgets({ ...updatedDoc.categoryBudgets });
         notifySuccess('Category budgets updated successfully!');
       }
+      setIsHovered(false);
       setShowModal(false);
     } catch (error) {
       notifyError(error.message || 'Failed to save category budgets.');
@@ -107,14 +108,15 @@ const BudgetCard = ({ expenses }) => {
         tabIndex={0}
         onKeyDown={(e) => e.key === 'Enter' && handleCreateOrEditBudget()}
       >
+        <div className="pencil-icon">&#9998;</div>
         <img
           src={noBudgetsIllustration}
           alt="No budgets illustration"
           className="no-budget-illustration"
         />
         <div className="no-budget-container">
-          <h3>No Budget Found</h3>
-          <p>Click to create your first budget!</p>
+          <h3>Looks like you don’t have a budget yet!</h3>
+          <p>Get started by creating your first budget now 🎉</p>
         </div>
 
         {showModal && (
@@ -135,7 +137,7 @@ const BudgetCard = ({ expenses }) => {
 
   return (
     <div
-      className={`budget-card ${isHovered ? 'hovered' : ''}`}
+      className={`budget-card budget-added ${isHovered ? 'hovered' : ''}`}
       onClick={handleCreateOrEditBudget}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}

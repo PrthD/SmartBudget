@@ -2,19 +2,27 @@
   position: relative;
   display: flex;
   justify-content: center;
-  gap: 20px;
   align-items: center;
+  text-align: center;
   width: 100%;
-  max-width: 550px;
+  /* max-width: 700px; */
   margin: 20px auto;
   background-color: #ffffff;
   color: #004c99;
   padding: 20px;
   border-radius: 20px;
   box-shadow: 0 10px 30px rgba(0, 76, 153, 0.1);
-  transition: box-shadow 0.3s, filter 0.3s ease-in-out;
+  transition: box-shadow 0.3s, filter 0.3s ease-in-out, max-width 0.3s ease;
   cursor: pointer;
 }
+
+  .budget-card.empty-state {
+    max-width: 700px;
+  }
+
+  .budget-card.budget-added {
+    max-width: 500px;
+  }
   
   .budget-card.hovered {
     box-shadow: 0 15px 35px rgba(0, 76, 153, 0.15);
@@ -36,20 +44,23 @@
   
   .card-content {
     display: flex;
+    flex-direction: row;
     align-items: center;
-    justify-content: center;
     gap: 20px;
-    width: 100%;
     text-align: left;
+    width: auto;
+    justify-content: center;
   }
   
   .progress-container {
+    flex-shrink: 0;
     width: 100px;
     height: 100px;
   }
   
   .expense-info {
     text-align: left;
+    flex: 1;
   }
   
   .expense-info h3 {
@@ -68,8 +79,8 @@
   .no-budget-container {
     display: flex;
     flex-direction: column;
-    justify-content: center;
-    text-align: left;
+    align-items: center;
+    text-align: center;
   }
   
   .no-budget-illustration {
@@ -89,5 +100,11 @@
     font-size: 1.2rem;
     color: #555;
     margin-top: 0;
+  }
+
+  .no-budget-container h3,
+  .no-budget-container p {
+    text-align: left;
+    width: 100%;
   }
   

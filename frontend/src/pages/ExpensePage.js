@@ -250,8 +250,8 @@ const ExpensesPage = () => {
 
   const noExpensesMessage =
     expenseData.length === 0
-      ? 'No expenses recorded yet. Start by adding your first expense!'
-      : 'No expenses match your search.';
+      ? 'It’s empty here! Add your first expense to get started 🚀'
+      : 'No expenses match your search. Try adjusting your filters.';
 
   return (
     <div className="expenses-page">

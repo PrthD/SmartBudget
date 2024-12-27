@@ -17,10 +17,13 @@
     border: 2px solid #d1d1d6;
     border-radius: 8px;
     font-size: 1rem;
-    transition: border-color 0.3s, box-shadow 0.3s;
+    transition: border-color 0.3s, box-shadow 0.3s, transform 0.3s;
     box-shadow: inset 2px 2px 8px rgba(0, 0, 0, 0.05);
   }
   
+  .search-input:hover {
+    border-color: #a3b3c9;
+  }
   .search-input:focus {
     border-color: #004c99;
     outline: none;
