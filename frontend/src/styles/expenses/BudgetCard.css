@@ -62,17 +62,48 @@
   .delete-icon-btn:hover {
     color: #c9302c;
     background-color: transparent;
-  }  
+  }
+
+  .interval-tag {
+    display: inline-block;
+    padding: 4px 10px;
+    font-size: 0.9rem;
+    font-weight: bold;
+    color: #ffffff;
+    border-radius: 15px;
+    text-transform: capitalize;
+    transition: background-color 0.3s ease, transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
+    white-space: nowrap;
+  }
+
+  .interval-tag.weekly {
+    background-color: #f39c12;
+  }
+
+  .interval-tag.biweekly {
+    background-color: #16a085;
+  }
+
+  .interval-tag.monthly {
+    background-color: #2980b9;
+  }
+
+  .interval-tag.yearly {
+    background-color: #8e44ad;
+  }
+
+  .interval-tag:hover {
+    opacity: 0.9;
+  }
   
   .card-content {
     display: flex;
-    /* flex: 1; */
     flex-direction: row;
     align-items: center;
     gap: 20px;
     text-align: left;
     justify-content: center;
-    width: auto; /* or 100%, your choice */
+    width: auto;
   }
   
   .progress-container {
@@ -90,6 +121,9 @@
     margin: 0;
     font-size: 1.8rem;
     font-weight: bold;
+    display: flex;
+    align-items: center;
+    gap: 10px;
   }
   
   .expense-info p {
@@ -102,7 +136,6 @@
   .no-budget-container {
     display: flex;
     flex-direction: column;
-    /* align-items: center; */
     text-align: center;
   }
 
@@ -119,7 +152,6 @@
     max-width: 150px;
     height: auto;
     flex-shrink: 0;
-    /* margin-bottom: 10px; */
   }
   
   .no-budget-container h3 {

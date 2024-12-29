@@ -36,7 +36,7 @@ router.get('/', async (req, res) => {
 router.post('/', validateBudget, async (req, res) => {
   logger.info('POST /api/budget - Creating new budget record');
   try {
-    const { categoryBudgets } = req.body;
+    const { categoryBudgets, interval = 'monthly' } = req.body;
 
     const sumCategoryBudgets = Object.values(categoryBudgets || {}).reduce(
       (sum, val) => sum + val,
@@ -46,6 +46,7 @@ router.post('/', validateBudget, async (req, res) => {
     const newBudget = new Budget({
       totalBudget: sumCategoryBudgets,
       categoryBudgets: categoryBudgets || {},
+      interval,
     });
 
     const savedBudget = await newBudget.save();
@@ -65,7 +66,7 @@ router.post('/', validateBudget, async (req, res) => {
 router.put('/:id', validateBudget, async (req, res) => {
   logger.info(`PUT /api/budget/${req.params.id} - Updating budget`);
   try {
-    const { categoryBudgets } = req.body;
+    const { categoryBudgets, interval } = req.body;
 
     const budget = await Budget.findById(req.params.id);
     if (!budget) {
@@ -80,6 +81,10 @@ router.put('/:id', validateBudget, async (req, res) => {
         0
       );
       budget.totalBudget = sumCategoryBudgets;
+    }
+
+    if (interval !== undefined) {
+      budget.interval = interval;
     }
 
     const updatedBudget = await budget.save();

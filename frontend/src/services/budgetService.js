@@ -19,9 +19,12 @@ export const fetchBudget = async () => {
 /**
  * Create a new budget record (POST /api/budget).
  */
-export const createBudget = async (categoryBudgets) => {
+export const createBudget = async (categoryBudgets, interval = 'monthly') => {
   try {
-    const response = await axios.post(API_BASE_URL, categoryBudgets);
+    const response = await axios.post(API_BASE_URL, {
+      categoryBudgets,
+      interval,
+    });
     return response.data;
   } catch (error) {
     const errorMsg =
@@ -33,12 +36,13 @@ export const createBudget = async (categoryBudgets) => {
 /**
  * Update budget information (PUT /api/budget/:id).
  */
-export const updateBudget = async (budgetId, categoryBudgets) => {
+export const updateBudget = async (budgetId, categoryBudgets, interval) => {
   try {
-    const response = await axios.put(
-      `${API_BASE_URL}/${budgetId}`,
-      categoryBudgets
-    );
+    const payload = {};
+    if (categoryBudgets) payload.categoryBudgets = categoryBudgets;
+    if (interval) payload.interval = interval;
+
+    const response = await axios.put(`${API_BASE_URL}/${budgetId}`, payload);
     return response.data;
   } catch (error) {
     const errorMsg =

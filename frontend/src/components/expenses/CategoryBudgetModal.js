@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import '../../styles/expenses/CategoryBudgetModal.css';
 import {
@@ -9,8 +9,15 @@ import {
   FaPlusCircle,
   FaDollarSign,
 } from 'react-icons/fa';
+import { notifyError } from '../../utils/notificationService';
+import { sortCategoryBudgets } from '../../utils/budgetHelpers';
 
-const CategoryBudgetModal = ({ categoryBudgets, onClose, onSave }) => {
+const CategoryBudgetModal = ({
+  categoryBudgets,
+  expenses,
+  onClose,
+  onSave,
+}) => {
   const predefinedCategories = [
     { name: 'Groceries', icon: <FaShoppingCart /> },
     { name: 'Transportation', icon: <FaBus /> },
@@ -20,6 +27,8 @@ const CategoryBudgetModal = ({ categoryBudgets, onClose, onSave }) => {
 
   const [budgets, setBudgets] = useState({});
   const [newCategoryName, setNewCategoryName] = useState('');
+  const [interval, setInterval] = useState('monthly');
+  const [addedCategories, setAddedCategories] = useState([]);
 
   useEffect(() => {
     const mergedBudgets = { ...categoryBudgets };
@@ -33,31 +42,83 @@ const CategoryBudgetModal = ({ categoryBudgets, onClose, onSave }) => {
     setBudgets(mergedBudgets);
   }, [categoryBudgets]);
 
+  const categoryCreatedAtMap = useMemo(() => {
+    const map = {};
+    expenses.forEach((exp) => {
+      const cat = exp.category;
+      if (!map[cat]) {
+        map[cat] = exp.createdAt;
+      } else {
+        if (new Date(exp.createdAt) < new Date(map[cat])) {
+          map[cat] = exp.createdAt;
+        }
+      }
+    });
+    return map;
+  }, [expenses]);
+
   const handleBudgetChange = (category, value) => {
-    const numericValue = Number(value);
-    if (isNaN(numericValue) || numericValue < 0) return;
-    setBudgets((prevBudgets) => ({
-      ...prevBudgets,
-      [category]: numericValue,
-    }));
+    if (/^\d*\.?\d*$/.test(value)) {
+      setBudgets((prev) => ({
+        ...prev,
+        [category]: value,
+      }));
+    }
   };
 
   const handleAddNewCategory = () => {
-    if (!newCategoryName.trim()) return;
-    const catName = newCategoryName.trim();
-    if (!budgets[catName]) {
+    const trimmedName = newCategoryName.trim();
+    if (!trimmedName) {
+      notifyError('Category name cannot be empty.');
+      return;
+    }
+    if (!budgets[trimmedName]) {
       setBudgets((prev) => ({
         ...prev,
-        [catName]: 0,
+        [trimmedName]: 0,
       }));
+      setAddedCategories((prev) => [...prev, trimmedName]);
     }
     setNewCategoryName('');
   };
 
   const handleSave = () => {
-    onSave(budgets);
+    const sanitizedBudgets = Object.fromEntries(
+      Object.entries(budgets).map(([category, value]) => [
+        category,
+        parseFloat(value) || 0,
+      ])
+    );
+
+    const anyInvalid = Object.values(sanitizedBudgets).some(
+      (val) => val < 0 || Number.isNaN(val)
+    );
+    if (anyInvalid) {
+      notifyError('Please ensure all budgets are non-negative amounts.');
+      return;
+    }
+
+    const total = Object.values(sanitizedBudgets).reduce(
+      (sum, val) => sum + val,
+      0
+    );
+    if (total === 0) {
+      notifyError('Budget cannot be 0. Please set a valid amount.');
+      return;
+    }
+
+    onSave(sanitizedBudgets, interval);
     onClose();
   };
+
+  const sortedCategories = useMemo(() => {
+    return sortCategoryBudgets(
+      budgets,
+      predefinedCategories,
+      addedCategories,
+      categoryCreatedAtMap
+    );
+  }, [budgets, predefinedCategories, addedCategories, categoryCreatedAtMap]);
 
   return (
     <div className="modal-overlay" role="dialog" aria-modal="true">
@@ -70,6 +131,24 @@ const CategoryBudgetModal = ({ categoryBudgets, onClose, onSave }) => {
           <button className="close-btn" onClick={onClose} title="Close">
             &times;
           </button>
+        </div>
+
+        {/* Interval Selector */}
+        <div className="budget-interval-container">
+          <label htmlFor="budget-interval" className="budget-interval-label">
+            Budget Interval:
+          </label>
+          <select
+            id="budget-interval"
+            value={interval}
+            onChange={(e) => setInterval(e.target.value)}
+            className="budget-interval-select"
+          >
+            <option value="weekly">Weekly</option>
+            <option value="biweekly">Biweekly</option>
+            <option value="monthly">Monthly</option>
+            <option value="yearly">Yearly</option>
+          </select>
         </div>
 
         {/* Add new category row */}
@@ -94,13 +173,15 @@ const CategoryBudgetModal = ({ categoryBudgets, onClose, onSave }) => {
           </button>
         </div>
 
+        {/* Display each category in budgets */}
         <div className="budgets-list">
-          {/* Display each category in budgets */}
-          {Object.keys(budgets).length > 0 ? (
-            Object.entries(budgets).map(([category, value]) => {
+          {sortedCategories.length > 0 ? (
+            sortedCategories.map((category) => {
+              const value = budgets[category] || '';
               const categoryIcon =
                 predefinedCategories.find((cat) => cat.name === category)
                   ?.icon || null;
+
               return (
                 <div
                   key={category}
@@ -121,7 +202,7 @@ const CategoryBudgetModal = ({ categoryBudgets, onClose, onSave }) => {
                     <input
                       type="number"
                       className="styled-input budget-input"
-                      value={value || ''}
+                      value={value}
                       onChange={(e) =>
                         handleBudgetChange(category, e.target.value)
                       }
@@ -152,6 +233,22 @@ const CategoryBudgetModal = ({ categoryBudgets, onClose, onSave }) => {
 
 CategoryBudgetModal.propTypes = {
   categoryBudgets: PropTypes.object.isRequired,
+  expenses: PropTypes.arrayOf(
+    PropTypes.shape({
+      _id: PropTypes.string,
+      category: PropTypes.string,
+      customCategory: PropTypes.bool,
+      amount: PropTypes.number,
+      date: PropTypes.string,
+      description: PropTypes.string,
+      frequency: PropTypes.string,
+      isOriginal: PropTypes.bool,
+      originalExpenseId: PropTypes.string,
+      skippedDates: PropTypes.array,
+      createdAt: PropTypes.string,
+      updatedAt: PropTypes.string,
+    })
+  ).isRequired,
   onClose: PropTypes.func.isRequired,
   onSave: PropTypes.func.isRequired,
 };

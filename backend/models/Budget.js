@@ -17,6 +17,11 @@ const BudgetSchema = new mongoose.Schema(
       of: Number,
       default: {},
     },
+    interval: {
+      type: String,
+      enum: ['weekly', 'biweekly', 'monthly', 'yearly'],
+      default: 'monthly',
+    },
   },
   { timestamps: true }
 );

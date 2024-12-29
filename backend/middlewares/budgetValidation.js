@@ -19,9 +19,9 @@ export const validateBudget = (req, res, next) => {
   // Validate each category budget if provided
   if (categoryBudgets) {
     for (const [category, budget] of Object.entries(categoryBudgets)) {
-      if (isNaN(budget) || budget < 0) {
+      if (budget === undefined || isNaN(budget) || budget < 0) {
         const errorMsg = `Budget for category "${category}" must be a non-negative number.`;
-        logger.warn(errorMsg);
+        logger.warn(errorMsg, { category, budget });
         return res.status(400).json({ error: errorMsg });
       }
     }

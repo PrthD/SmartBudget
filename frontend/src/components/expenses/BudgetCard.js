@@ -11,11 +11,12 @@ import {
   createBudget,
   deleteBudget,
 } from '../../services/budgetService';
+import { calculateTotalExpenseInInterval } from '../../utils/expenseHelpers';
 import {
-  calculateTotalExpense,
-  groupExpensesByCategory,
-} from '../../utils/expenseHelpers';
-import { getBudgetAlertColor } from '../../utils/budgetHelpers';
+  getBudgetAlertColor,
+  getTimeframeDates,
+  mergeBudgetCategories,
+} from '../../utils/budgetHelpers';
 import CategoryBudgetModal from './CategoryBudgetModal';
 import noBudgetsIllustration from '../../assets/icons/no-budgets.svg';
 import '../../styles/expenses/BudgetCard.css';
@@ -24,6 +25,7 @@ const BudgetCard = ({ expenses }) => {
   const [budgetId, setBudgetId] = useState(null);
   const [totalBudget, setTotalBudget] = useState(0);
   const [categoryBudgets, setCategoryBudgets] = useState({});
+  const [interval, setIntervalPeriod] = useState('monthly');
   const [showModal, setShowModal] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const [budgetLoaded, setBudgetLoaded] = useState(false);
@@ -35,14 +37,15 @@ const BudgetCard = ({ expenses }) => {
         setBudgetId(budgetResponse._id);
         setTotalBudget(Number(budgetResponse.totalBudget) || 0);
 
-        const groupedCategories = groupExpensesByCategory(expenses);
-        const combined = { ...budgetResponse.categoryBudgets };
-        groupedCategories.forEach(({ category }) => {
-          if (!combined[category]) {
-            combined[category] = 0;
-          }
-        });
-        setCategoryBudgets(combined);
+        if (budgetResponse.interval) {
+          setIntervalPeriod(budgetResponse.interval);
+        }
+
+        const merged = mergeBudgetCategories(
+          budgetResponse.categoryBudgets,
+          expenses
+        );
+        setCategoryBudgets(merged);
       } catch (error) {
         if (!error.message.includes('No budget record found')) {
           notifyError(error.message || 'Failed to load budget information.');
@@ -56,43 +59,41 @@ const BudgetCard = ({ expenses }) => {
   }, [expenses]);
 
   const handleCreateOrEditBudget = () => {
-    if (budgetId) {
-      setShowModal(true);
-      return;
-    }
-
-    setCategoryBudgets({});
+    const merged = mergeBudgetCategories(categoryBudgets, expenses);
+    setCategoryBudgets(merged);
     setShowModal(true);
   };
 
-  const handleModalSave = async (updatedCategoryBudgets) => {
-    const total = Object.values(updatedCategoryBudgets).reduce(
-      (sum, val) => sum + val,
-      0
+  const handleModalSave = async (updatedCategoryBudgets, selectedInterval) => {
+    const anyInvalid = Object.values(updatedCategoryBudgets).some(
+      (val) => val === null || val === undefined || val < 0 || Number.isNaN(val)
     );
-
-    if (total === 0) {
-      notifyError('Budget cannot be 0. Please set a valid amount.');
+    if (anyInvalid) {
+      notifyError('Please ensure all budgets are non-negative amounts.');
       return;
     }
 
     try {
       if (!budgetId) {
-        const created = await createBudget({
-          categoryBudgets: updatedCategoryBudgets,
-        });
-
+        const created = await createBudget(
+          updatedCategoryBudgets,
+          selectedInterval
+        );
         setBudgetId(created._id);
         setTotalBudget(Number(created.totalBudget) || 0);
         setCategoryBudgets({ ...created.categoryBudgets });
+        setIntervalPeriod(created.interval || 'monthly');
         notifySuccess('Budget created successfully!');
       } else {
-        const result = await updateBudget(budgetId, {
-          categoryBudgets: updatedCategoryBudgets,
-        });
+        const result = await updateBudget(
+          budgetId,
+          updatedCategoryBudgets,
+          selectedInterval
+        );
         const updatedDoc = result.updatedBudget;
         setTotalBudget(Number(updatedDoc.totalBudget) || 0);
         setCategoryBudgets({ ...updatedDoc.categoryBudgets });
+        setIntervalPeriod(updatedDoc.interval || 'monthly');
         notifySuccess('Budget updated successfully!');
       }
       setIsHovered(false);
@@ -117,6 +118,7 @@ const BudgetCard = ({ expenses }) => {
         setBudgetId(null);
         setTotalBudget(0);
         setCategoryBudgets({});
+        setIntervalPeriod('monthly');
       }
     } catch (error) {
       notifyError(error.message || 'Failed to delete budget.');
@@ -158,6 +160,7 @@ const BudgetCard = ({ expenses }) => {
         {showModal && (
           <CategoryBudgetModal
             categoryBudgets={categoryBudgets}
+            expenses={expenses}
             onClose={() => setShowModal(false)}
             onSave={handleModalSave}
           />
@@ -166,7 +169,12 @@ const BudgetCard = ({ expenses }) => {
     );
   }
 
-  const totalSpent = calculateTotalExpense(expenses);
+  const [startDate, endDate] = getTimeframeDates(interval);
+  const totalSpent = calculateTotalExpenseInInterval(
+    expenses,
+    startDate,
+    endDate
+  );
   const budgetPercentage =
     totalBudget > 0 ? (totalSpent / totalBudget) * 100 : 0;
   const alertColor = getBudgetAlertColor(budgetPercentage);
@@ -195,7 +203,12 @@ const BudgetCard = ({ expenses }) => {
           />
         </div>
         <div className="expense-info">
-          <h3>Budget Overview</h3>
+          <h3>
+            Budget Overview{' '}
+            <span className={`interval-tag ${interval.toLowerCase()}`}>
+              {interval.charAt(0).toUpperCase() + interval.slice(1)}
+            </span>
+          </h3>
           <p>
             ${totalSpent.toFixed(2)} / ${totalBudget.toFixed(2)}
           </p>
@@ -215,6 +228,7 @@ const BudgetCard = ({ expenses }) => {
       {showModal && (
         <CategoryBudgetModal
           categoryBudgets={categoryBudgets}
+          expenses={expenses}
           onClose={() => setShowModal(false)}
           onSave={handleModalSave}
         />
@@ -226,8 +240,18 @@ const BudgetCard = ({ expenses }) => {
 BudgetCard.propTypes = {
   expenses: PropTypes.arrayOf(
     PropTypes.shape({
-      amount: PropTypes.number.isRequired,
+      _id: PropTypes.string.isRequired,
       category: PropTypes.string.isRequired,
+      customCategory: PropTypes.bool,
+      amount: PropTypes.number.isRequired,
+      date: PropTypes.string,
+      description: PropTypes.string,
+      frequency: PropTypes.string,
+      isOriginal: PropTypes.bool,
+      originalExpenseId: PropTypes.string,
+      skippedDates: PropTypes.array,
+      createdAt: PropTypes.string,
+      updatedAt: PropTypes.string,
     })
   ).isRequired,
 };
