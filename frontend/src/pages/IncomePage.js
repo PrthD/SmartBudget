@@ -181,8 +181,9 @@ const IncomePage = () => {
   const handleSkipNextRecurrence = async (incomeId, dateToSkip) => {
     try {
       setLoading(true);
-
       await skipNextRecurrence(incomeId, dateToSkip);
+
+      await fetchInitialIncomes();
 
       setIncomeData((prevIncomes) =>
         prevIncomes.map((income) => {
@@ -246,7 +247,7 @@ const IncomePage = () => {
   const noIncomesMessage =
     incomeData.length === 0
       ? 'Nothing here yet! Add your first income to kick things off 💵'
-      : 'No incomes match your search. Try refining your filters.';
+      : 'No incomes match your search. Try adjusting your filters.';
 
   return (
     <div className="incomes-page">

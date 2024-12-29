@@ -70,18 +70,15 @@ export const groupIncomesBySource = (incomes) => {
   }
 
   const grouped = {};
-
   incomes.forEach((income) => {
     const key = income.source;
-
     if (!grouped[key]) {
       grouped[key] = {
-        source: income.source,
+        source: key,
         amount: 0,
         incomes: [],
       };
     }
-
     grouped[key].amount += income.amount || 0;
     grouped[key].incomes.push(income);
   });
@@ -129,12 +126,106 @@ export const getNextDate = (currentDate, frequency) => {
     case FREQUENCY.YEARLY:
       return currentDate.clone().add(1, 'year');
     default:
-      throw new Error('Invalid frequency type provided.');
+      throw new Error(`Invalid frequency type provided: ${frequency}`);
   }
 };
 
 /**
- * Calculate the next recurrence date for a recurring income, considering skipped dates.
+ * Generate ephemeral expansions for a single recurring income that fall within [startDate, endDate].
+ * @param {Object} income - The income object with fields: date, amount, frequency, skippedDates, etc.
+ * @param {moment.Moment} startDate - Start of the timeframe.
+ * @param {moment.Moment} endDate - End of the timeframe.
+ * @returns {Array<Object>} Array of ephemeral income instances (including the original date if in range).
+ */
+export const expandRecurringIncomesInInterval = (
+  income,
+  startDate,
+  endDate
+) => {
+  const expansions = [];
+  const { frequency, skippedDates = [] } = income;
+
+  let current = moment(income.date).tz('America/Edmonton').startOf('day');
+
+  const skipped = skippedDates.map((d) =>
+    moment(d).tz('America/Edmonton').format('YYYY-MM-DD')
+  );
+
+  const limit = endDate.clone().add(1, 'day').startOf('day');
+
+  while (current.isSameOrBefore(limit)) {
+    const currentStr = current.format('YYYY-MM-DD');
+
+    if (
+      !skipped.includes(currentStr) &&
+      current.isBetween(startDate, endDate, null, '[]')
+    ) {
+      expansions.push({
+        ...income,
+        date: currentStr,
+      });
+    }
+
+    current = getNextDate(current, frequency);
+
+    if (current.diff(startDate, 'years') > 5) {
+      break;
+    }
+  }
+
+  return expansions;
+};
+
+/**
+ * Expand *all* incomes in the specified interval, including ephemeral expansions
+ * for recurring incomes. For once-only incomes, we simply check if they fall in the range.
+ * @param {Array<Object>} incomes - The raw array of income documents from DB.
+ * @param {moment.Moment} startDate
+ * @param {moment.Moment} endDate
+ * @returns {Array<Object>} The ephemeral expansions for all incomes that fall in [startDate, endDate].
+ */
+export const expandIncomesInInterval = (incomes, startDate, endDate) => {
+  const allInInterval = [];
+
+  incomes.forEach((income) => {
+    if (!income.frequency || income.frequency === FREQUENCY.ONCE) {
+      const incomeDate = moment(income.date).tz('America/Edmonton');
+      if (incomeDate.isBetween(startDate, endDate, null, '[]')) {
+        allInInterval.push(income);
+      }
+    } else {
+      const expansions = expandRecurringIncomesInInterval(
+        income,
+        startDate,
+        endDate
+      );
+      allInInterval.push(...expansions);
+    }
+  });
+
+  return allInInterval;
+};
+
+/**
+ * Calculate the *total* income amount for a specified [startDate, endDate],
+ * including ephemeral expansions of any recurring incomes that fall in that range.
+ * @param {Array<Object>} incomes - The raw income data from DB.
+ * @param {moment.Moment} startDate
+ * @param {moment.Moment} endDate
+ * @returns {number} The total income for the chosen timeframe.
+ */
+export const calculateTotalIncomeInInterval = (incomes, startDate, endDate) => {
+  if (!Array.isArray(incomes)) {
+    throw new Error('Invalid data: incomes must be an array.');
+  }
+  const expansions = expandIncomesInInterval(incomes, startDate, endDate);
+
+  return expansions.reduce((sum, inc) => sum + (inc.amount || 0), 0);
+};
+
+/**
+ * Calculate the next recurrence date for a recurring income, considering skipped dates
+ * and ensuring that if the original date is in the future, we move to the recurrence *after* that date.
  * @param {Object} income - The income object.
  * @param {string} income.date - The original date of the income.
  * @param {string} income.frequency - The frequency of the income recurrence.
@@ -150,8 +241,12 @@ export const calculateNextRecurrence = (income) => {
   const today = moment().tz('America/Edmonton').startOf('day');
   const futureLimit = today.clone().add(5, 'years');
 
-  const skippedDates = (income.skippedDates || []).map((date) =>
-    moment(date).tz('America/Edmonton').startOf('day').format('YYYY-MM-DD')
+  if (nextDate.isSameOrAfter(today, 'day')) {
+    nextDate = getNextDate(nextDate, income.frequency);
+  }
+
+  const skippedDates = (income.skippedDates || []).map((d) =>
+    moment(d).tz('America/Edmonton').startOf('day').format('YYYY-MM-DD')
   );
 
   while (
@@ -159,6 +254,7 @@ export const calculateNextRecurrence = (income) => {
     skippedDates.includes(nextDate.format('YYYY-MM-DD'))
   ) {
     nextDate = getNextDate(nextDate, income.frequency);
+
     if (nextDate.isAfter(futureLimit)) {
       return null;
     }
@@ -174,16 +270,13 @@ export const calculateNextRecurrence = (income) => {
  * @returns {Array<Object>} Filtered array of income objects.
  */
 export const filterIncomes = (incomes, query) => {
-  if (!query) {
-    return incomes;
-  }
+  if (!query) return incomes;
 
   const keywords = query.toLowerCase().split(/\s+/);
 
   return incomes.filter((income) => {
     return keywords.every((keyword) => {
       const parsedKeyword = parseFloat(keyword);
-
       return (
         income.source.toLowerCase().includes(keyword) ||
         income.description?.toLowerCase().includes(keyword) ||
@@ -214,9 +307,8 @@ const compareValues = (field, a, b) => {
     return String(valueA)
       .toLowerCase()
       .localeCompare(String(valueB).toLowerCase());
-  } else {
-    return 0;
   }
+  return 0;
 };
 
 /**
@@ -231,7 +323,6 @@ export const sortByFields = (items, fields, orders = []) => {
     for (let i = 0; i < fields.length; i++) {
       const field = fields[i];
       const order = orders[i] || 'asc';
-
       let comparison = compareValues(field, a, b);
       if (comparison !== 0) {
         return order === 'asc' ? comparison : -comparison;

@@ -58,9 +58,9 @@ export const calculateTotalExpense = (expenseData) => {
 
 /**
  * Group expenses by category and sum their amounts.
+ * (Usually called after expansions or if expansions are not needed.)
  * @param {Array<Object>} expenses - Array of expense objects.
  * @returns {Array<Object>} Array of grouped expense objects by category.
- * @throws {Error} Throws an error if expenses is not an array.
  */
 export const groupExpensesByCategory = (expenses) => {
   if (!Array.isArray(expenses)) {
@@ -70,18 +70,15 @@ export const groupExpensesByCategory = (expenses) => {
   }
 
   const grouped = {};
-
   expenses.forEach((expense) => {
     const key = expense.category;
-
     if (!grouped[key]) {
       grouped[key] = {
-        category: expense.category,
+        category: key,
         amount: 0,
         expenses: [],
       };
     }
-
     grouped[key].amount += expense.amount || 0;
     grouped[key].expenses.push(expense);
   });
@@ -112,11 +109,10 @@ export const FREQUENCY = {
 };
 
 /**
- * Calculate the next date based on the provided frequency.
+ * Returns the next date after `currentDate` based on the provided frequency.
  * @param {moment.Moment} currentDate - The current date as a moment object.
  * @param {string} frequency - Frequency for the recurrence.
- * @returns {moment.Moment} The calculated next date as a moment object.
- * @throws {Error} Throws an error if an invalid frequency is provided.
+ * @returns {moment.Moment} The next recurrence date as a moment object.
  */
 export const getNextDate = (currentDate, frequency) => {
   switch (frequency) {
@@ -129,12 +125,110 @@ export const getNextDate = (currentDate, frequency) => {
     case FREQUENCY.YEARLY:
       return currentDate.clone().add(1, 'year');
     default:
-      throw new Error('Invalid frequency type provided.');
+      throw new Error(`Invalid frequency type provided: ${frequency}`);
   }
 };
 
 /**
- * Calculate the next recurrence date for a recurring expense, considering skipped dates.
+ * Generate ephemeral expansions for a single recurring expense that fall within [startDate, endDate].
+ * @param {Object} expense - The expense object with fields: date, amount, frequency, skippedDates, etc.
+ * @param {moment.Moment} startDate - Start of the timeframe.
+ * @param {moment.Moment} endDate - End of the timeframe.
+ * @returns {Array<Object>} Array of ephemeral expense instances (including the original date if in range).
+ */
+export const expandRecurringExpensesInInterval = (
+  expense,
+  startDate,
+  endDate
+) => {
+  const expansions = [];
+  const { frequency, skippedDates = [] } = expense;
+
+  let current = moment(expense.date).tz('America/Edmonton').startOf('day');
+
+  const skipped = skippedDates.map((d) =>
+    moment(d).tz('America/Edmonton').format('YYYY-MM-DD')
+  );
+
+  const limit = endDate.clone().add(1, 'day').startOf('day');
+
+  while (current.isSameOrBefore(limit)) {
+    const currentStr = current.format('YYYY-MM-DD');
+
+    if (
+      !skipped.includes(currentStr) &&
+      current.isBetween(startDate, endDate, null, '[]')
+    ) {
+      expansions.push({
+        ...expense,
+        date: currentStr,
+      });
+    }
+
+    current = getNextDate(current, frequency);
+
+    if (current.diff(startDate, 'years') > 5) {
+      break;
+    }
+  }
+
+  return expansions;
+};
+
+/**
+ * Expand *all* expenses in the specified interval, including ephemeral expansions
+ * for recurring expenses. For once-only expenses, we simply check if they fall in the range.
+ * @param {Array<Object>} expenses - The raw array of expense documents from DB.
+ * @param {moment.Moment} startDate
+ * @param {moment.Moment} endDate
+ * @returns {Array<Object>} The ephemeral expansions for all expenses that fall in [startDate, endDate].
+ */
+export const expandExpensesInInterval = (expenses, startDate, endDate) => {
+  const allInInterval = [];
+
+  expenses.forEach((expense) => {
+    if (!expense.frequency || expense.frequency === FREQUENCY.ONCE) {
+      const expenseDate = moment(expense.date).tz('America/Edmonton');
+      if (expenseDate.isBetween(startDate, endDate, null, '[]')) {
+        allInInterval.push(expense);
+      }
+    } else {
+      const expansions = expandRecurringExpensesInInterval(
+        expense,
+        startDate,
+        endDate
+      );
+      allInInterval.push(...expansions);
+    }
+  });
+
+  return allInInterval;
+};
+
+/**
+ * Calculate the *total* expense amount for a specified [startDate, endDate],
+ * including ephemeral expansions of any recurring expenses that fall in that range.
+ * @param {Array<Object>} expenses - The raw expense data from DB.
+ * @param {moment.Moment} startDate
+ * @param {moment.Moment} endDate
+ * @returns {number} The total expense for the chosen timeframe.
+ */
+export const calculateTotalExpenseInInterval = (
+  expenses,
+  startDate,
+  endDate
+) => {
+  if (!Array.isArray(expenses)) {
+    throw new Error('Invalid data: expenses must be an array.');
+  }
+  const expansions = expandExpensesInInterval(expenses, startDate, endDate);
+
+  return expansions.reduce((sum, exp) => sum + (exp.amount || 0), 0);
+};
+
+/**
+ * Calculate the next recurrence date for a recurring expense, considering skipped dates
+ * and ensuring that if the original date is in the future, we move to the recurrence *after* that date.
  * @param {Object} expense - The expense object.
  * @param {string} expense.date - The original date of the expense.
  * @param {string} expense.frequency - The frequency of the expense recurrence.
@@ -150,8 +244,12 @@ export const calculateNextRecurrence = (expense) => {
   const today = moment().tz('America/Edmonton').startOf('day');
   const futureLimit = today.clone().add(5, 'years');
 
-  const skippedDates = (expense.skippedDates || []).map((date) =>
-    moment(date).tz('America/Edmonton').startOf('day').format('YYYY-MM-DD')
+  if (nextDate.isSameOrAfter(today, 'day')) {
+    nextDate = getNextDate(nextDate, expense.frequency);
+  }
+
+  const skippedDates = (expense.skippedDates || []).map((d) =>
+    moment(d).tz('America/Edmonton').startOf('day').format('YYYY-MM-DD')
   );
 
   while (
@@ -174,16 +272,13 @@ export const calculateNextRecurrence = (expense) => {
  * @returns {Array<Object>} Filtered array of expense objects.
  */
 export const filterExpenses = (expenses, query) => {
-  if (!query) {
-    return expenses;
-  }
+  if (!query) return expenses;
 
   const keywords = query.toLowerCase().split(/\s+/);
 
-  return expenses.filter((expense) => {
-    return keywords.every((keyword) => {
+  return expenses.filter((expense) =>
+    keywords.every((keyword) => {
       const parsedKeyword = parseFloat(keyword);
-
       return (
         expense.category.toLowerCase().includes(keyword) ||
         expense.description?.toLowerCase().includes(keyword) ||
@@ -191,8 +286,8 @@ export const filterExpenses = (expenses, query) => {
         expense.date.includes(keyword) ||
         (expense.frequency && expense.frequency.toLowerCase() === keyword)
       );
-    });
-  });
+    })
+  );
 };
 
 /**
@@ -214,9 +309,8 @@ const compareValues = (field, a, b) => {
     return String(valueA)
       .toLowerCase()
       .localeCompare(String(valueB).toLowerCase());
-  } else {
-    return 0;
   }
+  return 0;
 };
 
 /**
@@ -231,8 +325,7 @@ export const sortByFields = (items, fields, orders = []) => {
     for (let i = 0; i < fields.length; i++) {
       const field = fields[i];
       const order = orders[i] || 'asc';
-
-      let comparison = compareValues(field, a, b);
+      const comparison = compareValues(field, a, b);
       if (comparison !== 0) {
         return order === 'asc' ? comparison : -comparison;
       }

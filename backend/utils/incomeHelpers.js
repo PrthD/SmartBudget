@@ -26,17 +26,18 @@ export const getNextDate = (currentDate, frequency) => {
     case FREQUENCY.YEARLY:
       return currentDate.clone().add(1, 'year');
     default:
-      throw new Error('Invalid frequency type provided.');
+      throw new Error(`Invalid frequency type provided: ${frequency}`);
   }
 };
 
 /**
- * Calculate the next recurrence date for a recurring income, considering skipped dates.
+ * Calculate the next recurrence date for a recurring income, considering skipped dates
+ * and ensuring that if the original date is in the future, we move to the recurrence *after* that date.
  * @param {Object} income - The income object.
  * @returns {Date|null} The next recurrence date or null if not applicable.
  */
 export const calculateNextRecurrence = (income) => {
-  if (!income.frequency || income.frequency === 'once') {
+  if (!income.frequency || income.frequency === FREQUENCY.ONCE) {
     return null;
   }
 
@@ -47,6 +48,10 @@ export const calculateNextRecurrence = (income) => {
   const skippedDates = (income.skippedDates || []).map((date) =>
     moment(date).tz('America/Edmonton').startOf('day').format('YYYY-MM-DD')
   );
+
+  if (nextDate.isSameOrAfter(today, 'day')) {
+    nextDate = getNextDate(nextDate, income.frequency);
+  }
 
   while (
     nextDate.isSameOrBefore(today) ||

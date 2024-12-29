@@ -182,8 +182,9 @@ const ExpensesPage = () => {
   const handleSkipNextRecurrence = async (expenseId, dateToSkip) => {
     try {
       setLoading(true);
-
       await skipNextRecurrence(expenseId, dateToSkip);
+
+      await fetchInitialExpenses();
 
       setExpenseData((prevExpenses) =>
         prevExpenses.map((expense) => {
