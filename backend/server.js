@@ -8,6 +8,7 @@ import aiRoutes from './routes/aiRoutes.js';
 import expenseRoutes from './routes/expenseRoutes.js';
 import budgetRoutes from './routes/budgetRoutes.js';
 import incomeRoutes from './routes/incomeRoutes.js';
+import incomeGoalRoutes from './routes/incomeGoalRoutes.js';
 import savingsRoutes from './routes/savingsRoutes.js';
 
 dotenv.config();
@@ -33,6 +34,7 @@ app.use('/api/ai', aiRoutes);
 app.use('/api/expense', expenseRoutes);
 app.use('/api/budget', budgetRoutes);
 app.use('/api/income', incomeRoutes);
+app.use('/api/income-goal', incomeGoalRoutes);
 app.use('/api/savings', savingsRoutes);
 
 // Centralized error-handling middleware

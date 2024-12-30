@@ -1,3 +1,11 @@
+.goal-card-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 10px;
+  width: 100%;
+}
+
 /* Split Screen Container Styling */
 .split-screen-container {
   display: flex;
@@ -24,7 +32,8 @@
 }
 
 /* Form and Overview Sections Styling */
-.form-section {
+.form-section,
+.overview-section {
   flex: 1;
   max-width: 600px;
   display: flex;
@@ -43,6 +52,25 @@
   margin: 0 auto;
   transform: translateX(0);
   opacity: 1;
+}
+
+.overview-section {
+  margin-top: 30px;
+  opacity: 1;
+  transform: translateX(0);
+  transition: box-shadow 0.3s, transform 0.3s ease-in-out, width 0.5s ease-in-out;
+  border-radius: 20px;
+  box-shadow: none;
+  width: auto;
+}
+
+.overview-section:hover {
+  box-shadow: 0 15px 35px rgba(0, 76, 153, 0.15);
+}
+
+.overview-section.hidden {
+  display: none;
+  pointer-events: none;
 }
 
 /* Chart Section */

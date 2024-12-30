@@ -17,6 +17,7 @@ import IncomeSort from '../components/incomes/IncomeSort';
 import NavBar from '../components/common/NavBar';
 import Chart from 'react-apexcharts';
 import IncomeCard from '../components/incomes/IncomeCard';
+import GoalCard from '../components/incomes/GoalCard';
 import { FaChevronDown, FaChevronUp } from 'react-icons/fa';
 import 'react-circular-progressbar/dist/styles.css';
 import { CSSTransition, TransitionGroup } from 'react-transition-group';
@@ -252,6 +253,10 @@ const IncomePage = () => {
   return (
     <div className="incomes-page">
       <NavBar />
+
+      <div className="goal-card-wrapper">
+        <GoalCard incomes={incomeData} />
+      </div>
 
       <div
         className={`split-screen-container ${

@@ -214,7 +214,11 @@ const CategoryBudgetModal = ({
               );
             })
           ) : (
-            <p className="no-budgets-message">No categories available.</p>
+            <p className="no-budgets-message">
+              No categories budgets found. Click the{' '}
+              <FaPlusCircle aria-label="Add Budget" /> button above to add a new
+              category budget.
+            </p>
           )}
         </div>
 

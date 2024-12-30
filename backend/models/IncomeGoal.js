@@ -1,18 +1,18 @@
 import mongoose from 'mongoose';
 
-const BudgetSchema = new mongoose.Schema(
+const IncomeGoalSchema = new mongoose.Schema(
   {
     user: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
       // required: true,
     },
-    totalBudget: {
+    totalGoal: {
       type: Number,
       default: 0,
       min: 0,
     },
-    categoryBudgets: {
+    sourceGoals: {
       type: Map,
       of: Number,
       default: {},
@@ -26,6 +26,7 @@ const BudgetSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-const Budget = mongoose.models.Budget || mongoose.model('Budget', BudgetSchema);
+const IncomeGoal =
+  mongoose.models.IncomeGoal || mongoose.model('IncomeGoal', IncomeGoalSchema);
 
-export default Budget;
+export default IncomeGoal;
