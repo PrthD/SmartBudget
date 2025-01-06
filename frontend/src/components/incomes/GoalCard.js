@@ -3,7 +3,11 @@ import PropTypes from 'prop-types';
 import { CircularProgressbar, buildStyles } from 'react-circular-progressbar';
 import { FaTrash } from 'react-icons/fa';
 import 'react-circular-progressbar/dist/styles.css';
-import { notifyError, notifySuccess } from '../../utils/notificationService';
+import {
+  notifyError,
+  notifySuccess,
+  showGoalSuccessAlert,
+} from '../../utils/notificationService';
 import { confirmAction } from '../../utils/confirmationService';
 import {
   fetchIncomeGoal,
@@ -29,6 +33,15 @@ const GoalCard = ({ incomes }) => {
   const [showModal, setShowModal] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const [goalLoaded, setGoalLoaded] = useState(false);
+
+  const [startDate, endDate] = getTimeframeDates(interval);
+  const totalIncome = calculateTotalIncomeInInterval(
+    incomes,
+    startDate,
+    endDate
+  );
+  const goalPercentage = totalGoal > 0 ? (totalIncome / totalGoal) * 100 : 0;
+  const alertColor = getGoalAlertColor(goalPercentage);
 
   useEffect(() => {
     const loadGoal = async () => {
@@ -56,6 +69,14 @@ const GoalCard = ({ incomes }) => {
 
     loadGoal();
   }, [incomes]);
+
+  useEffect(() => {
+    if (goalPercentage >= 100) {
+      showGoalSuccessAlert(
+        'Congratulations! You have achieved 100% or more of your income goal! 🎉'
+      );
+    }
+  }, [goalPercentage]);
 
   const handleCreateOrEditGoal = () => {
     const merged = mergeSourceGoals(sourceGoals, incomes);
@@ -167,15 +188,6 @@ const GoalCard = ({ incomes }) => {
       </div>
     );
   }
-
-  const [startDate, endDate] = getTimeframeDates(interval);
-  const totalIncome = calculateTotalIncomeInInterval(
-    incomes,
-    startDate,
-    endDate
-  );
-  const goalPercentage = totalGoal > 0 ? (totalIncome / totalGoal) * 100 : 0;
-  const alertColor = getGoalAlertColor(goalPercentage);
 
   return (
     <div

@@ -32,3 +32,42 @@ export const notifyWarning = (message) => {
     autoClose: 2000,
   });
 };
+
+export const showBudgetAlert = (message) => {
+  toast.warning(message, {
+    position: 'top-right',
+    autoClose: 5000,
+    hideProgressBar: false,
+    closeOnClick: true,
+    pauseOnHover: true,
+    draggable: true,
+    progress: undefined,
+    className: 'budget-toast',
+  });
+};
+
+export const showGoalSuccessAlert = (message) => {
+  toast.success(message, {
+    position: 'top-right',
+    autoClose: 5000,
+    hideProgressBar: false,
+    closeOnClick: true,
+    pauseOnHover: true,
+    draggable: true,
+    progress: undefined,
+    className: 'goal-toast',
+  });
+};
+
+export const showSavingsGoalSuccessAlert = (message) => {
+  toast.success(message, {
+    position: 'top-right',
+    autoClose: 5000,
+    hideProgressBar: false,
+    closeOnClick: true,
+    pauseOnHover: true,
+    draggable: true,
+    progress: undefined,
+    className: 'savings-goal-toast',
+  });
+};

@@ -34,7 +34,54 @@
     flex-shrink: 0;
   }
 
+  /* showBudgetAlert Stylings */
+  .budget-toast {
+    background-color: #fff9e6 !important;
+    color: #e6b800 !important;
+    font-weight: bold;
+    border-radius: 8px;
+    padding: 12px;
+    display: flex;
+    align-items: center;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+
+  .Toastify__toast-container--top-right {
+    top: 70px !important;
+    right: 5px !important;
+  }
+
+  .Toastify__toast-body {
+    flex: 1;
+    font-size: 16px;
+  }
+
+  /* showGoalSuccessAlert Stylings */
+  .goal-toast {
+    background-color: #e6ffe6 !important;
+    color: #339933 !important;
+    font-weight: bold;
+    border-radius: 8px;
+    padding: 12px;
+    display: flex;
+    align-items: center;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+
+  /* showSavingsGoalSuccessAlert Stylings */
+  .savings-goal-toast {
+    background-color: #e6ffe6 !important;
+    color: #339933 !important;
+    font-weight: bold;
+    border-radius: 8px;
+    padding: 12px;
+    display: flex;
+    align-items: center;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+
 /* confirmationService Stylings */
+/* confirmAction Stylings */
 .swal2-confirm, .swal2-cancel {
     border-radius: 5px;
     border: none;

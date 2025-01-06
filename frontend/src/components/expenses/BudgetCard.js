@@ -3,7 +3,11 @@ import PropTypes from 'prop-types';
 import { CircularProgressbar, buildStyles } from 'react-circular-progressbar';
 import { FaTrash } from 'react-icons/fa';
 import 'react-circular-progressbar/dist/styles.css';
-import { notifyError, notifySuccess } from '../../utils/notificationService';
+import {
+  notifyError,
+  notifySuccess,
+  showBudgetAlert,
+} from '../../utils/notificationService';
 import { confirmAction } from '../../utils/confirmationService';
 import {
   fetchBudget,
@@ -29,6 +33,16 @@ const BudgetCard = ({ expenses }) => {
   const [showModal, setShowModal] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const [budgetLoaded, setBudgetLoaded] = useState(false);
+
+  const [startDate, endDate] = getTimeframeDates(interval);
+  const totalSpent = calculateTotalExpenseInInterval(
+    expenses,
+    startDate,
+    endDate
+  );
+  const budgetPercentage =
+    totalBudget > 0 ? (totalSpent / totalBudget) * 100 : 0;
+  const alertColor = getBudgetAlertColor(budgetPercentage);
 
   useEffect(() => {
     const loadBudget = async () => {
@@ -57,6 +71,14 @@ const BudgetCard = ({ expenses }) => {
 
     loadBudget();
   }, [expenses]);
+
+  useEffect(() => {
+    if (budgetPercentage >= 100) {
+      showBudgetAlert(
+        'Budget alert! You have used 100% or more of your allocated budget. 🚨'
+      );
+    }
+  }, [budgetPercentage]);
 
   const handleCreateOrEditBudget = () => {
     const merged = mergeBudgetCategories(categoryBudgets, expenses);
@@ -168,16 +190,6 @@ const BudgetCard = ({ expenses }) => {
       </div>
     );
   }
-
-  const [startDate, endDate] = getTimeframeDates(interval);
-  const totalSpent = calculateTotalExpenseInInterval(
-    expenses,
-    startDate,
-    endDate
-  );
-  const budgetPercentage =
-    totalBudget > 0 ? (totalSpent / totalBudget) * 100 : 0;
-  const alertColor = getBudgetAlertColor(budgetPercentage);
 
   return (
     <div
