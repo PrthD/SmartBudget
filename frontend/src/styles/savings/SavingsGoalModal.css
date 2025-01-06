@@ -1,0 +1,230 @@
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1500;
+    cursor: default;
+  }
+  
+  .modal-content.savings-goal-modal {
+    background-color: #ffffff;
+    padding: 30px;
+    border-radius: 20px;
+    width: 500px;
+    box-shadow: 0 10px 30px rgba(0, 76, 153, 0.2);
+    position: relative;
+    transition: box-shadow 0.3s;
+    font-family: 'Inter', sans-serif;
+  }
+  
+  .modal-content.savings-goal-modal:hover {
+    box-shadow: 0 15px 35px rgba(0, 76, 153, 0.25);
+  }
+  
+  .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+  
+  .modal-title {
+    font-size: 1.8rem;
+    font-weight: bold;
+    color: #004c99;
+    margin: 0;
+  }
+  
+  .close-btn {
+    background: #d9534f;
+    border: none;
+    color: #ffffff;
+    font-size: 1.5rem;
+    font-weight: bold;
+    border-radius: 50%;
+    cursor: pointer;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: background-color 0.3s;
+  }
+  
+  .close-btn:hover {
+    background-color: #c9302c;
+  }
+  
+  .budget-interval-container {
+    margin-bottom: 20px;
+  }
+  
+  .budget-interval-label {
+    font-weight: bold;
+    margin-right: 10px;
+  }
+  
+  .budget-interval-select {
+    flex: 1;
+    padding: 8px 12px;
+    border: 2px solid #d1d1d6;
+    border-radius: 30px;
+    font-size: 1rem;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease;
+    background-color: #f9f9fb;
+    color: #004c99;
+  }
+  .budget-interval-select:hover {
+    border-color: #a3b3c9;
+  }
+  .budget-interval-select:focus {
+    border-color: #000000 !important;
+    box-shadow: 0 0 15px rgba(0, 76, 153, 0.3);
+    transform: scale(1.02);
+  }
+
+  .net-savings-info {
+    margin-bottom: 20px;
+  }
+
+  .net-savings-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 1.2rem;
+    margin: 5px 0;
+    color: #004c99;
+  }
+  
+  .net-savings-label {
+    font-weight: 600;
+  }
+  
+  .net-savings-value {
+    font-weight: 600;
+  }
+  
+  .negative-warning {
+    color: #d9534f;
+    margin-top: 8px;
+    text-align: center;
+    font-size: 1rem;
+    font-style: italic;
+  }
+  
+  .budgets-list {
+    margin-top: 10px;
+    margin-bottom: 20px;
+    max-height: 300px;
+    overflow-y: auto;
+  }
+  
+  .budget-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    gap: 10px;
+  }
+  
+  .category-label {
+    font-size: 1rem;
+    color: #004c99;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  
+  .budget-input-container {
+    position: relative;
+    flex: 0 1 180px;
+  }
+  
+  .budget-input {
+    padding: 12px 8px;
+    width: 100%;
+    border: 2px solid #d1d1d6;
+    border-radius: 30px;
+    font-size: 1rem;
+    transition: border-color 0.3s, box-shadow 0.3s, transform 0.3s;
+    background-color: #f9f9fb;
+    color: #004c99;
+    outline: none;
+    text-align: left;
+  }
+  .budget-input:hover {
+    border-color: #a3b3c9;
+  }
+  .budget-input:focus {
+    border-color: #004c99;
+    box-shadow: 0 0 15px rgba(0, 76, 153, 0.3);
+    transform: scale(1.02);
+  }
+
+  .negative-amount {
+    color: #d9534f;
+    font-weight: bold;
+  }
+  
+  .icon.budget-icon {
+    position: absolute;
+    left: 12px;
+    top: 53%;
+    transform: translateY(-50%);
+    color: #004c99;
+    font-size: 1.2rem;
+  }
+  
+  .modal-actions {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+  }
+  
+  .cancel-btn,
+  .save-btn {
+    background-color: #004c99;
+    color: #ffffff;
+    border: none;
+    padding: 15px 30px;
+    border-radius: 30px;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.3s ease-in-out;
+    font-size: 1.1rem;
+    font-weight: bold;
+    font-family: 'Inter', sans-serif;
+  }
+  
+  .cancel-btn:hover,
+  .save-btn:hover {
+    background-color: #003366;
+  }
+  
+  .cancel-btn {
+    background-color: #d9534f;
+  }
+  
+  .cancel-btn:hover {
+    background-color: #c9302c;
+  }
+  
+  @media (max-width: 480px) {
+    .modal-content.savings-goal-modal {
+      width: 95%;
+      padding: 20px;
+    }
+    .budget-input {
+      width: 100%;
+    }
+    .budget-item {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+  }
+  

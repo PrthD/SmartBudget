@@ -10,6 +10,7 @@ import budgetRoutes from './routes/budgetRoutes.js';
 import incomeRoutes from './routes/incomeRoutes.js';
 import incomeGoalRoutes from './routes/incomeGoalRoutes.js';
 import savingsRoutes from './routes/savingsRoutes.js';
+import savingsGoalRoutes from './routes/savingsGoalRoutes.js';
 
 dotenv.config();
 
@@ -36,9 +37,10 @@ app.use('/api/budget', budgetRoutes);
 app.use('/api/income', incomeRoutes);
 app.use('/api/income-goal', incomeGoalRoutes);
 app.use('/api/savings', savingsRoutes);
+app.use('/api/savings-goal', savingsGoalRoutes);
 
 // Centralized error-handling middleware
-app.use((err, req, res) => {
+app.use((err, req, res, _next) => {
   const statusCode = err.status || 500;
   logger.error(
     `${req.method} ${req.originalUrl} ${statusCode} - ${err.message}`

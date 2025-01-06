@@ -1,30 +1,69 @@
-.budget-card {
-  position: relative;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 100%;
-  margin: 20px auto;
-  background-color: #ffffff;
-  color: #004c99;
-  padding: 20px;
-  border-radius: 20px;
-  box-shadow: 0 10px 30px rgba(0, 76, 153, 0.1);
-  transition: box-shadow 0.3s, filter 0.3s ease-in-out, max-width 0.3s ease;
-  cursor: pointer;
-}
-
-  .budget-card.empty-state {
-    max-width: 700px;
+.savings-goal-card {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    margin: 20px auto;
+    background-color: #ffffff;
+    color: #004c99;
+    padding: 20px;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0, 76, 153, 0.1);
+    transition: box-shadow 0.3s, filter 0.3s ease-in-out, max-width 0.3s ease;
+    cursor: pointer;
   }
 
-  .budget-card.budget-added {
-    max-width: 500px;
+  .savings-goal-card.no-goals {
+    text-align: center;
+    max-width: 650px;
+  }
+  
+  .savings-goal-card.empty-state {
+    max-width: 720px;
+  }
+  
+  .savings-goal-card.goal-added {
+    max-width: 620px;
     justify-content: left;
   }
-
-  .budget-card.hovered {
+  
+  .savings-goal-card.hovered {
     box-shadow: 0 15px 35px rgba(0, 76, 153, 0.15);
+  }
+
+  .no-goals-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 10px;
+  }
+
+  .current-savings {
+    font-size: 1.8rem;
+    font-weight: bold;
+    margin: 10px 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .savings-summary {
+    font-size: 1.4rem;
+    margin: 10px 0;
+  }
+  
+  .negative-amount {
+    color: #d9534f;
+    font-weight: bold;
+  }  
+  
+  .no-goals-message {
+    font-size: 1.2rem;
+    color: #555;
+    margin-top: 15px;
   }
   
   .pencil-icon {
@@ -37,43 +76,10 @@
     transition: opacity 0.3s ease;
   }
   
-  .budget-card.hovered .pencil-icon {
+  .savings-goal-card.hovered .pencil-icon {
     opacity: 1;
   }
-
-.goal-card {
-  position: relative;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 100%;
-  margin: 20px auto;
-  background-color: #ffffff;
-  color: #004c99;
-  padding: 20px;
-  border-radius: 20px;
-  box-shadow: 0 10px 30px rgba(0, 76, 153, 0.1);
-  transition: box-shadow 0.3s, filter 0.3s ease-in-out, max-width 0.3s ease;
-  cursor: pointer;
-}
-
-  .goal-card.empty-state {
-    max-width: 730px;
-  }
-
-  .goal-card.goal-added {
-    max-width: 570px;
-    justify-content: left;
-  }
-
-  .goal-card.hovered {
-    box-shadow: 0 15px 35px rgba(0, 76, 153, 0.15);
-  }
-
-  .goal-card.hovered .pencil-icon {
-    opacity: 1;
-  }
-
+  
   .delete-icon-btn {
     position: absolute;
     bottom: 10px;
@@ -82,11 +88,9 @@
     background-color: transparent;
     border: none;
     color: #d9534f;
-    font-size: 1.20rem;
+    font-size: 1.2rem;
     cursor: pointer;
     padding: 0;
-    width: auto;
-    height: auto;
     margin: 0;
     transition: color 0.3s ease, background-color 0.3s ease;
     border-radius: 50%;
@@ -96,7 +100,7 @@
     color: #c9302c;
     background-color: transparent;
   }
-
+  
   .interval-tag {
     display: inline-block;
     padding: 4px 10px;
@@ -105,26 +109,23 @@
     color: #ffffff;
     border-radius: 15px;
     text-transform: capitalize;
-    transition: background-color 0.3s ease, transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
+    transition: background-color 0.3s, transform 0.3s, opacity 0.3s;
     white-space: nowrap;
   }
-
+  
   .interval-tag.weekly {
     background-color: #f39c12;
   }
-
   .interval-tag.biweekly {
     background-color: #16a085;
   }
-
   .interval-tag.monthly {
     background-color: #2980b9;
   }
-
   .interval-tag.yearly {
     background-color: #8e44ad;
   }
-
+  
   .interval-tag:hover {
     opacity: 0.9;
   }
@@ -145,12 +146,13 @@
     height: 100px;
   }
   
-  .expense-info {
+  .savings-info, .goal-info {
     text-align: left;
     flex: 1;
   }
   
-  .expense-info h3 {
+  .savings-info h3,
+  .goal-info h3 {
     margin: 0;
     font-size: 1.8rem;
     font-weight: bold;
@@ -159,20 +161,26 @@
     gap: 10px;
   }
   
-  .expense-info p {
+  .savings-info p,
+  .goal-info p {
     margin: 5px 0 0;
     font-size: 1.4rem;
     font-weight: bold;
     color: #003366;
   }
-
-  .no-budget-container {
+  
+  .no-goals-defined {
+    max-width: 720px;
+    cursor: default;
+  }
+  
+  .no-goal-container {
     display: flex;
     flex-direction: column;
     text-align: center;
   }
-
-  .no-budget-content {
+  
+  .no-goal-content {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -181,34 +189,34 @@
     text-align: left;
   }
   
-  .no-budget-illustration {
-    max-width: 150px;
-    height: auto;
-    flex-shrink: 0;
-  }
-  
   .no-goal-illustration {
     max-width: 120px;
     height: auto;
     flex-shrink: 0;
   }
-
-  .no-budget-container h3 {
+  
+  .no-goal-container h3 {
     font-size: 1.6rem;
     color: #004c99;
     font-weight: bold;
     margin: 0 0 5px 0;
   }
   
-  .no-budget-container p {
+  .no-goal-container p {
     font-size: 1.2rem;
     color: #555;
     margin-top: 0;
   }
-
-  .no-budget-container h3,
-  .no-budget-container p {
+  
+  .no-goal-container h3,
+  .no-goal-container p {
     text-align: left;
     width: 100%;
+  }
+  
+  .loading-state {
+    text-align: center;
+    font-size: 1.2rem;
+    color: #777;
   }
   

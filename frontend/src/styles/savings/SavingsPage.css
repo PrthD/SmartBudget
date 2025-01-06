@@ -1,9 +1,288 @@
-.savings-page th {
+.goal-card-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 10px;
+  width: 100%;
+}
+
+/* Split Screen Container Styling */
+.split-screen-container {
+  display: flex;
+  gap: 30px;
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+  align-items: center;
+  justify-content: space-around;
+  transition: transform 0.5s ease-in-out, padding 0.5s ease-in-out, justify-content 0.5s ease-in-out;
+  transform: translateX(0);
+  padding-right: 0;
+}
+
+/* Form and Overview Sections Styling */
+.form-section {
+  flex: 1;
+  max-width: 500px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  background-color: transparent;
+  border: none;
+  box-shadow: none;
+  height: 100%;
+  transition: all 0.5s ease-in-out;
+  width: 100%;
+}
+
+/* Overview Card Enhancements */
+.overview-card.detailed {
+  padding: 30px;
+  background-color: transparent;
+  border-radius: 15px;
+  box-shadow: none;
+  transition: box-shadow 0.3s ease-in-out, background-color 0.3s ease-in-out;
+}
+
+.overview-card.detailed:hover {
+  background-color: #ffffff;
+  box-shadow: 0 15px 35px rgba(0, 76, 153, 0.15);
+}
+
+.progress-bar-container {
+  display: flex;
+  height: 60px;
+  border-radius: 15px;
+  overflow: visible;
+  box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.2);
+  margin: 30px auto;
+  max-width: 700px;
+  position: relative;
+  background-color: #f1f3f6;
+  border: 2px solid #e4e7ec;
+}
+
+.progress-bar-segment {
+  position: relative;
+  min-width: 50px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: #fff;
+  font-size: 0.9rem;
+  font-weight: bold;
+  height: 100%;
+  flex: calc(var(--ratio, 0.1));
+  background-color: hsl(var(--segment-hue, 0), 70%, 50%);
+  transition: flex 0.3s ease-in-out, transform 0.3s ease-in-out, 
+              opacity 0.3s ease-in-out;
+  cursor: pointer;
+}
+
+.progress-bar-segment:hover {
+  opacity: 0.9;
+  transform: scaleY(1.05);
+}
+
+.progress-bar-empty-message {
+  margin-top: 10px;
+  font-size: 0.9rem;
+  color: #555;
+  font-style: italic;
+}
+
+.progress-bar-percentage {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 0.8rem;
+  white-space: nowrap;
+}
+
+.progress-bar-segment:hover .progress-bar-percentage {
+  display: block;
+  position: absolute;
+  top: -35px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 5px 8px;
+  font-size: 0.8rem;
+  font-weight: normal;
+  color: #333;
+  background-color: #fff;
+  border-radius: 5px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+  opacity: 1;
+  pointer-events: none;
+}
+
+.progress-bar-legend {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 20px;
+  margin-top: 15px;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.legend-color {
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+}
+
+.legend-label {
+  font-size: 0.9rem;
+  color: #333;
+  font-weight: bold;
+}
+
+.collapsible-header {
+  font-size: 1.5rem;
+  color: #004c99;
+  font-weight: 700;
+  margin-bottom: 20px;
+  text-align: center;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  transition: color 0.3s;
+}
+
+.collapsible-header::before,
+.collapsible-header::after {
+  content: '';
+  flex: 1;
+  border-bottom: 1px solid #e6e8f1;
+  margin: 0 10px;
+}
+
+.collapsible-header:hover::before,
+.collapsible-header:hover::after {
+  border-bottom: 1px solid #004c99;
+}
+
+.no-savings-container {
+  text-align: center;
+  padding: 40px;
+}
+
+.no-savings-illustration {
+  max-width: 400px;
+  margin-bottom: 20px;
+  filter: hue-rotate(190deg) contrast(100%);
+}
+
+.no-savings-container p {
+  font-size: 1.2rem;
+  color: #555;
+}
+
+/* Savings List Section Styling */
+.savings-list {
+  width: 95%;
+  max-width: 1400px;
+  margin: 20px auto 30px;
+  border-radius: 12px;
+  padding: 0 15px;
+  position: relative;
+}
+
+/* Savings List Title Styling */
+.savings-list h3 {
+  font-size: 1.5rem;
+  color: #004c99;
+  font-weight: 700;
+  margin-bottom: 20px;
   text-align: center;
 }
 
-.savings-page td div {
+/* Savings Cards Container */
+.savings-cards-container {
   display: flex;
-  gap: 10px;
-  justify-content: center;
+  flex-direction: column;
+  gap: 20px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Transition for Savings List */
+.savings-list-transition-enter {
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+}
+
+.savings-list-transition-enter-active {
+  max-height: 1000px;
+  opacity: 1;
+  transition: max-height 500ms cubic-bezier(0.25, 1, 0.5, 1), opacity 500ms cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.savings-list-transition-exit {
+  max-height: 1000px;
+  opacity: 1;
+}
+
+.savings-list-transition-exit-active {
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  transition: max-height 500ms cubic-bezier(0.25, 1, 0.5, 1), opacity 500ms cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+/* Ensure no horizontal scrolling */
+body,
+html {
+  overflow-x: hidden;
+}
+
+/* Additional Transitions for Card Details */
+.card-details-transition-enter {
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+}
+
+.card-details-transition-enter-active {
+  max-height: 500px;
+  opacity: 1;
+  transition: max-height 300ms ease-in-out, opacity 300ms ease-in-out;
+}
+
+.card-details-transition-exit {
+  max-height: 500px;
+  opacity: 1;
+}
+
+.card-details-transition-exit-active {
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  transition: max-height 300ms ease-in-out, opacity 300ms ease-in-out;
+}
+
+@media (max-width: 768px) {
+  .split-screen-container {
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+  }
+
+  .form-section,
+  .overview-card.detailed {
+      max-width: 90%;
+      width: 100%;
+  }
 }

@@ -19,7 +19,6 @@ import Chart from 'react-apexcharts';
 import ExpenseCard from '../components/expenses/ExpenseCard';
 import BudgetCard from '../components/expenses/BudgetCard';
 import { FaChevronDown, FaChevronUp } from 'react-icons/fa';
-import 'react-circular-progressbar/dist/styles.css';
 import { CSSTransition, TransitionGroup } from 'react-transition-group';
 import noExpensesIllustration from '../assets/icons/no-expenses.svg';
 import '../styles/expenses/ExpensePage.css';

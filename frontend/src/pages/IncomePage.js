@@ -19,7 +19,6 @@ import Chart from 'react-apexcharts';
 import IncomeCard from '../components/incomes/IncomeCard';
 import GoalCard from '../components/incomes/GoalCard';
 import { FaChevronDown, FaChevronUp } from 'react-icons/fa';
-import 'react-circular-progressbar/dist/styles.css';
 import { CSSTransition, TransitionGroup } from 'react-transition-group';
 import noIncomesIllustration from '../assets/icons/no-incomes.svg';
 import '../styles/incomes/IncomePage.css';
