@@ -121,3 +121,11 @@ export const sortSourceGoals = (
 
   return [...dbSources, ...newSources];
 };
+
+// Helper to build a unique key for GoalCard alerts
+export function getGoalAlertKey(interval, totalIncome, totalGoal) {
+  const incomeRounded = Math.round(totalIncome);
+  const goalRounded = Math.round(totalGoal);
+
+  return `goalAlert-${interval}-income=${incomeRounded}-goal=${goalRounded}`;
+}

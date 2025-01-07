@@ -3,7 +3,11 @@ import PropTypes from 'prop-types';
 import { CircularProgressbar, buildStyles } from 'react-circular-progressbar';
 import { FaTrash } from 'react-icons/fa';
 import 'react-circular-progressbar/dist/styles.css';
-import { notifyError, notifySuccess } from '../../utils/notificationService';
+import {
+  notifyError,
+  notifySuccess,
+  showSavingsGoalSuccessAlert,
+} from '../../utils/notificationService';
 import { confirmAction } from '../../utils/confirmationService';
 import {
   fetchSavingsGoal,
@@ -16,6 +20,7 @@ import { calculateTotalExpenseInInterval } from '../../utils/expenseHelpers';
 import {
   getSavingsTimeframe,
   getGoalAlertColor,
+  getAlertKey,
 } from '../../utils/savingsGoalHelpers';
 import SavingsGoalModal from '../savings/SavingsGoalModal';
 import noGoalIllustration from '../../assets/icons/no-goals.svg';
@@ -31,6 +36,56 @@ const SavingsGoalCard = ({ incomes, expenses, allSubGoals }) => {
 
   const hasAnySubGoals = allSubGoals && allSubGoals.length > 0;
   const intervals = ['weekly', 'biweekly', 'monthly', 'yearly'];
+
+  /* Calculate total income and expense for the selected interval */
+  const [startDate, endDate] = getSavingsTimeframe(interval);
+  const intervalIncome = calculateTotalIncomeInInterval(
+    incomes,
+    startDate,
+    endDate
+  );
+  const intervalExpense = calculateTotalExpenseInInterval(
+    expenses,
+    startDate,
+    endDate
+  );
+  const netSavings = intervalIncome - intervalExpense;
+
+  const handleIntervalCycle = () => {
+    const currentIndex = intervals.indexOf(interval);
+    const nextIndex = (currentIndex + 1) % intervals.length;
+    setIntervalPeriod(intervals[nextIndex]);
+  };
+
+  /* Calculate total saved and target amounts for all sub-goals */
+  const totalSaved = allSubGoals.reduce((acc, g) => {
+    const ratioDecimal = goalRatios[g.name] || 0;
+    const currentAmount = g.currentAmount || 0;
+    const allocated = netSavings * ratioDecimal;
+    return acc + currentAmount + allocated;
+  }, 0);
+
+  const totalTarget = allSubGoals.reduce((acc, g) => {
+    const parsedTarget = parseFloat(g.targetAmount ?? 0);
+    return acc + (Number.isNaN(parsedTarget) ? 0 : parsedTarget);
+  }, 0);
+
+  const progressPercentage =
+    totalTarget > 0 ? (totalSaved / totalTarget) * 100 : 0;
+  const alertColor = getGoalAlertColor(progressPercentage);
+
+  /* UseEffect for triggering success alerts */
+  const alertKey = getAlertKey(goalRatios, incomes, expenses, totalTarget);
+  useEffect(() => {
+    if (totalTarget > 0 && totalSaved >= totalTarget) {
+      if (!localStorage.getItem(alertKey)) {
+        showSavingsGoalSuccessAlert(
+          '🎉 Congratulations! You have achieved your savings goal!'
+        );
+        localStorage.setItem(alertKey, 'true');
+      }
+    }
+  }, [alertKey, totalSaved, totalTarget]);
 
   useEffect(() => {
     const loadGoal = async () => {
@@ -130,25 +185,6 @@ const SavingsGoalCard = ({ incomes, expenses, allSubGoals }) => {
     );
   }
 
-  const [startDate, endDate] = getSavingsTimeframe(interval);
-  const intervalIncome = calculateTotalIncomeInInterval(
-    incomes,
-    startDate,
-    endDate
-  );
-  const intervalExpense = calculateTotalExpenseInInterval(
-    expenses,
-    startDate,
-    endDate
-  );
-  const netSavings = intervalIncome - intervalExpense;
-
-  const handleIntervalCycle = () => {
-    const currentIndex = intervals.indexOf(interval);
-    const nextIndex = (currentIndex + 1) % intervals.length;
-    setIntervalPeriod(intervals[nextIndex]);
-  };
-
   if (!hasAnySubGoals) {
     return (
       <div className="savings-goal-card no-goals" onClick={handleIntervalCycle}>
@@ -216,22 +252,6 @@ const SavingsGoalCard = ({ incomes, expenses, allSubGoals }) => {
       </div>
     );
   }
-
-  const totalSaved = allSubGoals.reduce((acc, g) => {
-    const ratioDecimal = goalRatios[g.name] || 0;
-    const currentAmount = g.currentAmount || 0;
-    const allocated = netSavings * ratioDecimal;
-    return acc + currentAmount + allocated;
-  }, 0);
-
-  const totalTarget = allSubGoals.reduce((acc, g) => {
-    const parsedTarget = parseFloat(g.targetAmount ?? 0);
-    return acc + (Number.isNaN(parsedTarget) ? 0 : parsedTarget);
-  }, 0);
-
-  const progressPercentage =
-    totalTarget > 0 ? (totalSaved / totalTarget) * 100 : 0;
-  const alertColor = getGoalAlertColor(progressPercentage);
 
   return (
     <div

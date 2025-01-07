@@ -20,6 +20,7 @@ import {
   getBudgetAlertColor,
   getTimeframeDates,
   mergeBudgetCategories,
+  getBudgetAlertKey,
 } from '../../utils/budgetHelpers';
 import CategoryBudgetModal from './CategoryBudgetModal';
 import noBudgetsIllustration from '../../assets/icons/no-budgets.svg';
@@ -74,11 +75,15 @@ const BudgetCard = ({ expenses }) => {
 
   useEffect(() => {
     if (budgetPercentage >= 100) {
-      showBudgetAlert(
-        'Budget alert! You have used 100% or more of your allocated budget. 🚨'
-      );
+      const alertKey = getBudgetAlertKey(interval, totalSpent, totalBudget);
+      if (!localStorage.getItem(alertKey)) {
+        showBudgetAlert(
+          'Budget alert! You have used 100% or more of your allocated budget. 🚨'
+        );
+        localStorage.setItem(alertKey, 'true');
+      }
     }
-  }, [budgetPercentage]);
+  }, [interval, totalSpent, totalBudget, budgetPercentage]);
 
   const handleCreateOrEditBudget = () => {
     const merged = mergeBudgetCategories(categoryBudgets, expenses);

@@ -20,6 +20,7 @@ import {
   getGoalAlertColor,
   getTimeframeDates,
   mergeSourceGoals,
+  getGoalAlertKey,
 } from '../../utils/incomeGoalHelpers';
 import SourceGoalModal from './SourceGoalModal';
 import noGoalsIllustration from '../../assets/icons/no-goals.svg';
@@ -72,11 +73,15 @@ const GoalCard = ({ incomes }) => {
 
   useEffect(() => {
     if (goalPercentage >= 100) {
-      showGoalSuccessAlert(
-        'Congratulations! You have achieved 100% or more of your income goal! 🎉'
-      );
+      const alertKey = getGoalAlertKey(interval, totalIncome, totalGoal);
+      if (!localStorage.getItem(alertKey)) {
+        showGoalSuccessAlert(
+          'Congratulations! You have achieved 100% or more of your income goal! 🎉'
+        );
+        localStorage.setItem(alertKey, 'true');
+      }
     }
-  }, [goalPercentage]);
+  }, [interval, totalIncome, totalGoal, goalPercentage]);
 
   const handleCreateOrEditGoal = () => {
     const merged = mergeSourceGoals(sourceGoals, incomes);

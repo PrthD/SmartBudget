@@ -99,3 +99,17 @@ export const sortGoalsByDeadlineThenName = (goals) => {
  * 'interval' list to show them in a dropdown.
  */
 export const SAVINGS_INTERVALS = ['weekly', 'biweekly', 'monthly', 'yearly'];
+
+/**
+ * Generates a unique alert key based on goal ratios, income, expense data, and the total target.
+ * Ensures alerts are tied to specific distributions and financial data states.
+ */
+export function getAlertKey(goalRatios, incomes, expenses, totalTarget) {
+  const ratioPart = Object.entries(goalRatios)
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([name, ratio]) => `${name}:${ratio}`)
+    .join('|');
+  const totalIncome = incomes.reduce((acc, i) => acc + i.amount, 0);
+  const totalExpense = expenses.reduce((acc, e) => acc + e.amount, 0);
+  return `dist=${ratioPart};inc=${totalIncome};exp=${totalExpense};tgt=${totalTarget}`;
+}

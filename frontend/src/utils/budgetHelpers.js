@@ -126,3 +126,11 @@ export const sortCategoryBudgets = (
 
   return [...sortedPredefined, ...dbCategories, ...newCategories];
 };
+
+// Helper to build a unique key for BudgetCard alerts
+export function getBudgetAlertKey(interval, totalSpent, totalBudget) {
+  const spentRounded = Math.round(totalSpent);
+  const budgetRounded = Math.round(totalBudget);
+
+  return `budgetAlert-${interval}-spent=${spentRounded}-budget=${budgetRounded}`;
+}
