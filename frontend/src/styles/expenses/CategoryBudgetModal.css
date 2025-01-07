@@ -211,9 +211,11 @@
   border: none;
   padding: 15px 30px;
   border-radius: 30px;
+  width: 100%;
+  height: auto;
   cursor: pointer;
   transition: background-color 0.3s, transform 0.3s ease-in-out;
-  font-size: 1.1rem;
+  font-size: 1rem;
   font-weight: bold;
   font-family: 'Inter', sans-serif;
 }

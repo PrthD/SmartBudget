@@ -84,7 +84,9 @@
   border: none;
   color: #ffffff;
   cursor: pointer;
-  padding: 8px 15px;
+  width: 100%;
+  padding: 12px 20px;
+  text-align: center;
   font-size: 1rem;
   font-weight: bold;
   border-radius: 30px;

@@ -230,6 +230,7 @@
   border-radius: 30px;
   cursor: pointer;
   transition: background-color 0.3s, transform 0.3s ease-in-out;
+  width: 100%;
   min-width: 140px;
   font-size: 1.1rem;
   font-weight: bold;
