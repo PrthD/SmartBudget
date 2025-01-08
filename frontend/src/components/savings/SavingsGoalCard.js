@@ -133,6 +133,7 @@ const SavingsGoalCard = ({ incomes, expenses, allSubGoals }) => {
     });
 
     try {
+      let result;
       if (!goalId) {
         const created = await createSavingsGoal(newGoalRatios, newInterval);
         setGoalId(created._id);
@@ -140,16 +141,14 @@ const SavingsGoalCard = ({ incomes, expenses, allSubGoals }) => {
         setIntervalPeriod(created.interval || 'monthly');
         notifySuccess('Savings distribution created successfully!');
       } else {
-        const result = await updateSavingsGoal(
-          goalId,
-          newGoalRatios,
-          newInterval
-        );
+        result = await updateSavingsGoal(goalId, newGoalRatios, newInterval);
         const updatedDoc = result.updatedGoal;
         setGoalRatios(updatedDoc.goalRatios || {});
         setIntervalPeriod(updatedDoc.interval || 'monthly');
         notifySuccess('Savings distribution updated successfully!');
       }
+      localStorage.removeItem('distributionNeedsUpdate');
+
       setIsHovered(false);
       setShowModal(false);
     } catch (error) {
@@ -212,6 +211,7 @@ const SavingsGoalCard = ({ incomes, expenses, allSubGoals }) => {
   if (!goalId) {
     return (
       <div
+        id={goalId ? 'savings-goal-card' : undefined}
         className={`savings-goal-card empty-state ${isHovered ? 'hovered' : ''}`}
         onClick={handleCreateOrEditGoal}
         onMouseEnter={() => setIsHovered(true)}
@@ -255,6 +255,7 @@ const SavingsGoalCard = ({ incomes, expenses, allSubGoals }) => {
 
   return (
     <div
+      id="savings-goal-card"
       className={`savings-goal-card goal-added ${isHovered ? 'hovered' : ''}`}
       onClick={handleCreateOrEditGoal}
       onMouseEnter={() => setIsHovered(true)}

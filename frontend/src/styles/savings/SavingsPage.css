@@ -13,8 +13,8 @@
   max-width: 1200px;
   margin: 0 auto;
   width: 100%;
-  align-items: center;
-  justify-content: space-around;
+  align-items: flex-start;
+  justify-content: space-between;
   transition: transform 0.5s ease-in-out, padding 0.5s ease-in-out, justify-content 0.5s ease-in-out;
   transform: translateX(0);
   padding-right: 0;
@@ -37,7 +37,13 @@
 }
 
 /* Overview Card Enhancements */
+.overview-card {
+  text-align: center;
+}
+
 .overview-card.detailed {
+  max-width: 600px;
+  margin: 0 auto;
   padding: 30px;
   background-color: transparent;
   border-radius: 15px;
@@ -53,19 +59,21 @@
 .progress-bar-container {
   display: flex;
   height: 60px;
-  border-radius: 15px;
+  border-radius: 10px;
   overflow: visible;
   box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.2);
-  margin: 30px auto;
-  max-width: 700px;
+  margin: 20px auto;
+  max-width: 500px;
   position: relative;
   background-color: #f1f3f6;
   border: 2px solid #e4e7ec;
 }
 
 .progress-bar-segment {
+  margin-right: 2px;
+  background-clip: content-box;
   position: relative;
-  min-width: 50px;
+  min-width: 40px;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -80,6 +88,10 @@
   cursor: pointer;
 }
 
+.progress-bar-segment:last-child {
+  margin-right: 0;
+}
+
 .progress-bar-segment:hover {
   opacity: 0.9;
   transform: scaleY(1.05);
@@ -88,8 +100,9 @@
 .progress-bar-empty-message {
   margin-top: 10px;
   font-size: 0.9rem;
-  color: #555;
+  color: #333;
   font-style: italic;
+  font-weight: bold;
 }
 
 .progress-bar-percentage {
@@ -122,6 +135,7 @@
 
 .progress-bar-legend {
   display: flex;
+  flex-wrap: wrap;
   justify-content: center;
   align-items: center;
   gap: 20px;
@@ -129,21 +143,24 @@
 }
 
 .legend-item {
+  flex: none;
+  width: auto;
+  text-align: center;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 5px;
 }
 
 .legend-color {
-  width: 15px;
-  height: 15px;
+  width: 12px;
+  height: 12px;
   border-radius: 50%;
 }
 
 .legend-label {
-  font-size: 0.9rem;
-  color: #333;
-  font-weight: bold;
+  font-size: 0.8rem;
+  color: #444;
+  font-weight: 500;
 }
 
 .collapsible-header {
@@ -284,5 +301,16 @@ html {
   .overview-card.detailed {
       max-width: 90%;
       width: 100%;
+  }
+}
+
+@media (max-width: 600px) {
+  .progress-bar-container {
+      max-width: 100%;
+  }
+  .progress-bar-legend {
+      flex-wrap: wrap;
+      justify-content: flex-start;
+      gap: 10px;
   }
 }

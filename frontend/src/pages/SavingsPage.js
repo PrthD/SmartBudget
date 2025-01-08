@@ -21,7 +21,11 @@ import { CSSTransition, TransitionGroup } from 'react-transition-group';
 import noSavingsGoalsIllustration from '../assets/icons/no-savings.svg';
 import '../styles/savings/SavingsPage.css';
 import { LoadingContext } from '../contexts/LoadingContext';
-import { notifyError, notifySuccess } from '../utils/notificationService';
+import {
+  notifyError,
+  notifySuccess,
+  showBudgetAlert,
+} from '../utils/notificationService';
 
 const SavingsPage = () => {
   const [incomeData, setIncomeData] = useState([]);
@@ -95,8 +99,19 @@ const SavingsPage = () => {
   const handleSavingsGoalAdded = async (newGoal) => {
     try {
       setLoading(true);
+      if (newGoal.ratio === undefined) {
+        newGoal.ratio = 0;
+      }
       setSavingsData((prev) => [...prev, newGoal]);
       notifySuccess('Savings goal added successfully!');
+
+      if (document.getElementById('savings-goal-card')) {
+        showBudgetAlert(
+          'Your existing distribution may be out-of-date. Please re-check or update it.'
+        );
+      }
+      localStorage.setItem('distributionNeedsUpdate', 'true');
+
       setErrorNotified(false);
     } catch (error) {
       if (!errorNotified) {
@@ -132,6 +147,14 @@ const SavingsPage = () => {
         prev.map((g) => (g._id === updatedGoal._id ? updatedGoal : g))
       );
       notifySuccess('Savings goal updated successfully!');
+
+      if (document.getElementById('savings-goal-card')) {
+        showBudgetAlert(
+          'Your existing distribution may be out-of-date. Please re-check or update it.'
+        );
+      }
+      localStorage.setItem('distributionNeedsUpdate', 'true');
+
       setEditMode(false);
       setGoalToEdit(null);
       setErrorNotified(false);
@@ -153,6 +176,14 @@ const SavingsPage = () => {
       setSavingsData((prev) => prev.filter((goal) => goal._id !== id));
       await deleteSavingsGoals(id);
       notifySuccess('Savings goal deleted successfully.');
+
+      if (document.getElementById('savings-goal-card')) {
+        showBudgetAlert(
+          'You removed a savings goal. Please update or re-check your distribution if needed.'
+        );
+      }
+      localStorage.setItem('distributionNeedsUpdate', 'true');
+
       setErrorNotified(false);
     } catch (error) {
       if (!errorNotified) {

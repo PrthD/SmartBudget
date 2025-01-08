@@ -47,7 +47,14 @@ const SavingsGoalModal = ({
       const numericVal = parseFloat(val || '0') / 100;
       sumOfDecimalRatios += Number.isNaN(numericVal) ? 0 : numericVal;
     }
-    const newLeftover = currentNetSavings * (1 - sumOfDecimalRatios);
+
+    let newLeftover = currentNetSavings * (1 - sumOfDecimalRatios);
+
+    const EPSILON = 1e-9;
+    if (Math.abs(newLeftover) < EPSILON) {
+      newLeftover = 0;
+    }
+
     setLeftover(newLeftover);
   }, [ratioStrings, currentNetSavings]);
 
@@ -75,8 +82,13 @@ const SavingsGoalModal = ({
       sumOfDecimalRatios += parseFloat(val || '0') / 100;
     }
 
-    const newLeftover = currentNetSavings * (1 - sumOfDecimalRatios);
-    if (newLeftover < 0) {
+    let newLeftover = currentNetSavings * (1 - sumOfDecimalRatios);
+    const EPSILON = 1e-9;
+    if (Math.abs(newLeftover) < EPSILON) {
+      newLeftover = 0;
+    }
+
+    if (newLeftover < -EPSILON) {
       notifyError('You allocated more than your available net savings!');
       return;
     }
@@ -90,10 +102,7 @@ const SavingsGoalModal = ({
 
     const updatedSubGoals = subGoals.map((g) => {
       const decimalRatio = parseFloat(ratioStrings[g.name] || '0') / 100;
-      return {
-        ...g,
-        ratio: decimalRatio,
-      };
+      return { ...g, ratio: decimalRatio };
     });
 
     onSave(updatedSubGoals, interval);

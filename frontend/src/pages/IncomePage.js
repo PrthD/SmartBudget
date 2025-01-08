@@ -294,8 +294,30 @@ const IncomePage = () => {
                 legend: {
                   position: 'bottom',
                   labels: {
-                    colors: ['#000000'],
+                    colors: ['#444'],
                     useSeriesColors: false,
+                  },
+                  fontSize: '14px',
+                  fontFamily: 'Arial, sans-serif',
+                  fontWeight: 500,
+                },
+                tooltip: {
+                  theme: 'light',
+                  style: {
+                    fontSize: '12px',
+                    fontFamily: 'Arial, sans-serif',
+                  },
+                },
+                plotOptions: {
+                  pie: {
+                    donut: {
+                      size: '60%',
+                    },
+                  },
+                },
+                dataLabels: {
+                  style: {
+                    colors: ['#FFFFFF'],
                   },
                 },
               }}
