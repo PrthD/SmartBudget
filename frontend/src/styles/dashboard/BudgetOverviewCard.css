@@ -1,0 +1,220 @@
+.budget-overview-card {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  margin: 0;
+  background-color: #ffffff;
+  color: #004c99;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 10px 30px rgba(0, 76, 153, 0.1);
+  transition: box-shadow 0.3s ease !important;
+  cursor: pointer;
+}
+  
+  .budget-overview-card.empty-state {
+    max-width: 700px;
+    cursor: default;
+  }
+  
+  .budget-overview-card.budget-added {
+    max-width: 540px;
+    justify-content: flex-start;
+  }
+  
+  .budget-overview-card.hovered {
+    box-shadow: 0 15px 35px rgba(0, 76, 153, 0.2);
+  }
+  
+  .enlarge-icon {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 1.3rem !important;
+    color: #004c99;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+  
+  .budget-overview-card.hovered .enlarge-icon {
+    opacity: 1;
+  }
+  
+  .card-content {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 20px;
+    text-align: left;
+    justify-content: center;
+    width: auto;
+  }
+  
+  .progress-container {
+    flex-shrink: 0;
+    width: 100px;
+    height: 100px;
+  }
+  
+  .expense-info {
+    text-align: left;
+    flex: 1;
+  }
+  
+  .expense-info h3 {
+    margin: 0;
+    font-size: 1.8rem;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  
+  .expense-info p {
+    margin: 5px 0 0;
+    font-size: 1.4rem;
+    font-weight: bold;
+    color: #003366;
+  }
+  
+  .interval-tag {
+    display: inline-block;
+    padding: 4px 10px;
+    font-size: 0.9rem;
+    font-weight: bold;
+    color: #ffffff;
+    border-radius: 15px;
+    text-transform: capitalize;
+    transition: background-color 0.3s ease, transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
+    white-space: nowrap;
+  }
+  
+  .interval-tag.weekly {
+    background-color: #f39c12;
+  }
+  
+  .interval-tag.biweekly {
+    background-color: #16a085;
+  }
+  
+  .interval-tag.monthly {
+    background-color: #2980b9;
+  }
+  
+  .interval-tag.yearly {
+    background-color: #8e44ad;
+  }
+  
+  .interval-tag:hover {
+    opacity: 0.9;
+  }
+  
+  .no-budget-container {
+    display: flex;
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .no-budget-content {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    width: 100%;
+    text-align: left;
+  }
+  
+  .no-budget-illustration {
+    max-width: 150px;
+    height: auto;
+    flex-shrink: 0;
+  }
+  
+  .no-budget-container h3 {
+    font-size: 1.6rem;
+    color: #004c99;
+    font-weight: bold;
+    margin: 0 0 5px 0;
+  }
+  
+  .no-budget-container p {
+    font-size: 1.2rem;
+    color: #555;
+    margin-top: 0;
+  }
+
+  .no-budget-container h3,
+  .no-budget-container p {
+    text-align: left;
+    width: 100%;
+  }
+
+  .budget-distribution-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 10000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .budget-distribution-modal {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: #ffffff;
+    border-radius: 15px;
+    padding: 30px;
+    max-width: 600px;
+    width: 90%;
+    box-shadow: 0 15px 35px rgba(0, 76, 153, 0.25);
+    max-height: 90vh;
+    overflow-y: auto;
+    z-index: 10001;
+  }
+  
+  .budget-distribution-modal h2 {
+    margin-top: 0;
+    font-size: 1.5rem;
+    color: #004c99;
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  
+  .close-btn {
+    background: #d9534f;
+    border: none;
+    color: #ffffff;
+    font-size: 1.5rem;
+    font-weight: bold;
+    border-radius: 50%;
+    cursor: pointer;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    transition: background-color 0.3s ease;
+    z-index: 10002;
+  }
+  
+  .close-btn:hover {
+    background-color: #c9302c;
+  }
+
+  @media (max-width: 768px) {
+    .budget-overview-card {
+      max-width: 100%;
+    }
+  }
+  

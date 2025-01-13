@@ -1,55 +1,85 @@
-// File: src/pages/Dashboard.js
-
 import React, { useMemo, useEffect, useState, useContext } from 'react';
-import { Link } from 'react-router-dom';
 import { fetchIncomes } from '../services/incomeService';
 import { fetchExpenses } from '../services/expenseService';
-import { fetchBudget } from '../services/budgetService'; // Updated import
-import { calculateTotalIncome } from '../utils/incomeHelpers';
-import { calculateTotalExpense } from '../utils/expenseHelpers';
+import { fetchSavingsGoals } from '../services/savingsService';
+import { fetchBudget } from '../services/budgetService';
+import { fetchIncomeGoal } from '../services/incomeGoalService';
+import { fetchSavingsGoal } from '../services/savingsGoalService';
+import { calculateTotalIncomeInInterval } from '../utils/incomeHelpers';
+import { calculateTotalExpenseInInterval } from '../utils/expenseHelpers';
+import { getSavingsTimeframe } from '../utils/savingsGoalHelpers';
 import {
   generateMonthlyData,
   generateSavingsData,
 } from '../utils/chartHelpers';
-import {
-  FaDollarSign,
-  FaMoneyBillWave,
-  FaPiggyBank,
-  FaChartLine,
-} from 'react-icons/fa';
+import { FaDollarSign, FaMoneyBillWave, FaPiggyBank } from 'react-icons/fa';
 import { notifyError } from '../utils/notificationService';
 import NavBar from '../components/common/NavBar';
-import IncomeVsExpenseChart from '../components/charts/IncomeVsExpenseChart';
-import MonthlyTrendsChart from '../components/charts/MonthlyTrendsChart';
-import SavingsChart from '../components/charts/SavingsChart';
-import GoalCard from '../components/incomes/GoalCard';
-import BudgetCard from '../components/expenses/BudgetCard';
-import 'react-circular-progressbar/dist/styles.css';
-import '../styles/Dashboard.css';
+import BudgetOverviewCard from '../components/dashboard/BudgetOverviewCard';
+import GoalOverviewCard from '../components/dashboard/GoalOverviewCard';
+import SavingsGoalOverviewCard from '../components/dashboard/SavingsGoalOverviewCard';
+import ChartSwiper from '../components/charts/ChartSwiper';
+import noChartDataIcon from '../assets/icons/no-chart-data.png';
+import '../styles/dashboard/Dashboard.css';
 import { LoadingContext } from '../contexts/LoadingContext';
+
+const intervals = ['weekly', 'biweekly', 'monthly', 'yearly'];
 
 const Dashboard = () => {
   const [incomeData, setIncomeData] = useState([]);
   const [expenseData, setExpenseData] = useState([]);
-  // Removed goalData state
+  const [interval, setInterval] = useState('monthly');
+  const [savingsData, setSavingsData] = useState([]);
+  const [budgetInfo, setBudgetInfo] = useState(null);
+  const [incomeGoalInfo, setIncomeGoalInfo] = useState(null);
+  const [savingsGoalInfo, setSavingsGoalInfo] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
   const { setLoading: setGlobalLoading } = useContext(LoadingContext);
 
-  // Fetch all necessary data
+  useEffect(() => {
+    fetchDashboardData();
+  }, []);
+
   const fetchDashboardData = async () => {
     try {
       setGlobalLoading(true);
-      const [incomes, expenses] = await Promise.all([
-        fetchIncomes(),
-        fetchExpenses(),
-        fetchBudget(),
-      ]);
+      const [incomes = [], expenses = [], savingsGoals = []] =
+        await Promise.allSettled([
+          fetchIncomes(),
+          fetchExpenses(),
+          fetchSavingsGoals(),
+        ]).then((results) =>
+          results.map((result) =>
+            result.status === 'fulfilled' ? result.value : []
+          )
+        );
+
+      let fetchedBudget, fetchedGoal, fetchedSavings;
+      try {
+        fetchedBudget = await fetchBudget();
+      } catch (err) {
+        fetchedBudget = null;
+      }
+      try {
+        fetchedGoal = await fetchIncomeGoal();
+      } catch (err) {
+        fetchedGoal = null;
+      }
+      try {
+        fetchedSavings = await fetchSavingsGoal();
+      } catch (err) {
+        fetchedSavings = null;
+      }
+
+      setBudgetInfo(fetchedBudget);
+      setIncomeGoalInfo(fetchedGoal);
+      setSavingsGoalInfo(fetchedSavings);
 
       setIncomeData(incomes);
       setExpenseData(expenses);
-      // Removed setGoalData(goal)
+      setSavingsData(savingsGoals);
       setError('');
     } catch (err) {
       const errorMsg =
@@ -62,19 +92,24 @@ const Dashboard = () => {
     }
   };
 
-  useEffect(() => {
-    fetchDashboardData();
-  }, []);
+  const handleIntervalChange = () => {
+    const currentIndex = intervals.indexOf(interval);
+    const nextIndex = (currentIndex + 1) % intervals.length;
+    setInterval(intervals[nextIndex]);
+  };
 
-  // Calculate key metrics
+  const [startDate, endDate] = useMemo(() => {
+    return getSavingsTimeframe(interval);
+  }, [interval]);
+
   const totalIncome = useMemo(
-    () => calculateTotalIncome(incomeData),
-    [incomeData]
+    () => calculateTotalIncomeInInterval(incomeData, startDate, endDate),
+    [incomeData, startDate, endDate]
   );
 
   const totalExpense = useMemo(
-    () => calculateTotalExpense(expenseData),
-    [expenseData]
+    () => calculateTotalExpenseInInterval(expenseData, startDate, endDate),
+    [expenseData, startDate, endDate]
   );
 
   const totalSavings = useMemo(
@@ -82,147 +117,163 @@ const Dashboard = () => {
     [totalIncome, totalExpense]
   );
 
-  // Generate data for charts
-  const monthlyData = useMemo(
-    () => generateMonthlyData(incomeData, expenseData),
+  const monthlyChartData = useMemo(
+    () => generateMonthlyData(incomeData || [], expenseData || []) || [],
     [incomeData, expenseData]
   );
 
-  const savingsData = useMemo(
-    () => generateSavingsData(monthlyData),
-    [monthlyData]
+  const savingsChartData = useMemo(
+    () => generateSavingsData(monthlyChartData || []) || [],
+    [monthlyChartData]
   );
 
-  // Handle Refresh
-  const handleRefresh = () => {
-    fetchDashboardData();
-  };
+  const isBudgetEmpty = !budgetInfo;
+  const isGoalEmpty = !incomeGoalInfo;
+  const isSavingsEmpty = !savingsGoalInfo;
+
+  function getOverviewLayoutState() {
+    return isBudgetEmpty || isGoalEmpty || isSavingsEmpty
+      ? 'empty-state'
+      : 'filled-state';
+  }
+
+  const isChartDataEmpty = monthlyChartData.length === 0;
+
+  const containerClass = `overview-charts-container ${getOverviewLayoutState()}`;
+  const sectionClass = `overview-section ${getOverviewLayoutState()}`;
+  const chartClass = `chart-swiper-container ${
+    isChartDataEmpty ? 'empty-state' : 'filled-state'
+  }`;
+
+  if (loading) {
+    return (
+      <div className="dashboard-loading">
+        <NavBar />
+        <div className="loader">Loading...</div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="dashboard-error">
+        <NavBar />
+        <div className="error-message">
+          <h3>Error</h3>
+          <p>{error}</p>
+          <button onClick={fetchDashboardData} className="retry-button">
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="dashboard">
       <NavBar />
 
-      <header className="dashboard-header">
-        <h1>SmartBudgetAI Dashboard</h1>
-        <button
-          className="refresh-btn"
-          onClick={handleRefresh}
-          title="Refresh Dashboard"
-        >
-          &#8635;
-        </button>
-      </header>
+      <div className="dashboard-container">
+        {/* Metrics Section */}
+        <section className="metrics-section">
+          <div
+            className="metric-card income-card"
+            onClick={handleIntervalChange}
+          >
+            <FaDollarSign className="metric-icon" />
+            <div className="metric-info">
+              <h3>Total Income</h3>
+              <p>${totalIncome.toFixed(2)}</p>
+              <small>Interval: {interval}</small>
+            </div>
+          </div>
 
-      {loading ? (
-        <div className="loading-state">
-          <div className="spinner"></div>
-          <p>Loading your financial overview...</p>
-        </div>
-      ) : error ? (
-        <div className="error-state">
-          <p>{error}</p>
-          <button onClick={handleRefresh} className="retry-btn">
-            Retry
-          </button>
-        </div>
-      ) : (
-        <>
-          {/* Key Financial Metrics */}
-          <section className="metrics-overview">
-            <div className="metric-card income-card">
-              <FaDollarSign className="metric-icon" />
-              <div className="metric-info">
-                <h3>Total Income</h3>
-                <p>${totalIncome.toFixed(2)}</p>
-              </div>
+          <div
+            className="metric-card expense-card"
+            onClick={handleIntervalChange}
+          >
+            <FaMoneyBillWave className="metric-icon" />
+            <div className="metric-info">
+              <h3>Total Expenses</h3>
+              <p>${totalExpense.toFixed(2)}</p>
+              <small>Interval: {interval}</small>
             </div>
-            <div className="metric-card expense-card">
-              <FaMoneyBillWave className="metric-icon" />
-              <div className="metric-info">
-                <h3>Total Expenses</h3>
-                <p>${totalExpense.toFixed(2)}</p>
-              </div>
+          </div>
+
+          <div
+            className="metric-card savings-card"
+            onClick={handleIntervalChange}
+          >
+            <FaPiggyBank className="metric-icon" />
+            <div className="metric-info">
+              <h3>Total Savings</h3>
+              <p>${totalSavings.toFixed(2)}</p>
+              <small>Interval: {interval}</small>
             </div>
-            <div className="metric-card savings-card">
-              <FaPiggyBank className="metric-icon" />
-              <div className="metric-info">
-                <h3>Total Savings</h3>
-                <p>${totalSavings.toFixed(2)}</p>
-              </div>
-            </div>
+          </div>
+        </section>
+
+        {/* Overview left, chart right */}
+        <div className={containerClass}>
+          <section className={sectionClass}>
+            {<BudgetOverviewCard expenses={expenseData} />}
+            {<GoalOverviewCard incomes={incomeData} />}
+            {
+              <SavingsGoalOverviewCard
+                incomes={incomeData}
+                expenses={expenseData}
+                allSubGoals={savingsData
+                  .filter((g) => g && g.title)
+                  .map((g) => ({
+                    name: g.title,
+                    deadline: g.deadline,
+                    currentAmount: g.currentAmount,
+                    targetAmount: g.targetAmount,
+                    ratio: 0,
+                  }))}
+              />
+            }
           </section>
 
-          {/* Financial Goals */}
-          <section className="goals-section">
-            <h2>Your Income Goals</h2>
-            <GoalCard incomes={incomeData} />
-          </section>
-
-          {/* Budgets Overview */}
-          <section className="budgets-section">
-            <h2>Your Budgets</h2>
-            <BudgetCard expenses={expenseData} />
-          </section>
-
-          {/* Charts Overview */}
-          <section className="charts-overview">
-            <div className="chart-container">
-              <h3>Income vs Expenses Overview</h3>
-              <IncomeVsExpenseChart
+          {/* Chart area */}
+          <div className={chartClass}>
+            {isChartDataEmpty ? (
+              <div
+                className={`no-chart-data ${
+                  isChartDataEmpty ? getOverviewLayoutState() : ''
+                }`}
+              >
+                <img
+                  src={noChartDataIcon}
+                  alt="No Chart Data"
+                  className="no-chart-data-image"
+                />
+                <p className="no-chart-data-message">
+                  📊 No data available for charts! <br />
+                  Add income or expenses to visualize your financial trends. 🚀
+                </p>
+              </div>
+            ) : (
+              <ChartSwiper
+                savingsChartData={savingsChartData}
+                monthlyChartData={monthlyChartData}
                 totalIncome={totalIncome}
                 totalExpense={totalExpense}
               />
-            </div>
-            <div className="chart-container">
-              <h3>Monthly Trends</h3>
-              <MonthlyTrendsChart monthlyData={monthlyData} />
-            </div>
-            <div className="chart-container">
-              <h3>Savings Over Time</h3>
-              <SavingsChart savingsData={savingsData} />
-            </div>
-          </section>
+            )}
+          </div>
+        </div>
+      </div>
 
-          {/* Navigation Links */}
-          <section className="dashboard-navigation">
-            <Link to="/expenses">
-              <button className="dashboard-btn">
-                <FaMoneyBillWave className="nav-icon" />
-                Manage Expenses
-              </button>
-            </Link>
-            <Link to="/incomes">
-              <button className="dashboard-btn">
-                <FaDollarSign className="nav-icon" />
-                Manage Incomes
-              </button>
-            </Link>
-            <Link to="/savings">
-              <button className="dashboard-btn">
-                <FaPiggyBank className="nav-icon" />
-                Savings Goals
-              </button>
-            </Link>
-            <Link to="/charts">
-              <button className="dashboard-btn">
-                <FaChartLine className="nav-icon" />
-                Advanced Charts & Analytics
-              </button>
-            </Link>
-          </section>
-
-          {/* Summary Section */}
-          <section className="dashboard-summary">
-            <p>
-              Welcome to your SmartBudgetAI Dashboard! Here you can get a
-              comprehensive overview of your financial health, track your income
-              and expenses, set and monitor your income goals, and analyze your
-              savings trends. Use the navigation buttons above to dive deeper
-              into each section and take full control of your finances.
-            </p>
-          </section>
-        </>
-      )}
+      {/* Summary Section */}
+      <section className="dashboard-summary">
+        <p>
+          Welcome to your Smart Budget Dashboard! Here you can get a
+          comprehensive overview of your financial health, track your income and
+          expenses, set and monitor your income goals, and analyze your savings
+          trends.
+        </p>
+      </section>
     </div>
   );
 };
