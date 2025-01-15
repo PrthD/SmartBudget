@@ -3,19 +3,21 @@ import Expense from '../models/Expense.js';
 import logger from '../config/logger.js';
 import { calculateNextRecurrence } from '../utils/expenseHelpers.js';
 import { validateExpense } from '../middlewares/expenseValidation.js';
+import { requireAuth } from '../middlewares/authMiddleware.js';
 import moment from 'moment-timezone';
 
 const router = express.Router();
 
 // @route    POST /api/expense/new
 // @desc     Add a new expense entry
-router.post('/new', validateExpense, async (req, res) => {
+router.post('/new', requireAuth, validateExpense, async (req, res) => {
   logger.info('POST /api/expense/new - Adding a new expense');
   const { category, customCategory, amount, date, description, frequency } =
     req.body;
 
   try {
     const expense = new Expense({
+      user: req.userId,
       category,
       customCategory: customCategory || false,
       amount: parseFloat(amount),
@@ -40,10 +42,10 @@ router.post('/new', validateExpense, async (req, res) => {
 
 // @route    GET /api/expense/all
 // @desc     Get all expense entries
-router.get('/all', async (req, res) => {
+router.get('/all', requireAuth, async (req, res) => {
   logger.info('GET /api/expense/all - Retrieving all expenses');
   try {
-    const expenses = await Expense.find();
+    const expenses = await Expense.find({ user: req.userId });
     logger.info('All expenses retrieved successfully');
 
     const expensesWithNextRecurrence = expenses.map((expense) => {
@@ -63,7 +65,7 @@ router.get('/all', async (req, res) => {
 
 // @route    PUT /api/expense/update/:id
 // @desc     Update an existing expense entry
-router.put('/update/:id', validateExpense, async (req, res) => {
+router.put('/update/:id', requireAuth, validateExpense, async (req, res) => {
   logger.info(`PUT /api/expense/update/${req.params.id} - Updating an expense`);
   const { category, customCategory, amount, date, description, frequency } =
     req.body;
@@ -73,6 +75,12 @@ router.put('/update/:id', validateExpense, async (req, res) => {
     if (!expense) {
       logger.warn(`Expense not found for id: ${req.params.id}`);
       return res.status(404).json({ error: 'Expense not found' });
+    }
+
+    if (expense.user.toString() !== req.userId) {
+      return res
+        .status(403)
+        .json({ error: 'Not authorized to edit this expense' });
     }
 
     expense.category = category || expense.category;
@@ -97,16 +105,24 @@ router.put('/update/:id', validateExpense, async (req, res) => {
 
 // @route    DELETE /api/expense/delete/:id
 // @desc     Delete an expense entry by ID
-router.delete('/delete/:id', async (req, res) => {
+router.delete('/delete/:id', requireAuth, async (req, res) => {
   logger.info(
     `DELETE /api/expense/delete/${req.params.id} - Deleting an expense`
   );
   try {
-    const deletedExpense = await Expense.findByIdAndDelete(req.params.id);
-    if (!deletedExpense) {
+    const expense = await Expense.findById(req.params.id);
+    if (!expense) {
       logger.warn(`Expense not found for id: ${req.params.id}`);
       return res.status(404).json({ error: 'Expense not found' });
     }
+
+    if (expense.user.toString() !== req.userId) {
+      return res
+        .status(403)
+        .json({ error: 'Not authorized to delete this expense' });
+    }
+
+    await Expense.findByIdAndDelete(req.params.id);
 
     logger.info('Expense deleted successfully');
     res.status(200).json({ message: 'Expense deleted successfully' });
@@ -118,7 +134,7 @@ router.delete('/delete/:id', async (req, res) => {
 
 // @route    POST /api/expense/skip-next/:id
 // @desc     Skip a specific recurrence date for a recurring expense
-router.post('/skip-next/:id', async (req, res) => {
+router.post('/skip-next/:id', requireAuth, async (req, res) => {
   const { id } = req.params;
   const { dateToSkip } = req.body;
   logger.info(`POST /api/expense/skip-next/${id} - Skipping a recurrence date`);
@@ -128,6 +144,12 @@ router.post('/skip-next/:id', async (req, res) => {
     if (!expense) {
       logger.warn(`Expense not found for id: ${id}`);
       return res.status(404).json({ error: 'Expense not found' });
+    }
+
+    if (expense.user.toString() !== req.userId) {
+      return res
+        .status(403)
+        .json({ error: 'Not authorized to modify this expense' });
     }
 
     expense.skippedDates = expense.skippedDates || [];

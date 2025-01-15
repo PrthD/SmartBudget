@@ -5,10 +5,11 @@ import 'react-toastify/dist/ReactToastify.css';
 import ExpensePage from './pages/ExpensePage';
 import IncomePage from './pages/IncomePage';
 import SavingsPage from './pages/SavingsPage';
-import ChartsPage from './pages/ChartsPage';
 import Dashboard from './pages/Dashboard';
+import AuthPage from './pages/AuthPage';
 import { LoadingProvider } from './contexts/LoadingContext';
 import GlobalLoader from './components/common/GlobalLoader';
+import ProtectedRoute from './components/common/ProtectedRoute';
 // import './App.css';
 
 function App() {
@@ -19,19 +20,48 @@ function App() {
       <div className="App">
         <Routes>
           {/* Dashboard Page */}
-          <Route path="/" element={<Dashboard />} />
+          <Route
+            path="/"
+            element={
+              <ProtectedRoute>
+                <Dashboard />
+              </ProtectedRoute>
+            }
+          />
 
           {/* Expense Page */}
-          <Route path="/expense" element={<ExpensePage />} />
+          <Route
+            path="/expense"
+            element={
+              <ProtectedRoute>
+                <ExpensePage />
+              </ProtectedRoute>
+            }
+          />
 
           {/* Income Page */}
-          <Route path="/income" element={<IncomePage />} />
+          <Route
+            path="/income"
+            element={
+              <ProtectedRoute>
+                <IncomePage />
+              </ProtectedRoute>
+            }
+          />
 
           {/* Savings Page */}
-          <Route path="/savings" element={<SavingsPage />} />
+          <Route
+            path="/savings"
+            element={
+              <ProtectedRoute>
+                <SavingsPage />
+              </ProtectedRoute>
+            }
+          />
 
-          {/* Charts Page */}
-          <Route path="/charts" element={<ChartsPage />} />
+          {/* Auth Routes */}
+          <Route path="/login" element={<AuthPage />} />
+          <Route path="/signup" element={<AuthPage />} />
         </Routes>
       </div>
     </LoadingProvider>

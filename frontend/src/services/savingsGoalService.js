@@ -1,11 +1,21 @@
 import axios from 'axios';
+import { getToken } from './authService';
 
 const API_BASE_URL = 'http://localhost:5000/api/savings-goal';
+
+const getAuthConfig = () => {
+  const token = getToken();
+  return {
+    headers: {
+      Authorization: token ? `Bearer ${token}` : '',
+    },
+  };
+};
 
 // Fetch the existing single doc (GET /api/savings-goal)
 export const fetchSavingsGoal = async () => {
   try {
-    const response = await axios.get(API_BASE_URL);
+    const response = await axios.get(API_BASE_URL, getAuthConfig());
     return response.data;
   } catch (error) {
     const errorMsg =
@@ -17,7 +27,11 @@ export const fetchSavingsGoal = async () => {
 // Create a new doc (POST /api/savings-goal)
 export const createSavingsGoal = async (goalRatios, interval = 'monthly') => {
   try {
-    const response = await axios.post(API_BASE_URL, { goalRatios, interval });
+    const response = await axios.post(
+      API_BASE_URL,
+      { goalRatios, interval },
+      getAuthConfig()
+    );
     return response.data;
   } catch (error) {
     const errorMsg =
@@ -42,7 +56,11 @@ export const updateSavingsGoal = async (
       payload.totalSegregated = totalSegregated;
     }
 
-    const response = await axios.put(`${API_BASE_URL}/${goalId}`, payload);
+    const response = await axios.put(
+      `${API_BASE_URL}/${goalId}`,
+      payload,
+      getAuthConfig()
+    );
     return response.data;
   } catch (error) {
     const errorMsg =
@@ -54,7 +72,10 @@ export const updateSavingsGoal = async (
 // Delete doc by ID (DELETE /api/savings-goal/:id)
 export const deleteSavingsGoal = async (goalId) => {
   try {
-    const response = await axios.delete(`${API_BASE_URL}/${goalId}`);
+    const response = await axios.delete(
+      `${API_BASE_URL}/${goalId}`,
+      getAuthConfig()
+    );
     return response.data;
   } catch (error) {
     const errorMsg =

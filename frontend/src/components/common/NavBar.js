@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FaBell, FaUserCircle } from 'react-icons/fa';
+import { logoutUser } from '../../services/userService';
 import '../../styles/common/NavBar.css';
 
 const NavBar = () => {
@@ -42,6 +43,11 @@ const NavBar = () => {
     transition: 'margin-left 0.3s ease-in-out',
   };
 
+  const handleLogout = () => {
+    logoutUser();
+    navigate('/login');
+  };
+
   return (
     <div className="main-content" style={mainContentStyle}>
       <nav className="nav-bar">
@@ -68,7 +74,7 @@ const NavBar = () => {
             {isProfileDropdownOpen && (
               <div className="profile-dropdown">
                 <button>Settings</button>
-                <button>Logout</button>
+                <button onClick={handleLogout}>Logout</button>
               </div>
             )}
           </div>
@@ -100,9 +106,7 @@ const NavBar = () => {
               </a>
             </li>
           </ul>
-          <button className="logout-button">
-            {' '}
-            {/*onClick={() => navigate('/logout')}*/}
+          <button className="logout-button" onClick={handleLogout}>
             Logout
           </button>
         </div>

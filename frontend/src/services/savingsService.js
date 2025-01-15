@@ -1,13 +1,23 @@
 import axios from 'axios';
+import { getToken } from './authService';
 
 const API_BASE_URL = 'http://localhost:5000/api/savings';
+
+const getAuthConfig = () => {
+  const token = getToken();
+  return {
+    headers: {
+      Authorization: token ? `Bearer ${token}` : '',
+    },
+  };
+};
 
 /**
  * Fetch all savings docs (GET /api/savings).
  */
 export const fetchSavingsGoals = async () => {
   try {
-    const response = await axios.get(API_BASE_URL);
+    const response = await axios.get(API_BASE_URL, getAuthConfig());
     return response.data;
   } catch (error) {
     const errorMsg =
@@ -21,7 +31,7 @@ export const fetchSavingsGoals = async () => {
  */
 export const addSavingsGoal = async (goalData) => {
   try {
-    const response = await axios.post(API_BASE_URL, goalData);
+    const response = await axios.post(API_BASE_URL, goalData, getAuthConfig());
     return response.data;
   } catch (error) {
     const errorMsg =
@@ -35,7 +45,11 @@ export const addSavingsGoal = async (goalData) => {
  */
 export const updateSavingsGoals = async (id, updatedData) => {
   try {
-    const response = await axios.put(`${API_BASE_URL}/${id}`, updatedData);
+    const response = await axios.put(
+      `${API_BASE_URL}/${id}`,
+      updatedData,
+      getAuthConfig()
+    );
     return response.data;
   } catch (error) {
     const errorMsg =
@@ -49,7 +63,10 @@ export const updateSavingsGoals = async (id, updatedData) => {
  */
 export const deleteSavingsGoals = async (id) => {
   try {
-    const response = await axios.delete(`${API_BASE_URL}/${id}`);
+    const response = await axios.delete(
+      `${API_BASE_URL}/${id}`,
+      getAuthConfig()
+    );
     return response.data;
   } catch (error) {
     const errorMsg =

@@ -2,6 +2,7 @@ import express from 'express';
 import IncomeGoal from '../models/IncomeGoal.js';
 import logger from '../config/logger.js';
 import { validateIncomeGoal } from '../middlewares/incomeGoalValidation.js';
+import { requireAuth } from '../middlewares/authMiddleware.js';
 
 const router = express.Router();
 
@@ -9,13 +10,10 @@ const router = express.Router();
  * @route   GET /api/income-goal
  * @desc    Fetch the income goal for the logged-in user
  */
-router.get('/', async (req, res) => {
+router.get('/', requireAuth, async (req, res) => {
   logger.info('GET /api/income-goal - Fetching income goal');
   try {
-    // const userId = req.user._id;
-    // const incomeGoal = await IncomeGoal.findOne({ user: userId });
-
-    const incomeGoal = await IncomeGoal.findOne(); // For demo, just fetch the first
+    const incomeGoal = await IncomeGoal.findOne({ user: req.userId });
     if (!incomeGoal) {
       logger.warn('No income goal found in the system');
       return res.status(404).json({ error: 'No income goal record found.' });
@@ -33,7 +31,7 @@ router.get('/', async (req, res) => {
  * @route   POST /api/income-goal
  * @desc    Create a new income goal
  */
-router.post('/', validateIncomeGoal, async (req, res) => {
+router.post('/', requireAuth, validateIncomeGoal, async (req, res) => {
   logger.info('POST /api/income-goal - Creating new income goal');
   try {
     const { sourceGoals = {}, interval = 'monthly' } = req.body;
@@ -44,6 +42,7 @@ router.post('/', validateIncomeGoal, async (req, res) => {
     );
 
     const newIncomeGoal = new IncomeGoal({
+      user: req.userId,
       totalGoal: sumSourceGoals,
       sourceGoals,
       interval,
@@ -63,7 +62,7 @@ router.post('/', validateIncomeGoal, async (req, res) => {
  * @route   PUT /api/income-goal/:id
  * @desc    Update an existing income goal
  */
-router.put('/:id', validateIncomeGoal, async (req, res) => {
+router.put('/:id', requireAuth, validateIncomeGoal, async (req, res) => {
   logger.info(`PUT /api/income-goal/${req.params.id} - Updating income goal`);
   try {
     const { sourceGoals, interval } = req.body;
@@ -72,6 +71,12 @@ router.put('/:id', validateIncomeGoal, async (req, res) => {
     if (!goalDoc) {
       logger.warn(`Income goal not found for id: ${req.params.id}`);
       return res.status(404).json({ error: 'Income goal not found' });
+    }
+
+    if (goalDoc.user.toString() !== req.userId) {
+      return res
+        .status(403)
+        .json({ error: 'Not authorized to edit this income goal' });
     }
 
     if (sourceGoals !== undefined) {
@@ -104,16 +109,24 @@ router.put('/:id', validateIncomeGoal, async (req, res) => {
  * @route   DELETE /api/income-goal/:id
  * @desc    Permanently delete an existing income goal
  */
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', requireAuth, async (req, res) => {
   logger.info(
     `DELETE /api/income-goal/${req.params.id} - Deleting income goal`
   );
   try {
-    const deletedGoal = await IncomeGoal.findByIdAndDelete(req.params.id);
-    if (!deletedGoal) {
+    const goal = await IncomeGoal.findById(req.params.id);
+    if (!goal) {
       logger.warn(`Income goal not found for id: ${req.params.id}`);
       return res.status(404).json({ error: 'Income goal not found' });
     }
+
+    if (goal.user.toString() !== req.userId) {
+      return res
+        .status(403)
+        .json({ error: 'Not authorized to delete this goal' });
+    }
+
+    const deletedGoal = await IncomeGoal.findByIdAndDelete(req.params.id);
 
     logger.info('Income goal deleted successfully:', deletedGoal);
     return res

@@ -2,6 +2,7 @@ import express from 'express';
 import Budget from '../models/Budget.js';
 import logger from '../config/logger.js';
 import { validateBudget } from '../middlewares/budgetValidation.js';
+import { requireAuth } from '../middlewares/authMiddleware.js';
 
 const router = express.Router();
 
@@ -9,13 +10,10 @@ const router = express.Router();
  * @route   GET /api/budget
  * @desc    Fetch the budget document for the logged-in user
  */
-router.get('/', async (req, res) => {
+router.get('/', requireAuth, async (req, res) => {
   logger.info('GET /api/budget - Fetching budget');
   try {
-    // const userId = req.user._id;
-    // const budget = await Budget.findOne({ user: userId });
-
-    const budget = await Budget.findOne(); // For demo: just fetch the first
+    const budget = await Budget.findOne({ user: req.userId });
     if (!budget) {
       logger.warn('No budget found in the system');
       return res.status(404).json({ error: 'No budget record found.' });
@@ -33,7 +31,7 @@ router.get('/', async (req, res) => {
  * @route   POST /api/budget
  * @desc    Create a new budget record
  */
-router.post('/', validateBudget, async (req, res) => {
+router.post('/', requireAuth, validateBudget, async (req, res) => {
   logger.info('POST /api/budget - Creating new budget record');
   try {
     const { categoryBudgets, interval = 'monthly' } = req.body;
@@ -44,6 +42,7 @@ router.post('/', validateBudget, async (req, res) => {
     );
 
     const newBudget = new Budget({
+      user: req.userId,
       totalBudget: sumCategoryBudgets,
       categoryBudgets: categoryBudgets || {},
       interval,
@@ -63,7 +62,7 @@ router.post('/', validateBudget, async (req, res) => {
  * @route   PUT /api/budget/:id
  * @desc    Update an existing budget record
  */
-router.put('/:id', validateBudget, async (req, res) => {
+router.put('/:id', requireAuth, validateBudget, async (req, res) => {
   logger.info(`PUT /api/budget/${req.params.id} - Updating budget`);
   try {
     const { categoryBudgets, interval } = req.body;
@@ -72,6 +71,12 @@ router.put('/:id', validateBudget, async (req, res) => {
     if (!budget) {
       logger.warn(`Budget not found for id: ${req.params.id}`);
       return res.status(404).json({ error: 'Budget not found' });
+    }
+
+    if (budget.user.toString() !== req.userId) {
+      return res
+        .status(403)
+        .json({ error: 'Not authorized to edit this budget' });
     }
 
     if (categoryBudgets !== undefined) {
@@ -103,14 +108,22 @@ router.put('/:id', validateBudget, async (req, res) => {
  * @route   DELETE /api/budget/:id
  * @desc    Permanently delete an existing budget record
  */
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', requireAuth, async (req, res) => {
   logger.info(`DELETE /api/budget/${req.params.id} - Deleting budget`);
   try {
-    const deletedBudget = await Budget.findByIdAndDelete(req.params.id);
-    if (!deletedBudget) {
+    const budget = await Budget.findById(req.params.id);
+    if (!budget) {
       logger.warn(`Budget not found for id: ${req.params.id}`);
       return res.status(404).json({ error: 'Budget not found' });
     }
+
+    if (budget.user.toString() !== req.userId) {
+      return res
+        .status(403)
+        .json({ error: 'Not authorized to delete this budget' });
+    }
+
+    const deletedBudget = await Budget.findByIdAndDelete(req.params.id);
 
     logger.info('Budget deleted successfully:', deletedBudget);
     return res.status(200).json({ message: 'Budget deleted successfully' });

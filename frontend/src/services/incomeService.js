@@ -1,11 +1,21 @@
 import axios from 'axios';
+import { getToken } from './authService';
 
 const API_BASE_URL = 'http://localhost:5000/api/income';
+
+const getAuthConfig = () => {
+  const token = getToken();
+  return {
+    headers: {
+      Authorization: token ? `Bearer ${token}` : '',
+    },
+  };
+};
 
 // Fetch all incomes
 export const fetchIncomes = async () => {
   try {
-    const response = await axios.get(`${API_BASE_URL}/all`);
+    const response = await axios.get(`${API_BASE_URL}/all`, getAuthConfig());
     return response.data;
   } catch (error) {
     const errorMsg = error.response?.data?.error || 'Failed to fetch incomes';
@@ -16,7 +26,11 @@ export const fetchIncomes = async () => {
 // Add a new income
 export const addIncome = async (incomeData) => {
   try {
-    const response = await axios.post(`${API_BASE_URL}/new`, incomeData);
+    const response = await axios.post(
+      `${API_BASE_URL}/new`,
+      incomeData,
+      getAuthConfig()
+    );
     return response.data;
   } catch (error) {
     const errorMsg = error.response?.data?.error || 'Failed to add income';
@@ -29,7 +43,8 @@ export const updateIncome = async (id, updatedData) => {
   try {
     const response = await axios.put(
       `${API_BASE_URL}/update/${id}`,
-      updatedData
+      updatedData,
+      getAuthConfig()
     );
     return response.data;
   } catch (error) {
@@ -41,7 +56,10 @@ export const updateIncome = async (id, updatedData) => {
 // Delete an income by ID, including its recurrences
 export const deleteIncome = async (id) => {
   try {
-    const response = await axios.delete(`${API_BASE_URL}/delete/${id}`);
+    const response = await axios.delete(
+      `${API_BASE_URL}/delete/${id}`,
+      getAuthConfig()
+    );
     return response.data;
   } catch (error) {
     const errorMsg =
@@ -54,9 +72,13 @@ export const deleteIncome = async (id) => {
 // Skip the next recurrence of a recurring income
 export const skipNextRecurrence = async (id, dateToSkip) => {
   try {
-    const response = await axios.post(`${API_BASE_URL}/skip-next/${id}`, {
-      dateToSkip,
-    });
+    const response = await axios.post(
+      `${API_BASE_URL}/skip-next/${id}`,
+      {
+        dateToSkip,
+      },
+      getAuthConfig()
+    );
     return response.data;
   } catch (error) {
     const errorMsg =

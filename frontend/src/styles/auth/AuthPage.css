@@ -1,0 +1,105 @@
+.auth-page-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background: linear-gradient(120deg, #a1c4fd, #c2e9fb);
+    font-family: 'Open Sans', sans-serif;
+  }
+  
+  .auth-form-wrapper {
+    background-color: #ffffffdd;
+    border-radius: 12px;
+    padding: 30px 40px;
+    width: 370px;
+    max-width: 95%;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+    animation: fadeInDown 0.5s ease forwards;
+  }
+  
+  @keyframes fadeInDown {
+    0% { opacity:0; transform: translateY(-20px); }
+    100% { opacity:1; transform: translateY(0); }
+  }
+  
+  .auth-form-wrapper h2 {
+    text-align: center;
+    margin-bottom: 20px;
+    color: #333;
+    font-weight: 600;
+  }
+  
+  .auth-form {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .auth-form .form-group {
+    margin-bottom: 15px;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+  }
+  
+  .auth-form .form-group label {
+    margin-bottom: 5px;
+    font-size: 0.95rem;
+    color: #555;
+  }
+  
+  .auth-form .form-group input {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 1rem;
+    transition: border-color 0.3s ease;
+  }
+  
+  .auth-form .form-group input:focus {
+    border-color: #4a90e2;
+    outline: none;
+  }
+  
+  .auth-submit-btn {
+    margin-top: 10px;
+    padding: 12px;
+    background-color: #4a90e2;
+    border: none;
+    border-radius: 6px;
+    color: #fff;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  .auth-submit-btn:hover {
+    background-color: #357abd;
+  }
+  
+  .toggle-mode-text {
+    margin-top: 18px;
+    text-align: center;
+    font-size: 0.9rem;
+  }
+  
+  .switch-mode-btn {
+    background: transparent;
+    border: none;
+    color: #4a90e2;
+    margin-left: 5px;
+    cursor: pointer;
+    font-size: 1rem;
+  }
+  
+  .switch-mode-btn:hover {
+    text-decoration: underline;
+  }
+  
+  /* Responsive design */
+  @media (max-width: 480px) {
+    .auth-form-wrapper {
+      width: 90%;
+      padding: 20px;
+    }
+  }
+  
