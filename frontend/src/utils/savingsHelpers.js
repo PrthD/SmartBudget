@@ -102,6 +102,9 @@ const compareSavingsValues = (field, a, b) => {
   if (field === 'targetAmount' || field === 'currentAmount') {
     return valueA - valueB;
   } else if (field === 'deadline') {
+    if (!valueA && !valueB) return 0;
+    if (!valueA) return 1;
+    if (!valueB) return -1;
     return moment(valueA).diff(moment(valueB));
   } else if (field === 'title' || field === 'description') {
     return String(valueA || '')

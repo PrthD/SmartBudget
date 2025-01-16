@@ -5,6 +5,10 @@ import { fetchSavingsGoals } from '../services/savingsService';
 import { fetchBudget } from '../services/budgetService';
 import { fetchIncomeGoal } from '../services/incomeGoalService';
 import { fetchSavingsGoal } from '../services/savingsGoalService';
+import {
+  fetchUserDetails,
+  updateFirstTimeLogin,
+} from '../services/userService';
 import { calculateTotalIncomeInInterval } from '../utils/incomeHelpers';
 import { calculateTotalExpenseInInterval } from '../utils/expenseHelpers';
 import { getSavingsTimeframe } from '../utils/savingsGoalHelpers';
@@ -14,6 +18,7 @@ import {
 } from '../utils/chartHelpers';
 import { FaDollarSign, FaMoneyBillWave, FaPiggyBank } from 'react-icons/fa';
 import { notifyError } from '../utils/notificationService';
+import { showFirstTimeGreeting } from '../utils/confirmationService';
 import NavBar from '../components/common/NavBar';
 import BudgetOverviewCard from '../components/dashboard/BudgetOverviewCard';
 import GoalOverviewCard from '../components/dashboard/GoalOverviewCard';
@@ -39,58 +44,73 @@ const Dashboard = () => {
   const { setLoading: setGlobalLoading } = useContext(LoadingContext);
 
   useEffect(() => {
-    fetchDashboardData();
+    const checkFirstTimeLogin = async () => {
+      try {
+        const user = await fetchUserDetails();
+        if (user.isFirstTimeLogin) {
+          await showFirstTimeGreeting();
+          await updateFirstTimeLogin();
+        }
+      } catch (err) {
+        console.error('Error checking first-time login:', err.message);
+      }
+    };
+
+    checkFirstTimeLogin();
   }, []);
 
-  const fetchDashboardData = async () => {
-    try {
-      setGlobalLoading(true);
-      const [incomes = [], expenses = [], savingsGoals = []] =
-        await Promise.allSettled([
+  useEffect(() => {
+    const fetchDashboardData = async () => {
+      try {
+        setGlobalLoading(true);
+
+        const [incomes, expenses, savingsGoals] = await Promise.all([
           fetchIncomes(),
           fetchExpenses(),
           fetchSavingsGoals(),
-        ]).then((results) =>
-          results.map((result) =>
-            result.status === 'fulfilled' ? result.value : []
-          )
-        );
+        ]);
 
-      let fetchedBudget, fetchedGoal, fetchedSavings;
-      try {
-        fetchedBudget = await fetchBudget();
-      } catch (err) {
-        fetchedBudget = null;
-      }
-      try {
-        fetchedGoal = await fetchIncomeGoal();
-      } catch (err) {
-        fetchedGoal = null;
-      }
-      try {
-        fetchedSavings = await fetchSavingsGoal();
-      } catch (err) {
-        fetchedSavings = null;
-      }
+        let fetchedBudget = null;
+        let fetchedGoal = null;
+        let fetchedSavings = null;
 
-      setBudgetInfo(fetchedBudget);
-      setIncomeGoalInfo(fetchedGoal);
-      setSavingsGoalInfo(fetchedSavings);
+        try {
+          fetchedBudget = await fetchBudget();
+        } catch {
+          fetchedBudget = null;
+        }
+        try {
+          fetchedGoal = await fetchIncomeGoal();
+        } catch {
+          fetchedGoal = null;
+        }
+        try {
+          fetchedSavings = await fetchSavingsGoal();
+        } catch {
+          fetchedSavings = null;
+        }
 
-      setIncomeData(incomes);
-      setExpenseData(expenses);
-      setSavingsData(savingsGoals);
-      setError('');
-    } catch (err) {
-      const errorMsg =
-        err.response?.data?.error || 'Failed to load dashboard data.';
-      setError(errorMsg);
-      notifyError(errorMsg);
-    } finally {
-      setLoading(false);
-      setGlobalLoading(false);
-    }
-  };
+        setBudgetInfo(fetchedBudget);
+        setIncomeGoalInfo(fetchedGoal);
+        setSavingsGoalInfo(fetchedSavings);
+
+        setIncomeData(incomes || []);
+        setExpenseData(expenses || []);
+        setSavingsData(savingsGoals || []);
+        setError('');
+      } catch (err) {
+        const errorMsg =
+          err.response?.data?.error || 'Failed to load dashboard data.';
+        setError(errorMsg);
+        notifyError(errorMsg);
+      } finally {
+        setLoading(false);
+        setGlobalLoading(false);
+      }
+    };
+
+    fetchDashboardData();
+  }, [setGlobalLoading]);
 
   const handleIntervalChange = () => {
     const currentIndex = intervals.indexOf(interval);
@@ -131,13 +151,13 @@ const Dashboard = () => {
   const isGoalEmpty = !incomeGoalInfo;
   const isSavingsEmpty = !savingsGoalInfo;
 
+  const isChartDataEmpty = monthlyChartData.length === 0;
+
   function getOverviewLayoutState() {
     return isBudgetEmpty || isGoalEmpty || isSavingsEmpty
       ? 'empty-state'
       : 'filled-state';
   }
-
-  const isChartDataEmpty = monthlyChartData.length === 0;
 
   const containerClass = `overview-charts-container ${getOverviewLayoutState()}`;
   const sectionClass = `overview-section ${getOverviewLayoutState()}`;
@@ -161,7 +181,10 @@ const Dashboard = () => {
         <div className="error-message">
           <h3>Error</h3>
           <p>{error}</p>
-          <button onClick={fetchDashboardData} className="retry-button">
+          <button
+            onClick={() => window.location.reload()}
+            className="retry-button"
+          >
             Retry
           </button>
         </div>
@@ -264,16 +287,6 @@ const Dashboard = () => {
           </div>
         </div>
       </div>
-
-      {/* Summary Section */}
-      <section className="dashboard-summary">
-        <p>
-          Welcome to your Smart Budget Dashboard! Here you can get a
-          comprehensive overview of your financial health, track your income and
-          expenses, set and monitor your income goals, and analyze your savings
-          trends.
-        </p>
-      </section>
     </div>
   );
 };

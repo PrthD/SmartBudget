@@ -11,9 +11,14 @@ const AuthPage = () => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [transition, setTransition] = useState(false);
 
   const switchMode = () => {
-    setMode((prev) => (prev === 'login' ? 'signup' : 'login'));
+    setTransition(true);
+    setTimeout(() => {
+      setMode((prev) => (prev === 'login' ? 'signup' : 'login'));
+      setTransition(false);
+    }, 400);
   };
 
   const handleSubmit = async (e) => {
@@ -40,7 +45,17 @@ const AuthPage = () => {
 
   return (
     <div className="auth-page-container">
-      <div className="auth-form-wrapper">
+      {/* Background with icon */}
+      <div className="auth-page-background">
+        <div className="auth-logo">SmartBudget</div>
+        <div className="auth-icon">💰</div>
+      </div>
+
+      {/* Form container */}
+      <div
+        key={mode}
+        className={`auth-form-wrapper ${transition ? 'form-transition' : ''}`}
+      >
         <h2>{mode === 'login' ? 'Login' : 'Sign Up'}</h2>
         <form onSubmit={handleSubmit} className="auth-form">
           {mode === 'signup' && (

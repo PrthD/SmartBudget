@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FaBell, FaUserCircle } from 'react-icons/fa';
+import { FaUserCircle } from 'react-icons/fa';
 import { logoutUser } from '../../services/userService';
 import '../../styles/common/NavBar.css';
 
@@ -64,7 +64,7 @@ const NavBar = () => {
           </div>
         </div>
         <div className="nav-right">
-          <FaBell className="notification-icon" />
+          {/* <FaBell className="notification-icon" /> */}
           <div
             className="profile-icon-wrapper"
             onClick={toggleProfileDropdown}
@@ -73,7 +73,7 @@ const NavBar = () => {
             <FaUserCircle className="profile-icon" />
             {isProfileDropdownOpen && (
               <div className="profile-dropdown">
-                <button>Settings</button>
+                <button>Profile</button>
                 <button onClick={handleLogout}>Logout</button>
               </div>
             )}

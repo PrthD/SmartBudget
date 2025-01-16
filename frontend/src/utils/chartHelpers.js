@@ -1,41 +1,60 @@
 import { Chart, ArcElement, Tooltip, Legend } from 'chart.js';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
+import { calculateTotalIncomeInInterval } from '../utils/incomeHelpers';
+import { calculateTotalExpenseInInterval } from '../utils/expenseHelpers';
+import moment from 'moment-timezone';
 
 Chart.register(ArcElement, Tooltip, Legend, ChartDataLabels);
 
 // Generate monthly data for income and expense
 export const generateMonthlyData = (incomeData, expenseData) => {
-  const monthlyTotals = {};
+  if (
+    (!incomeData || incomeData.length === 0) &&
+    (!expenseData || expenseData.length === 0)
+  ) {
+    return [];
+  }
 
-  incomeData.forEach((income) => {
-    const month = new Date(income.date).toLocaleString('default', {
-      month: 'short',
+  const monthlyTotals = [];
+  const startOfYear = moment().startOf('year');
+  const currentMonth = moment().endOf('month');
+
+  for (
+    let month = startOfYear.clone();
+    month.isSameOrBefore(currentMonth);
+    month.add(1, 'month')
+  ) {
+    const monthStart = month.clone().startOf('month');
+    const monthEnd = month.clone().endOf('month');
+
+    const totalIncome = calculateTotalIncomeInInterval(
+      incomeData,
+      monthStart,
+      monthEnd
+    );
+    const totalExpense = calculateTotalExpenseInInterval(
+      expenseData,
+      monthStart,
+      monthEnd
+    );
+
+    monthlyTotals.push({
+      month: month.format('MMM'),
+      income: totalIncome,
+      expenses: totalExpense,
     });
-    monthlyTotals[month] = monthlyTotals[month] || { income: 0, expenses: 0 };
-    monthlyTotals[month].income += income.amount;
-  });
+  }
 
-  expenseData.forEach((expense) => {
-    const month = new Date(expense.date).toLocaleString('default', {
-      month: 'short',
-    });
-    monthlyTotals[month] = monthlyTotals[month] || { income: 0, expenses: 0 };
-    monthlyTotals[month].expenses += expense.amount;
-  });
-
-  return Object.keys(monthlyTotals).map((month) => ({
-    month,
-    income: monthlyTotals[month].income,
-    expenses: monthlyTotals[month].expenses,
-  }));
+  return monthlyTotals;
 };
 
 // Generate savings data based on monthly data
-export const generateSavingsData = (monthlyData) =>
-  monthlyData.map((data) => ({
+export const generateSavingsData = (monthlyData) => {
+  return monthlyData.map((data) => ({
     month: data.month,
     savings: data.income - data.expenses,
   }));
+};
 
 // Generalized function to generate a pie chart
 export const createExpensePieChart = (
@@ -353,7 +372,6 @@ export const customTooltipCallbacks = {
     const { formattedValue } = tooltipItem;
     return `Value: ${formattedValue}`;
   },
-  // etc.
 };
 
 // Plugin to show values on top of bars or slices

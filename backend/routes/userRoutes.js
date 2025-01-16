@@ -1,6 +1,7 @@
 import express from 'express';
 import bcrypt from 'bcrypt';
 import User from '../models/User.js';
+import { requireAuth } from '../middlewares/authMiddleware.js';
 import { generateToken } from '../utils/authUtils.js';
 import logger from '../config/logger.js';
 
@@ -90,6 +91,70 @@ router.post('/login', async (req, res) => {
     });
   } catch (err) {
     logger.error('Error in user login:', err.message);
+    return res.status(500).json({ error: 'Server Error' });
+  }
+});
+
+/**
+ * @route   GET /api/users/me
+ * @desc    Get the logged-in user's details
+ */
+router.get('/me', requireAuth, async (req, res) => {
+  logger.info('GET /api/users/me - Fetching user details');
+  try {
+    if (!req.userId) {
+      logger.warn('req.userId is missing (middleware might not have set it)');
+      return res.status(401).json({ error: 'Not authorized' });
+    }
+
+    const user = await User.findById(req.userId).select(
+      'name email isFirstTimeLogin'
+    );
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    res.status(200).json(user);
+  } catch (err) {
+    logger.error('Error fetching user details:', err.message);
+    return res.status(500).json({ error: 'Server Error' });
+  }
+});
+
+/**
+ * @route   PATCH /api/users/me
+ * @desc    Update the logged-in user's details (e.g., isFirstTimeLogin)
+ */
+router.patch('/me', requireAuth, async (req, res) => {
+  logger.info('PATCH /api/users/me - Updating user details');
+  try {
+    if (!req.userId) {
+      logger.warn('req.userId is missing (middleware might not have set it)');
+      return res.status(401).json({ error: 'Not authorized' });
+    }
+
+    const user = await User.findById(req.userId);
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    if (typeof req.body.isFirstTimeLogin !== 'undefined') {
+      user.isFirstTimeLogin = req.body.isFirstTimeLogin;
+    }
+
+    await user.save();
+
+    res.status(200).json({
+      message: 'User updated successfully',
+      user: {
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        isFirstTimeLogin: user.isFirstTimeLogin,
+      },
+    });
+  } catch (err) {
+    logger.error('Error updating user details:', err.message);
     return res.status(500).json({ error: 'Server Error' });
   }
 });
