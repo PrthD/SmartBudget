@@ -59,11 +59,22 @@ export const fetchUserDetails = async () => {
 };
 
 /**
+ * Update the user's profile details
+ *  - name, email, password, profilePhoto (base64 or empty), etc.
+ * @param {Object} updates
+ * @returns {Promise<Object>} Updated user object
+ */
+export const updateUserProfile = async (updates) => {
+  const token = getToken();
+  const response = await axios.patch(`${API_BASE_URL}/me`, updates, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return response.data.user;
+};
+
+/**
  * Update the user's `isFirstTimeLogin` field to false.
  * @returns {Promise<void>}
- * @description
- * This is typically called right after showing the first-time greeting popup,
- * so that reloading the page or navigating does not trigger the greeting again.
  */
 export const updateFirstTimeLogin = async () => {
   const token = getToken();
@@ -93,4 +104,46 @@ const saveTokenToLocalStorage = (token) => {
  */
 export const getToken = () => {
   return localStorage.getItem('jwtToken') || null;
+};
+
+/**
+ * Utility to generate a stable default avatar (Base64 data URL).
+ * The background color is derived from the user's name (stable hash).
+ */
+export const generateDefaultAvatar = (userName = '') => {
+  const parts = userName.trim().split(' ');
+  const initials = parts
+    .map((part) => part[0]?.toUpperCase() || '')
+    .join('')
+    .slice(0, 2);
+
+  function stableColorFromString(str) {
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+      hash = str.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    const r = (hash & 0xff0000) >> 16;
+    const g = (hash & 0x00ff00) >> 8;
+    const b = hash & 0x0000ff;
+    return `rgb(${r & 255},${g & 255},${b & 255})`;
+  }
+
+  const bgColor = stableColorFromString(userName || 'DefaultUser');
+
+  const canvas = document.createElement('canvas');
+  const size = 100;
+  canvas.width = size;
+  canvas.height = size;
+  const ctx = canvas.getContext('2d');
+
+  ctx.fillStyle = bgColor;
+  ctx.fillRect(0, 0, size, size);
+
+  ctx.fillStyle = '#fff';
+  ctx.font = 'bold 40px sans-serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(initials, size / 2, size / 2);
+
+  return canvas.toDataURL('image/png');
 };

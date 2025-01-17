@@ -86,6 +86,7 @@ router.post('/login', async (req, res) => {
         _id: user._id,
         name: user.name,
         email: user.email,
+        profilePhoto: user.profilePhoto,
       },
       token,
     });
@@ -108,7 +109,7 @@ router.get('/me', requireAuth, async (req, res) => {
     }
 
     const user = await User.findById(req.userId).select(
-      'name email isFirstTimeLogin'
+      'name email isFirstTimeLogin profilePhoto'
     );
     if (!user) {
       return res.status(404).json({ error: 'User not found' });
@@ -123,7 +124,7 @@ router.get('/me', requireAuth, async (req, res) => {
 
 /**
  * @route   PATCH /api/users/me
- * @desc    Update the logged-in user's details (e.g., isFirstTimeLogin)
+ * @desc    Update the logged-in user's details
  */
 router.patch('/me', requireAuth, async (req, res) => {
   logger.info('PATCH /api/users/me - Updating user details');
@@ -133,25 +134,47 @@ router.patch('/me', requireAuth, async (req, res) => {
       return res.status(401).json({ error: 'Not authorized' });
     }
 
-    const user = await User.findById(req.userId);
+    const user = await User.findById(req.userId).select('+password');
     if (!user) {
       return res.status(404).json({ error: 'User not found' });
     }
 
-    if (typeof req.body.isFirstTimeLogin !== 'undefined') {
-      user.isFirstTimeLogin = req.body.isFirstTimeLogin;
+    const { name, email, password, profilePhoto, isFirstTimeLogin } = req.body;
+
+    if (
+      profilePhoto &&
+      Buffer.byteLength(profilePhoto, 'utf-8') > 10 * 1024 * 1024
+    ) {
+      return res
+        .status(413)
+        .json({ error: 'Profile photo is too large. Maximum size is 10MB.' });
+    }
+
+    if (typeof name === 'string' && name.trim() !== '') {
+      user.name = name.trim();
+    }
+    if (typeof email === 'string' && email.trim() !== '') {
+      user.email = email.trim();
+    }
+
+    if (typeof password === 'string' && password.trim() !== '') {
+      user.password = password;
+    }
+
+    if (typeof profilePhoto !== 'undefined') {
+      user.profilePhoto = profilePhoto;
+    }
+
+    if (typeof isFirstTimeLogin === 'boolean') {
+      user.isFirstTimeLogin = isFirstTimeLogin;
     }
 
     await user.save();
 
+    const { password: _, ...updatedUserData } = user.toObject();
     res.status(200).json({
       message: 'User updated successfully',
-      user: {
-        _id: user._id,
-        name: user.name,
-        email: user.email,
-        isFirstTimeLogin: user.isFirstTimeLogin,
-      },
+      user: updatedUserData,
     });
   } catch (err) {
     logger.error('Error updating user details:', err.message);

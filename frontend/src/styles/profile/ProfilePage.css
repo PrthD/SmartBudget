@@ -1,0 +1,192 @@
+.profile-container {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  background-color: #f9f9f9;
+  min-height: 100vh;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0 1rem;
+}
+
+.profile-card {
+  background-color: #fff;
+  width: 100%;
+  max-width: 600px;
+  margin: 2rem auto;
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.profile-title {
+  margin-bottom: 0.5rem;
+  font-size: 2rem;
+  color: #333;
+  font-weight: 700;
+}
+
+.profile-subtitle {
+  font-size: 1rem;
+  color: #777;
+  margin-bottom: 1.5rem;
+}
+
+.profile-photo-container {
+  position: relative;
+  margin: 0 auto 1.5rem auto;
+  width: 130px;
+  height: 130px;
+  cursor: pointer;
+  transition: transform 0.3s ease;
+}
+
+.profile-photo {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid #ddd;
+  transition: border-color 0.3s ease, transform 0.3s ease;
+}
+
+.profile-photo-container:hover .profile-photo {
+  border-color: #4a90e2;
+}
+
+.photo-overlay-icons {
+  position: absolute;
+  top: 52%;
+  left: 52%;
+  width: 130px;
+  height: 130px;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: rgba(0, 0, 0, 0.4);
+  color: #fff;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  cursor: pointer;
+  pointer-events: none;
+}
+
+.profile-photo-container:hover .photo-overlay-icons {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.photo-overlay-icons svg {
+  font-size: 1.8rem;
+  cursor: pointer;
+  pointer-events: none;
+}
+
+.photo-delete-icon {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  transform: translate(25%, 25%);
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background-color: #ff5c5c;
+  color: #fff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  transition: background-color 0.3s, transform 0.2s;
+  pointer-events: auto;
+  z-index: 2;
+}
+
+.photo-delete-icon:hover {
+  background-color: #e14646;
+}
+
+.photo-delete-icon:hover ~ .profile-photo {
+  border-color: #ddd !important;
+}
+
+.photo-delete-icon:hover ~ .photo-overlay-icons {
+  opacity: 0 !important;
+}
+
+.photo-delete-icon:active {
+  transform: translate(25%, 25%) scale(0.95);
+}
+
+.profile-form {
+  text-align: left;
+  margin-top: 1rem;
+}
+
+.form-group {
+  margin-bottom: 1.2rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.form-group label {
+  margin-bottom: 6px;
+  font-size: 1rem;
+  color: #444;
+  font-weight: 500;
+}
+
+.form-group input {
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 1rem;
+  background: #f7f9fc;
+  transition: box-shadow 0.3s ease, border-color 0.3s ease;
+}
+
+.form-group input:focus {
+  border-color: #4a90e2;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.2);
+}
+
+.hint-text {
+  font-size: 0.8rem;
+  color: #999;
+  margin-top: 4px;
+  display: block;
+}
+
+.save-changes-btn {
+  margin-top: 10px;
+  padding: 12px;
+  background-color: #4a90e2;
+  border: none;
+  border-radius: 8px;
+  color: #fff;
+  font-size: 1rem;
+  cursor: pointer;
+  width: 100%;
+  transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+.save-changes-btn:hover {
+  background-color: #357abd;
+}
+
+.save-changes-btn:active {
+  transform: scale(0.98);
+}
+
+.profile-loading {
+  margin-top: 80px;
+  text-align: center;
+  font-size: 1.2rem;
+  color: #333;
+}

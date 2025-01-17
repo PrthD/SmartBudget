@@ -21,7 +21,8 @@ connectDB();
 
 // Middleware
 app.use(cors({ origin: 'http://localhost:3000' }));
-app.use(express.json());
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ limit: '10mb', extended: true }));
 
 // Logging HTTP requests with morgan and winston
 app.use(

@@ -1,14 +1,44 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FaUserCircle } from 'react-icons/fa';
-import { logoutUser } from '../../services/userService';
+import { FaUserCircle, FaChevronDown, FaChevronUp } from 'react-icons/fa';
+import {
+  fetchUserDetails,
+  generateDefaultAvatar,
+  logoutUser,
+} from '../../services/userService';
 import '../../styles/common/NavBar.css';
 
 const NavBar = () => {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
+  const [user, setUser] = useState(null);
+
   const navigate = useNavigate();
   const dropdownRef = useRef(null);
+
+  useEffect(() => {
+    const getUserData = async () => {
+      try {
+        const userDetails = await fetchUserDetails();
+        setUser(userDetails);
+      } catch (err) {
+        console.error('Error fetching user in NavBar:', err);
+      }
+    };
+    getUserData();
+  }, []);
+
+  useEffect(() => {
+    const handleUserUpdated = (event) => {
+      if (event.detail) {
+        setUser(event.detail);
+      }
+    };
+    window.addEventListener('user-updated', handleUserUpdated);
+    return () => {
+      window.removeEventListener('user-updated', handleUserUpdated);
+    };
+  }, []);
 
   const toggleDrawer = () => {
     setIsDrawerOpen(!isDrawerOpen);
@@ -38,31 +68,37 @@ const NavBar = () => {
     };
   }, []);
 
-  const mainContentStyle = {
-    marginLeft: isDrawerOpen ? '250px' : '0',
-    transition: 'margin-left 0.3s ease-in-out',
-  };
-
   const handleLogout = () => {
     logoutUser();
     navigate('/login');
   };
 
+  const handleProfileClick = () => {
+    navigate('/profile');
+  };
+
+  let userPhoto = '';
+  if (user) {
+    if (user.profilePhoto) {
+      userPhoto = user.profilePhoto;
+    } else {
+      userPhoto = generateDefaultAvatar(user.name);
+    }
+  }
+
   return (
-    <div className="main-content" style={mainContentStyle}>
+    <div className="main-content">
       <nav className="nav-bar">
         <div className="nav-left">
           <button className="hamburger-menu" onClick={toggleDrawer}>
             ☰
           </button>
-          <div
-            className="logo"
-            onClick={handleLogoClick}
-            style={{ cursor: 'pointer' }}
-          >
+          <div className="logo" onClick={handleLogoClick}>
             SMART BUDGET
           </div>
         </div>
+
+        {/* Profile Icon + Name */}
         <div className="nav-right">
           {/* <FaBell className="notification-icon" /> */}
           <div
@@ -70,20 +106,43 @@ const NavBar = () => {
             onClick={toggleProfileDropdown}
             ref={dropdownRef}
           >
-            <FaUserCircle className="profile-icon" />
+            {user && userPhoto ? (
+              <img src={userPhoto} alt="profile" className="nav-profile-img" />
+            ) : (
+              <FaUserCircle className="profile-icon" />
+            )}
+
+            {isProfileDropdownOpen ? (
+              <FaChevronUp className="nav-chevron-icon" />
+            ) : (
+              <FaChevronDown className="nav-chevron-icon" />
+            )}
+
             {isProfileDropdownOpen && (
               <div className="profile-dropdown">
-                <button>Profile</button>
+                <button onClick={handleProfileClick}>Profile</button>
                 <button onClick={handleLogout}>Logout</button>
               </div>
             )}
           </div>
         </div>
+
         <div className={`drawer ${isDrawerOpen ? 'open' : ''}`}>
-          <div className="drawer-profile">
-            <div className="profile-placeholder">User</div>
-            <p className="profile-name">John Doe</p>
+          {/* Drawer Profile */}
+          <div className="drawer-profile" onClick={handleProfileClick}>
+            {user && userPhoto ? (
+              <img
+                src={userPhoto}
+                alt="profile"
+                className="drawer-profile-img"
+              />
+            ) : (
+              <div className="profile-placeholder">User</div>
+            )}
+            <p className="profile-name">{user ? user.name : 'John Doe'}</p>
           </div>
+
+          {/* Drawer Links */}
           <ul className="drawer-links">
             <li>
               <a href="/" onClick={closeDrawer}>

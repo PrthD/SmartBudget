@@ -7,6 +7,7 @@ import IncomePage from './pages/IncomePage';
 import SavingsPage from './pages/SavingsPage';
 import Dashboard from './pages/Dashboard';
 import AuthPage from './pages/AuthPage';
+import ProfilePage from './pages/ProfilePage';
 import { LoadingProvider } from './contexts/LoadingContext';
 import GlobalLoader from './components/common/GlobalLoader';
 import ProtectedRoute from './components/common/ProtectedRoute';
@@ -25,6 +26,16 @@ function App() {
             element={
               <ProtectedRoute>
                 <Dashboard />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Profile Page */}
+          <Route
+            path="/profile"
+            element={
+              <ProtectedRoute>
+                <ProfilePage />
               </ProtectedRoute>
             }
           />

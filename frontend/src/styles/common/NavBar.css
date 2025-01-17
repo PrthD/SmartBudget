@@ -15,20 +15,38 @@
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-/* Responsive Design */
-@media (max-width: 768px) {
-  .nav-bar {
-    padding: 10px;
-  }
+.nav-profile-img {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  margin-right: 5px;
+  object-fit: cover;
+  vertical-align: middle;
 }
 
-/* Navigation Left Section */
+.nav-chevron-icon {
+  font-size: 0.8rem;
+  color: #fff;
+  margin-left: 4px;
+  vertical-align: middle;
+  transition: transform 0.3s ease;
+  cursor: pointer;
+}
+
+.drawer-profile-img {
+  width: 45px;
+  height: 45px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-right: 10px;
+  margin-left: 8px;
+}
+
 .nav-left {
   display: flex;
   align-items: center;
 }
 
-/* Hamburger Menu */
 .hamburger-menu {
   font-size: 1.5rem;
   background: none;
@@ -51,17 +69,15 @@
   box-shadow: none;
 }
 
-/* Logo Styling */
 .logo {
   font-size: 1.5rem;
   font-weight: bold;
   text-transform: uppercase;
-  display: inline-block; /* Ensure text stays in one line */
+  display: inline-block;
   white-space: nowrap;
-  /* margin-left: 15px; */
+  cursor: pointer;
 }
 
-/* Drawer for Mobile Navigation */
 .drawer {
   position: fixed;
   top: 0;
@@ -83,11 +99,21 @@
   transform: translateX(300px);
 }
 
-/* Drawer Profile Section */
 .drawer-profile {
   display: flex;
   align-items: center;
   margin-bottom: 20px;
+  padding: 8px;
+  border: 2px solid #ffffff;
+  background-color: transparent;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+  cursor: pointer;
+  transition: border-color 0.3s ease, transform 0.3s ease, background-color 0.3s ease;
+}
+
+.drawer-profile:hover {
+  border-color: #99ccff;
 }
 
 .profile-placeholder {
@@ -104,20 +130,33 @@
 }
 
 .profile-name {
-  font-size: 1rem;
-  font-weight: bold;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #fff;
 }
 
-/* Drawer Links */
 .drawer-links {
   list-style: none;
   padding: 0;
-  margin-top: 10px;
+  margin-top: 20px;
   flex-grow: 1;
 }
 
 .drawer-links li {
   margin: 15px 0;
+  padding: 10px 15px;
+  border-radius: 8px;
+  transition: background-color 0.3s ease, transform 0.3s ease, color 0.3s ease;
+  cursor: pointer;
+}
+
+.drawer-links li:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  transform: translateX(5px);
+}
+
+.drawer-links li:hover a {
+  color: #cce7ff;
 }
 
 .drawer-links li:first-child {
@@ -128,7 +167,8 @@
   text-decoration: none;
   color: #fff;
   font-size: 1.2rem;
-  transition: color 0.3s, transform 0.3s;
+  display: block;
+  transition: color 0.3s ease;
 }
 
 .drawer-links a:focus {
@@ -137,18 +177,16 @@
 
 .drawer-links a:hover {
   color: #cce7ff;
-  transform: translateX(5px);
 }
 
-/* Logout Button */
 .logout-button {
   background: #ff5555;
   color: #fff;
-  padding: 10px 20px;
+  padding: 12px 20px;
   border: none;
-  border-radius: 5px;
+  border-radius: 8px;
   cursor: pointer;
-  transition: background-color 0.3s ease-in-out;
+  transition: background-color 0.3s ease, transform 0.3s ease;
   margin-top: auto;
   width: 100%;
   text-align: center;
@@ -162,7 +200,6 @@
   background: #ff3a4a;
 }
 
-/* Drawer Overlay */
 .drawer-overlay {
   position: fixed;
   top: 0;
@@ -174,15 +211,13 @@
   cursor: pointer;
 }
 
-/* Navigation Right Section */
 .nav-right {
   display: flex;
   align-items: center;
   gap: 15px;
 }
 
-/* Notification Icon */
-.notification-icon {
+/* .notification-icon {
   font-size: 1.5rem;
   color: #fff;
   cursor: pointer;
@@ -191,9 +226,8 @@
 
 .notification-icon:hover {
   color: #cce7ff;
-}
+} */
 
-/* Profile Icon */
 .profile-icon-wrapper {
   position: relative;
   cursor: pointer;
@@ -209,7 +243,6 @@
   color: #cce7ff;
 }
 
-/* Profile Dropdown */
 .profile-dropdown {
   position: absolute;
   top: 100%;
@@ -233,7 +266,7 @@
   text-align: left;
   width: 100%;
   cursor: pointer;
-  transition: background 0.3s, color 0.3s;
+  transition: all 0.3s;
 }
 
 .profile-dropdown button:hover {
@@ -241,7 +274,6 @@
   color: #004c99;
 }
 
-/* Main Content Adjustments */
 .main-content {
   padding-top: 60px;
   margin-left: 0;
@@ -259,5 +291,12 @@
   }
   .drawer-links a:hover {
     color: #99c2ff;
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .nav-bar {
+    padding: 10px;
   }
 }
