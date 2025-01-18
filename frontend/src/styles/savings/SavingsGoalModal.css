@@ -164,7 +164,7 @@
   .budget-input:focus {
     border-color: #004c99;
     box-shadow: 0 0 15px rgba(0, 76, 153, 0.3);
-    transform: scale(1.02);
+    transform: none !important;
   }
 
   .negative-amount {
@@ -223,10 +223,6 @@
     }
     .budget-input {
       width: 100%;
-    }
-    .budget-item {
-      flex-direction: column;
-      align-items: flex-start;
     }
   }
   

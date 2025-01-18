@@ -11,7 +11,6 @@ import ProfilePage from './pages/ProfilePage';
 import { LoadingProvider } from './contexts/LoadingContext';
 import GlobalLoader from './components/common/GlobalLoader';
 import ProtectedRoute from './components/common/ProtectedRoute';
-// import './App.css';
 
 function App() {
   return (

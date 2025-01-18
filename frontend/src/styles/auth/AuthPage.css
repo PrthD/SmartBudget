@@ -33,7 +33,8 @@
   }
 
   .auth-icon {
-    font-size: 6em;
+    width: 90px;
+    height: 90px;
     animation: bounce 1.5s infinite ease-in-out;
   }
 

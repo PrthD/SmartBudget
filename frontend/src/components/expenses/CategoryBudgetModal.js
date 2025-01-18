@@ -183,10 +183,7 @@ const CategoryBudgetModal = ({
                   ?.icon || null;
 
               return (
-                <div
-                  key={category}
-                  className="budget-item form-group input-icon"
-                >
+                <div key={category} className="budget-item">
                   <div className="category-label">
                     {categoryIcon && (
                       <span className="category-icon">{categoryIcon}</span>

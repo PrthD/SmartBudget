@@ -6,6 +6,7 @@ import {
   generateDefaultAvatar,
   logoutUser,
 } from '../../services/userService';
+import smartBudgetIcon from '../../assets/icons/smartbudget-icon.png';
 import '../../styles/common/NavBar.css';
 
 const NavBar = () => {
@@ -94,7 +95,12 @@ const NavBar = () => {
             ☰
           </button>
           <div className="logo" onClick={handleLogoClick}>
-            SMART BUDGET
+            <img
+              src={smartBudgetIcon}
+              alt="Smart Budget Icon"
+              className="nav-logo-icon"
+            />
+            <span>SMART BUDGET</span>
           </div>
         </div>
 

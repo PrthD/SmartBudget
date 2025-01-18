@@ -143,7 +143,7 @@ const SourceGoalModal = ({ sourceGoals, incomes, onClose, onSave }) => {
               const value = goals[source] || '';
 
               return (
-                <div key={source} className="budget-item form-group input-icon">
+                <div key={source} className="budget-item">
                   <div className="category-label">{source}:</div>
                   <div
                     className={`input-container budget-input-container ${

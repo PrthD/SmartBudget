@@ -78,6 +78,13 @@
   cursor: pointer;
 }
 
+.nav-logo-icon {
+  width: 32px;
+  height: 32px;
+  margin-right: 4px;
+  vertical-align: middle;
+}
+
 .drawer {
   position: fixed;
   top: 0;

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { registerUser, loginUser } from '../services/userService';
 import { notifyError, notifySuccess } from '../utils/notificationService';
+import smartBudgetIcon from '../assets/icons/smartbudget-icon.png';
 import '../styles/auth/AuthPage.css';
 
 const AuthPage = () => {
@@ -48,7 +49,11 @@ const AuthPage = () => {
       {/* Background with icon */}
       <div className="auth-page-background">
         <div className="auth-logo">SmartBudget</div>
-        <div className="auth-icon">💰</div>
+        <img
+          src={smartBudgetIcon}
+          alt="Smart Budget icon"
+          className="auth-icon"
+        />
       </div>
 
       {/* Form container */}

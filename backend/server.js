@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import morgan from 'morgan';
+import helmet from 'helmet';
 import logger from './config/logger.js';
 import { connectDB, disconnectDB } from './config/db.js';
 import expenseRoutes from './routes/expenseRoutes.js';
@@ -20,6 +21,7 @@ const app = express();
 connectDB();
 
 // Middleware
+app.use(helmet());
 app.use(cors({ origin: 'http://localhost:3000' }));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ limit: '10mb', extended: true }));

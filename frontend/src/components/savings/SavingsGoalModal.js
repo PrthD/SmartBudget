@@ -181,7 +181,7 @@ const SavingsGoalModal = ({
           {sortedGoals.map((g) => {
             const val = ratioStrings[g.name] || '';
             return (
-              <div key={g.name} className="budget-item form-group input-icon">
+              <div key={g.name} className="budget-item">
                 <div className="category-label">{g.name}:</div>
                 <div
                   className={`input-container budget-input-container ${
