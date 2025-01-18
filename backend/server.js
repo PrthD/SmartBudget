@@ -16,13 +16,21 @@ import userRoutes from './routes/userRoutes.js';
 dotenv.config();
 
 const app = express();
+const allowedOrigins = [
+  process.env.FRONTEND_DEV_ORIGIN,
+  process.env.FRONTEND_PROD_ORIGIN,
+];
 
 // Connect to Database
 connectDB();
 
 // Middleware
 app.use(helmet());
-app.use(cors({ origin: 'http://localhost:3000' }));
+app.use(
+  cors({
+    origin: allowedOrigins.filter(Boolean),
+  })
+);
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ limit: '10mb', extended: true }));
 
