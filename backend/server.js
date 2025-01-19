@@ -19,6 +19,7 @@ const app = express();
 const allowedOrigins = [
   process.env.FRONTEND_DEV_ORIGIN,
   process.env.FRONTEND_PROD_ORIGIN,
+  process.env.FRONTEND_CUSTOM_ORIGIN,
 ];
 
 // Connect to Database
