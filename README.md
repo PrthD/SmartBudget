@@ -19,14 +19,13 @@ SmartBudget is a powerful, user-friendly web application that helps individuals 
 
 ## Technology Stack
 
-| Layer        | Tech / Tools                                        |
-| ------------ | --------------------------------------------------- |
-| **Frontend** | React, Axios, React Router, CSS/SCSS                |
-| **Backend**  | Node.js, Express.js, Helmet, Morgan                 |
-| **Database** | MongoDB Atlas                                       |
-| **APIs**     | RESTful endpoints (Express routes), JSON Web Tokens |
-| **Hosting**  | - **Backend** on [Render](https://render.com/)      |
-|              | - **Frontend** on [Render](https://render.com/)     |
+| Layer        | Tech / Tools                                            |
+| ------------ | ------------------------------------------------------- |
+| **Frontend** | React, Axios, React Router, CSS/SCSS                    |
+| **Backend**  | Node.js, Express.js, Helmet, Morgan                     |
+| **Database** | MongoDB Atlas                                           |
+| **APIs**     | RESTful endpoints (Express routes), JSON Web Tokens     |
+| **Hosting**  | - **Backend/Frontend** on [Render](https://render.com/) |
 
 ## Live Demo
 
@@ -48,7 +47,7 @@ SmartBudget is a powerful, user-friendly web application that helps individuals 
 
    ```bash
    git clone https://github.com/PrthD/SmartBudget.git
-   cd smartbudget
+   cd SmartBudget
    ```
 
 2. **Install** dependencies in both **frontend** and **backend** folders:
@@ -94,11 +93,6 @@ SmartBudget is a powerful, user-friendly web application that helps individuals 
    npm start
    # Runs on http://localhost:3000
    ```
-
-### Deployment
-
-- The **backend** is deployed on Render at: `https://smartbudget-backend.onrender.com`
-- The **frontend** is deployed on Render at: `https://smartbudget-frontend.onrender.com`
 
 To replicate this:
 
