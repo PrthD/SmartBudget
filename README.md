@@ -4,7 +4,7 @@
 [![Node.js](https://img.shields.io/badge/Node.js-18.x-brightgreen?style=flat-square&logo=node.js)](https://nodejs.org/)
 [![Express.js](https://img.shields.io/badge/Express.js-4.x-lightgrey?style=flat-square&logo=express)](https://expressjs.com/)
 [![MongoDB](https://img.shields.io/badge/MongoDB-Atlas-green?style=flat-square&logo=mongodb)](https://www.mongodb.com/atlas/database)
-[![License](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square)](<[LICENSE](https://github.com/PrthD/SmartBudget/blob/main/LICENSE)>)
+[![License](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square)](https://github.com/PrthD/SmartBudget/blob/main/LICENSE)
 
 SmartBudget is a powerful, user-friendly web application that helps individuals manage their expenses, set financial goals, and track savings—all in one place. Built with a modern MERN stack, it delivers a polished UI and real-time data handling for seamless budgeting.
 
