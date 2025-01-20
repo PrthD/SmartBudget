@@ -103,9 +103,7 @@ To replicate this:
 
 ## Screenshots
 
-_(Optional) Insert some screenshots or GIFs here._
-
-![SmartBudget Dashboard Screenshot](YOUR_SCREENSHOT.png)
+![SmartBudget Dashboard Screenshot](https://github.com/PrthD/SmartBudget/blob/main/frontend/src/assets/icons/smartbudget-icon.png)
 
 ## Contributing
 
