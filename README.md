@@ -103,7 +103,7 @@ To replicate this:
 
 ## Screenshots
 
-![SmartBudget Dashboard Screenshot](https://github.com/PrthD/SmartBudget/blob/main/frontend/src/assets/icons/smartbudget-icon.png)
+![SmartBudget Dashboard Screenshot](![image](https://github.com/user-attachments/assets/a26ea270-4a66-474a-af17-1f8b3d096fe3))
 
 ## Contributing
 
