@@ -64,6 +64,12 @@ export const createExpensePieChart = (
   breakdownMap,
   zeroCategories = []
 ) => {
+  const needed = data.labels.length;
+  const dynamicColors = [];
+  for (let i = 0; i < needed; i++) {
+    dynamicColors.push(`#${Math.floor(Math.random() * 16777215).toString(16)}`);
+  }
+
   return new Chart(ctx, {
     type: 'pie',
     data: {
@@ -72,25 +78,16 @@ export const createExpensePieChart = (
         {
           label: data.label || 'Distribution',
           data: data.values,
-          backgroundColor: data.colors || [
-            '#FF6384',
-            '#36A2EB',
-            '#FFCE56',
-            '#4BC0C0',
-            '#9966FF',
-            '#FF9F40',
-            '#D4A5A5',
-            '#8FD175',
-            '#F1C232',
-            '#76A5AF',
-            '#B8860B',
-            '#3CB371',
-          ],
+          backgroundColor:
+            data.colors && data.colors.length >= needed
+              ? data.colors
+              : dynamicColors,
         },
       ],
     },
     options: {
       responsive: true,
+      events: ['mousemove'],
       plugins: {
         legend: {
           position: 'bottom',
@@ -156,6 +153,12 @@ export const createIncomePieChart = (
   breakdownMap,
   zeroSources = []
 ) => {
+  const needed = data.labels.length;
+  const dynamicColors = [];
+  for (let i = 0; i < needed; i++) {
+    dynamicColors.push(`#${Math.floor(Math.random() * 16777215).toString(16)}`);
+  }
+
   return new Chart(ctx, {
     type: 'pie',
     data: {
@@ -164,25 +167,16 @@ export const createIncomePieChart = (
         {
           label: data.label || 'Income Goal Distribution',
           data: data.values,
-          backgroundColor: data.colors || [
-            '#FF6384',
-            '#36A2EB',
-            '#FFCE56',
-            '#4BC0C0',
-            '#9966FF',
-            '#FF9F40',
-            '#D4A5A5',
-            '#8FD175',
-            '#F1C232',
-            '#76A5AF',
-            '#B8860B',
-            '#3CB371',
-          ],
+          backgroundColor:
+            data.colors && data.colors.length >= needed
+              ? data.colors
+              : dynamicColors,
         },
       ],
     },
     options: {
       responsive: true,
+      events: ['mousemove'],
       plugins: {
         legend: {
           position: 'bottom',
@@ -250,6 +244,12 @@ export const createSavingsPieChart = (
   breakdownMap,
   zeroCategories = []
 ) => {
+  const needed = data.labels.length;
+  const dynamicColors = [];
+  for (let i = 0; i < needed; i++) {
+    dynamicColors.push(`#${Math.floor(Math.random() * 16777215).toString(16)}`);
+  }
+
   return new Chart(ctx, {
     type: 'pie',
     data: {
@@ -258,25 +258,16 @@ export const createSavingsPieChart = (
         {
           label: data.label || 'Savings Distribution',
           data: data.values,
-          backgroundColor: data.colors || [
-            '#FF6384',
-            '#36A2EB',
-            '#FFCE56',
-            '#4BC0C0',
-            '#9966FF',
-            '#FF9F40',
-            '#D4A5A5',
-            '#8FD175',
-            '#F1C232',
-            '#76A5AF',
-            '#B8860B',
-            '#3CB371',
-          ],
+          backgroundColor:
+            data.colors && data.colors.length >= needed
+              ? data.colors
+              : dynamicColors,
         },
       ],
     },
     options: {
       responsive: true,
+      events: ['mousemove'],
       plugins: {
         legend: {
           position: 'bottom',
