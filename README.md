@@ -103,11 +103,18 @@ To replicate this:
 
 ### Video Walkthrough
 
-<a href="https://drive.google.com/file/d/17MDsNQhj1_eIbny_8SGCV9A-Zxx9dnH8/view?usp=sharing" target="_blank">
-    <img src="https://drive.google.com/thumbnail?id=17MDsNQhj1_eIbny_8SGCV9A-Zxx9dnH8" alt="SmartBudget Video Walkthrough" width="300" style="border: 2px solid #ccc; border-radius: 10px;">
-</a>
+<div align="center">
+  <a href="https://drive.google.com/file/d/17MDsNQhj1_eIbny_8SGCV9A-Zxx9dnH8/view?usp=sharing" target="_blank" style="text-decoration: none;">
+    <div style="position: relative; display: inline-block;">
+      <img src="https://drive.google.com/thumbnail?id=17MDsNQhj1_eIbny_8SGCV9A-Zxx9dnH8" alt="SmartBudget Video Walkthrough" width="300" style="border: 2px solid #ccc; border-radius: 10px; transition: transform 0.3s, box-shadow 0.3s;">
+      <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background-color: rgba(0, 0, 0, 0.5); border-radius: 50%; padding: 10px;">
+        <img src="https://img.icons8.com/ios-glyphs/30/ffffff/play--v1.png" alt="Play Icon">
+      </div>
+    </div>
+  </a>
+</div>
 
-> Click on the thumbnail above to watch a detailed video walkthrough of the application.
+<p align="center">Click on the thumbnail above to watch a detailed video walkthrough of the application.</p>
 
 ## Contributing
 
