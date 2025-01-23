@@ -103,11 +103,8 @@ To replicate this:
 
 ### Video Walkthrough
 
-<a href="https://drive.google.com/file/d/17MDsNQhj1_eIbny_8SGCV9A-Zxx9dnH8/view?usp=sharing" target="_blank" style="display: inline-block; position: relative; text-decoration: none; border: 2px solid #ccc; border-radius: 10px; overflow: hidden; width: 320px; height: 320px;">
-    <img src="https://github.com/PrthD/SmartBudget/blob/main/frontend/src/assets/icons/smartbudget-icon.png" alt="SmartBudget Video Walkthrough" width="100%" height="100%">
-    <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: white; font-size: 50px; background-color: rgba(0, 0, 0, 0.5); padding: 10px; border-radius: 50%;">
-        ▶
-    </div>
+<a href="https://drive.google.com/file/d/17MDsNQhj1_eIbny_8SGCV9A-Zxx9dnH8/view?usp=sharing" target="_blank">
+    <img src="https://github.com/PrthD/SmartBudget/blob/main/frontend/src/assets/icons/smartbudget-icon.png" alt="SmartBudget Video Walkthrough" width="300">
 </a>
 
 > Click on the thumbnail above to watch a detailed video walkthrough of the application.
