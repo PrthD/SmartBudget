@@ -103,7 +103,7 @@ To replicate this:
 
 ### Video Walkthrough
 
-[![SmartBudget Video Walkthrough](https://img.youtube.com/vi/YOUTUBE_VIDEO_ID/0.jpg)](https://drive.google.com/file/d/17MDsNQhj1_eIbny_8SGCV9A-Zxx9dnH8/view?usp=sharing)
+[![SmartBudget Video Walkthrough](https://github.com/PrthD/SmartBudget/blob/main/frontend/src/assets/icons/smartbudget-icon.png)](https://drive.google.com/file/d/17MDsNQhj1_eIbny_8SGCV9A-Zxx9dnH8/view?usp=sharing)
 
 > Click on the thumbnail above to watch a detailed video walkthrough of the application.
 
