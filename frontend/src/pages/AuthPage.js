@@ -13,6 +13,7 @@ const AuthPage = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [transition, setTransition] = useState(false);
+  const [showDelayMessage, setShowDelayMessage] = useState(false);
 
   const switchMode = () => {
     setTransition(true);
@@ -24,22 +25,33 @@ const AuthPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    const delayTimer = setTimeout(() => {
+      setShowDelayMessage(true);
+    }, 3000);
+
     try {
       if (mode === 'signup') {
         if (!name.trim()) {
           throw new Error('Name is required for signup.');
         }
         const res = await registerUser(name.trim(), email.trim(), password);
+        clearTimeout(delayTimer);
+        setShowDelayMessage(false);
         notifySuccess(
           `Welcome, ${res.user.name}! Your account has been created.`
         );
         navigate('/');
       } else {
         const res = await loginUser(email.trim(), password);
+        clearTimeout(delayTimer);
+        setShowDelayMessage(false);
         notifySuccess(`Welcome back, ${res.user.name}!`);
         navigate('/');
       }
     } catch (error) {
+      clearTimeout(delayTimer);
+      setShowDelayMessage(false);
       notifyError(error.message || 'Authentication error');
     }
   };
@@ -62,6 +74,13 @@ const AuthPage = () => {
         className={`auth-form-wrapper ${transition ? 'form-transition' : ''}`}
       >
         <h2>{mode === 'login' ? 'Login' : 'Sign Up'}</h2>
+
+        {showDelayMessage && (
+          <div className="delay-notification">
+            <p>Our server is waking up – please wait a moment...</p>
+          </div>
+        )}
+
         <form onSubmit={handleSubmit} className="auth-form">
           {mode === 'signup' && (
             <div className="form-group">

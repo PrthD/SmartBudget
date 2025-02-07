@@ -178,15 +178,17 @@ const Dashboard = () => {
     return (
       <div className="dashboard-error">
         <NavBar />
-        <div className="error-message">
-          <h3>Error</h3>
-          <p>{error}</p>
-          <button
-            onClick={() => window.location.reload()}
-            className="retry-button"
-          >
-            Retry
-          </button>
+        <div className="error-container">
+          <div className="error-card">
+            <h3 className="error-title">Error</h3>
+            <p className="error-text">{error}</p>
+            <button
+              onClick={() => window.location.reload()}
+              className="retry-button"
+            >
+              Retry
+            </button>
+          </div>
         </div>
       </div>
     );
