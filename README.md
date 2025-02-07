@@ -101,9 +101,13 @@ To replicate this:
 3. Update environment variables on Render for both services.
 4. Reference the correct `REACT_APP_API_URL` in the frontend `.env`.
 
-## Screenshots
+### Video Walkthrough
 
-![SmartBudget Dashboard Screenshot](![image](https://github.com/user-attachments/assets/a26ea270-4a66-474a-af17-1f8b3d096fe3))
+<a href="https://drive.google.com/file/d/17MDsNQhj1_eIbny_8SGCV9A-Zxx9dnH8/view?usp=sharing" target="_blank">
+    <img src="https://drive.google.com/thumbnail?id=17MDsNQhj1_eIbny_8SGCV9A-Zxx9dnH8" alt="SmartBudget Video Walkthrough" width="300" style="border: 2px solid #ccc; border-radius: 10px;">
+</a>
+
+<p style="max-width: 300px; margin: auto;">Click on the thumbnail above to watch a detailed video walkthrough of the application.</p>
 
 ## Contributing
 
