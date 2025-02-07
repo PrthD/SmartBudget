@@ -16,7 +16,7 @@ export const registerUser = async (name, email, password) => {
     password,
   });
   const data = response.data;
-  saveTokenToLocalStorage(data.token);
+  saveTokenToLocalStorage(data.token, data.refreshToken);
   return data;
 };
 
@@ -32,7 +32,7 @@ export const loginUser = async (email, password) => {
     password,
   });
   const data = response.data;
-  saveTokenToLocalStorage(data.token);
+  saveTokenToLocalStorage(data.token, data.refreshToken);
   return data;
 };
 
@@ -95,8 +95,11 @@ export const logoutUser = () => {
 /**
  * Save JWT token in localStorage.
  */
-const saveTokenToLocalStorage = (token) => {
+const saveTokenToLocalStorage = (token, refreshToken) => {
   localStorage.setItem('jwtToken', token);
+  if (refreshToken) {
+    localStorage.setItem('refreshToken', refreshToken);
+  }
 };
 
 /**

@@ -1,8 +1,9 @@
 import express from 'express';
 import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
 import User from '../models/User.js';
 import { requireAuth } from '../middlewares/authMiddleware.js';
-import { generateToken } from '../utils/authUtils.js';
+import { generateToken, generateRefreshToken } from '../utils/authUtils.js';
 import logger from '../config/logger.js';
 
 const router = express.Router();
@@ -34,7 +35,8 @@ router.post('/register', async (req, res) => {
 
     logger.info(`New user created: ${newUser._id}`);
 
-    const token = generateToken(newUser);
+    const accessToken = generateToken(newUser);
+    const refreshToken = generateRefreshToken(newUser);
 
     return res.status(201).json({
       message: 'User registered successfully',
@@ -43,7 +45,8 @@ router.post('/register', async (req, res) => {
         name: newUser.name,
         email: newUser.email,
       },
-      token,
+      token: accessToken,
+      refreshToken,
     });
   } catch (err) {
     logger.error('Error in user registration:', err.message);
@@ -76,7 +79,8 @@ router.post('/login', async (req, res) => {
       return res.status(401).json({ error: 'Invalid email or password' });
     }
 
-    const token = generateToken(user);
+    const accessToken = generateToken(user);
+    const refreshToken = generateRefreshToken(user);
 
     logger.info(`User logged in: ${user._id}`);
 
@@ -88,11 +92,41 @@ router.post('/login', async (req, res) => {
         email: user.email,
         profilePhoto: user.profilePhoto,
       },
-      token,
+      token: accessToken,
+      refreshToken,
     });
   } catch (err) {
     logger.error('Error in user login:', err.message);
     return res.status(500).json({ error: 'Server Error' });
+  }
+});
+
+/**
+ * @route   POST /api/users/refresh
+ * @desc    Refreshes the access token using a valid refresh token
+ */
+router.post('/refresh', async (req, res) => {
+  const { refreshToken } = req.body;
+  if (!refreshToken) {
+    return res.status(400).json({ error: 'Refresh token required' });
+  }
+  try {
+    const decoded = jwt.verify(
+      refreshToken,
+      process.env.JWT_REFRESH_SECRET || 'refreshsecretkey'
+    );
+    const user = await User.findById(decoded.userId);
+    if (!user) {
+      return res.status(401).json({ error: 'Invalid refresh token' });
+    }
+    const newAccessToken = generateToken(user);
+    const newRefreshToken = generateRefreshToken(user);
+    return res.status(200).json({
+      token: newAccessToken,
+      refreshToken: newRefreshToken,
+    });
+  } catch (err) {
+    return res.status(401).json({ error: 'Invalid refresh token' });
   }
 });
 
