@@ -77,7 +77,7 @@ const AuthPage = () => {
 
         {showDelayMessage && (
           <div className="delay-notification">
-            <p>Our server is waking up – please wait a moment...</p>
+            <p>Please wait a moment...</p>
           </div>
         )}
 
