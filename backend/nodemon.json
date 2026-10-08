@@ -1,5 +1,0 @@
-{
-  "watch": ["server.js", "routes/", "models/"],
-  "ext": "js,json",
-  "exec": "node --experimental-specifier-resolution=node server.js"
-}
