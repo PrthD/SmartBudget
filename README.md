@@ -8,7 +8,7 @@
 Track spending and income, plan budgets, save toward goals and get plain-language insights,<br />
 with optional AI that helps without ever being required.
 
-[![CI](https://github.com/PrthD/SmartBudgetAI/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/PrthD/SmartBudgetAI/actions/workflows/ci.yml)
+[![CI](https://github.com/PrthD/SmartBudget/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/PrthD/SmartBudget/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
 [![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)](https://react.dev)
@@ -144,7 +144,7 @@ flowchart LR
 ## Project structure
 
 ```
-SmartBudgetAI/
+SmartBudget/
 ├── backend/                  REST API
 │   ├── server.js             Entry point: database connection, startup, graceful shutdown
 │   ├── src/
@@ -184,8 +184,8 @@ SmartBudgetAI/
 ### Quick start
 
 ```bash
-git clone https://github.com/PrthD/SmartBudgetAI.git
-cd SmartBudgetAI
+git clone https://github.com/PrthD/SmartBudget.git
+cd SmartBudget
 
 make setup     # install dependencies for both apps
 make env       # create local .env files from the examples
