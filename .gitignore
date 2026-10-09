@@ -12,6 +12,8 @@ frontend/logs/
 .env*
 backend/.env*
 frontend/.env*
+!**/.env.example
+!frontend/.env.production
 
 # Build directories (Frontend and Backend)
 build/
@@ -27,3 +29,6 @@ yarn-error.log*
 # Miscellaneous
 .DS_Store
 Thumbs.db
+# Local tooling artefacts (curl cookie jars, probes)
+*.cookies
+cookie-jar*

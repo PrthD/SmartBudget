@@ -1,6 +1,23 @@
 {
-  "dependencies": {
-    "rimraf": "^6.0.1",
-    "tar": "^7.4.3"
+  "name": "smartbudget",
+  "private": true,
+  "description": "SmartBudget monorepo tasks — see scripts/dev.mjs (also available as make <task>).",
+  "scripts": {
+    "setup": "node scripts/dev.mjs setup",
+    "env": "node scripts/dev.mjs env",
+    "db-up": "node scripts/dev.mjs db-up",
+    "db-down": "node scripts/dev.mjs db-down",
+    "db-reset": "node scripts/dev.mjs db-reset",
+    "seed": "node scripts/dev.mjs seed",
+    "dev": "node scripts/dev.mjs dev",
+    "dev-api": "node scripts/dev.mjs dev-api",
+    "dev-web": "node scripts/dev.mjs dev-web",
+    "dev-memory": "node scripts/dev.mjs dev-memory",
+    "test": "node scripts/dev.mjs test",
+    "lint": "node scripts/dev.mjs lint",
+    "format": "node scripts/dev.mjs format",
+    "build": "node scripts/dev.mjs build",
+    "tasks": "node scripts/dev.mjs help",
+    "make:install": "node scripts/make-shim/install.mjs"
   }
 }

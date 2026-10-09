@@ -1,0 +1,20 @@
+# Local development database. Start with `make db-up` (or `npm run db:up`).
+# Data persists in the named volume until `make db-reset`.
+services:
+  mongo:
+    image: mongo:8
+    container_name: smartbudget-mongo
+    restart: unless-stopped
+    ports:
+      # Bound to localhost only: never exposed to the network.
+      - '127.0.0.1:27017:27017'
+    volumes:
+      - smartbudget-mongo-data:/data/db
+    healthcheck:
+      test: ['CMD', 'mongosh', '--quiet', '--eval', 'db.adminCommand("ping").ok']
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+volumes:
+  smartbudget-mongo-data:
