@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Link } from 'react-router';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -15,25 +15,10 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import { SLOW_WAIT_STAGES, useWaitStage } from '@/hooks/use-wait-stage';
 import { useAuth } from './hooks';
 import { PasswordInput } from './PasswordInput';
 import { LoginSchema, RegisterSchema } from './schemas';
-
-// The API sleeps on Render's free tier; the first request can take ~30s.
-const SLOW_SERVER_MS = 4000;
-
-function useSlowNotice(pending) {
-  const [slow, setSlow] = useState(false);
-  useEffect(() => {
-    if (!pending) return undefined;
-    const timer = setTimeout(() => setSlow(true), SLOW_SERVER_MS);
-    return () => {
-      clearTimeout(timer);
-      setSlow(false);
-    };
-  }, [pending]);
-  return pending && slow;
-}
 
 /** Sign-in and sign-up share one form; `mode` decides fields and wording. */
 export function AuthForm({ mode }) {
@@ -47,7 +32,7 @@ export function AuthForm({ mode }) {
       : { email: '', password: '' },
   });
   const pending = form.formState.isSubmitting;
-  const slow = useSlowNotice(pending);
+  const waitStage = useWaitStage(pending, SLOW_WAIT_STAGES);
 
   const onSubmit = form.handleSubmit(async (values) => {
     setError(null);
@@ -76,12 +61,13 @@ export function AuthForm({ mode }) {
           <AlertDescription>{error}</AlertDescription>
         </Alert>
       )}
-      {slow && (
-        <Alert>
+      {waitStage > 0 && (
+        <Alert role="status">
           <Loader2 className="animate-spin" />
           <AlertDescription>
-            Waking up the server — this can take up to 30 seconds the first
-            time.
+            {waitStage === 1
+              ? 'Hang tight, this is taking a little longer than usual.'
+              : 'Still working on it. This can occasionally take up to a minute.'}
           </AlertDescription>
         </Alert>
       )}
@@ -150,7 +136,13 @@ export function AuthForm({ mode }) {
           />
           <Button type="submit" className="w-full" disabled={pending}>
             {pending && <Loader2 className="size-4 animate-spin" />}
-            {isRegister ? 'Create account' : 'Sign in'}
+            {pending
+              ? isRegister
+                ? 'Creating your account…'
+                : 'Signing in…'
+              : isRegister
+                ? 'Create account'
+                : 'Sign in'}
           </Button>
         </form>
       </Form>
